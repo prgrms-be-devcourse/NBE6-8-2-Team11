@@ -1,17 +1,28 @@
 package com.back.domain.care.entity;
 
 import com.back.domain.adoption.enums.RequestStatus;
+import com.back.domain.care.enums.ReceivedStatus;
+import com.back.domain.member.entity.Member;
+import com.back.domain.notification.entity.Notification;
+import com.back.domain.pet.entity.Pet;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +41,9 @@ public class Care {
     @Column(name = "care_id")
     private Long id;
 
+    @Column(name = "care_received_status", nullable = false)
+    private ReceivedStatus receivedStatus;
+
     @Lob
     @Column(name = "care_message", nullable = false)
     private String message;
@@ -46,4 +60,15 @@ public class Care {
 
     @CreatedDate
     private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pet_id", nullable = false)
+    private Pet pet;
+
+    @OneToMany(mappedBy = "care", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
 }
