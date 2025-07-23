@@ -32,14 +32,23 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    testImplementation("org.springframework.security:spring-security-test")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     //mySQL connector for JPA
     runtimeOnly("com.mysql:mysql-connector-j")
+    // Redis
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     // JWT dependencies
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
     // Spring doc
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0")
+
+    //lombok 의존성 추가
+    testCompileOnly ("org.projectlombok:lombok") // 테스트 의존성 추가
+    testAnnotationProcessor ("org.projectlombok:lombok") // 테스트 의존성 추가
 }
 
 tasks.withType<Test> {
