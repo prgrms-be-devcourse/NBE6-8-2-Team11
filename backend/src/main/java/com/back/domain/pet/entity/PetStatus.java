@@ -1,0 +1,31 @@
+package com.back.domain.pet.entity;
+
+
+import com.back.domain.pet.enums.PetStatusType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Getter
+@Table(name = "pet_status")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class PetStatus {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "pet_status_id")
+    private Long id;
+
+    @Column(name = "pet_status_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PetStatusType status;
+}
