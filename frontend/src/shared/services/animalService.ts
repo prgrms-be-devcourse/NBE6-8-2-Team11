@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import { Animal } from '../types';
+import { Pet } from '../types';
 
 export interface GetAnimalsParams {
   page?: number;
@@ -10,7 +10,7 @@ export interface GetAnimalsParams {
 }
 
 export interface GetAnimalsResponse {
-  animals: Animal[];
+  animals: Pet[];
   total: number;
   page: number;
   limit: number;
@@ -35,14 +35,14 @@ export const animalService = {
   },
 
   // 특정 동물 조회
-  async getAnimal(id: string): Promise<Animal> {
-    const response = await apiClient.get<Animal>(`/animals/${id}`);
+  async getAnimal(id: string): Promise<Pet> {
+    const response = await apiClient.get<Pet>(`/animals/${id}`);
     return response.data;
   },
 
   // 동물 검색
-  async searchAnimals(query: string): Promise<Animal[]> {
-    const response = await apiClient.get<Animal[]>(`/animals/search?q=${encodeURIComponent(query)}`);
+  async searchAnimals(query: string): Promise<Pet[]> {
+    const response = await apiClient.get<Pet[]>(`/animals/search?q=${encodeURIComponent(query)}`);
     return response.data;
   },
 
