@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Pet } from '@/shared/types';
-import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies, estimateAnimalSize } from '@/shared/utils';
+import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '@/shared/utils';
 
 interface AnimalCardProps {
   pet: Pet;
@@ -52,9 +52,6 @@ export default function AnimalCard({ pet }: AnimalCardProps) {
         <div className="flex flex-wrap gap-1 mb-4">
           <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
             {formatAnimalSpecies(pet.species)}
-          </span>
-          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
-            {estimateAnimalSize(pet.species)}
           </span>
           <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
             {formatAnimalGender(pet.gender)}
