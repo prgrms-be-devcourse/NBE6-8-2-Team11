@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,13 +39,20 @@ public class AdoptionController {
         );
     }
 
-        @GetMapping("/{memberId}")
+    @GetMapping
     @Operation(summary = "회원 입양/돌봄 신청 목록 조회", description = "회원의 입양 및 돌봄 신청 목록을 조회합니다.")
     public ResponseEntity<ApiResponse<List<ApplicationSimpleListResponseDto>>> getAdoptionAndCareList(
-            @PathVariable Long memberId) {
-        List<ApplicationSimpleListResponseDto> simpleApplications = adoptionService.getMemberApplications(memberId);
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
+            );
+        }
+        List<ApplicationSimpleListResponseDto> simpleApplications
+                = adoptionService.getMemberApplications(userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(simpleApplications)
         );
     }
+
 }

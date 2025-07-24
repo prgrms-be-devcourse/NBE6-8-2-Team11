@@ -51,8 +51,8 @@ public class AdoptionService {
         return AdoptionResponseDto.from(adoption);
     }
 
-    public List<ApplicationSimpleListResponseDto> getMemberApplications(Long memberId) {
-        Member member = memberRepository.findById(memberId)
+    public List<ApplicationSimpleListResponseDto> getMemberApplications(String memberEmail) {
+        Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         List<Adoption> adoptions = adoptionRepository.findByMemberOrderByCreatedAtDesc(member);
