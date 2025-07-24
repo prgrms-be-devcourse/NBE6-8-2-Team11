@@ -55,22 +55,6 @@ export const formatAnimalSpecies = (species: string): string => {
   return speciesMap[species] || species;
 };
 
-// 동물 크기 추정 함수 (species 기반)
-export const estimateAnimalSize = (species: string): string => {
-  if (!species || typeof species !== 'string') {
-    console.warn('Invalid species provided:', species);
-    return '크기 미상';
-  }
-  const sizeMap: Record<string, string> = {
-    dog: '중형', // 기본값, 실제로는 개 품종에 따라 다를 수 있음
-    cat: '소형',
-    rabbit: '소형',
-    bird: '소형',
-    other: '기타',
-  };
-  return sizeMap[species] || '크기 미상';
-};
-
 // 클래스명 조합 함수
 export const cn = (...classes: (string | undefined | null | false)[]): string => {
   return classes.filter(Boolean).join(' ');
@@ -135,8 +119,4 @@ export const parseQueryParams = (queryString: string): Record<string, string> =>
   }
   
   return result;
-};
-
-// 하위 호환성을 위한 기존 함수들 (deprecated)
-export const formatAnimalType = formatAnimalSpecies;
-export const formatAnimalSize = estimateAnimalSize; 
+}; 

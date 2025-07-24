@@ -1,6 +1,6 @@
 import { MOCK_PETS } from '../../../shared/constants';
 import { Pet } from '../../../shared/types';
-import { formatAnimalAge, formatAnimalGender, estimateAnimalSize } from '../../../shared/utils';
+import { formatAnimalAge, formatAnimalGender } from '../../../shared/utils';
 
 export default function GalleryPreview() {
   return (
@@ -24,7 +24,7 @@ export default function GalleryPreview() {
               <div className="p-6">
                 <h3 className="font-semibold text-gray-800 mb-2">{pet.name}</h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  {formatAnimalAge(pet.age)} • {formatAnimalGender(pet.gender)} • {estimateAnimalSize(pet.species)}
+                  {formatAnimalAge(pet.age)} • {formatAnimalGender(pet.gender)}
                 </p>
                 <button className="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors">
                   상세보기
