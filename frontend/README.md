@@ -1,36 +1,168 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🐾 펫프렌드 - 유기 동물 입양 및 돌봄 서비스
 
-## Getting Started
+유기동물과 입양희망자를 연결하는 따뜻한 플랫폼입니다. 보호소와 입양희망자가 신청서를 통해 연결될 수 있도록 도와드립니다.
 
-First, run the development server:
+## 📋 프로젝트 목적
+
+- 유기동물을 입양/돌봄할 수 있는 플랫폼 제공
+- 유기동물 보호자(동물단체나 병원 등)와 입양희망자 연결
+- 신청서를 통한 체계적인 매칭 시스템
+
+## 🛠 기술 스택
+
+### Frontend
+- **언어**: JavaScript, TypeScript
+- **프레임워크**: React, Next.js 15
+- **스타일링**: CSS, Tailwind CSS
+- **빌드 도구**: Babel
+- **버전 관리**: Git, GitHub
+
+### 주요 라이브러리
+- React 19.1.0
+- Next.js 15.4.3
+- Tailwind CSS 4.x
+
+## 🎨 페이지 구성
+
+### 현재 구현된 페이지
+1. **메인 페이지** (`/`) - 홈페이지
+2. **입양동물 페이지** (`/gallery`) - 갤러리 형식 조회 (예정)
+3. **내 정보 페이지** (`/profile`) - 사용자 정보 (예정)
+4. **입양신청 페이지** (`/apply`) - 입양 및 돌봄 신청 (예정)
+
+## ✨ 메인 페이지 특징
+
+### 🎨 디자인 스타일
+- **밝고 따뜻한 색감**: 오렌지/노란색 그라데이션 사용
+- **모던한 디자인**: 깔끔한 카드 레이아웃과 부드러운 그림자
+- **반응형 디자인**: 모바일부터 데스크톱까지 완벽 대응
+
+### 🏗 구성 요소
+
+#### 1. 헤더 (Navigation)
+- 로고와 브랜드명 "돌봄즈"
+- 네비게이션 메뉴 (홈, 입양동물, 내정보, 입양신청)
+- 로그인 버튼
+
+#### 2. 히어로 섹션
+- 강력한 메시지와 CTA 버튼
+- 애니메이션이 있는 동물 이미지 갤러리
+- 호버 효과와 부드러운 전환
+
+#### 3. 통계 섹션
+- 성공한 입양, 보호중인 동물, 협력 보호소, 입양희망자 수
+
+#### 4. 서비스 소개
+- 동물 검색, 입양 신청, 매칭 서비스
+- 아이콘과 설명이 포함된 카드 형태
+
+#### 5. 갤러리 미리보기
+- 입양 대기중인 동물들의 카드 형태
+- "더 많은 동물 보기" 버튼
+
+#### 6. CTA 섹션
+- 강력한 행동 유도 메시지
+- 오렌지 그라데이션 배경
+
+#### 7. 푸터
+- 서비스, 지원, 연락처 정보
+- 브랜드 정보와 저작권
+
+### ✨ 특별한 기능
+- **애니메이션**: 카드 회전 효과, 호버 스케일 효과
+- **접근성**: 명확한 색상 대비와 읽기 쉬운 폰트
+- **사용자 경험**: 직관적인 네비게이션과 명확한 CTA
+
+## 🚀 시작하기
+
+### 설치
+
+```bash
+# 의존성 설치
+npm install
+```
+
+### 개발 서버 실행
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 결과를 확인하세요.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 빌드
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+```
 
-## Learn More
+### 프로덕션 실행
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 프로젝트 구조
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+frontend/
+├── src/
+│   ├── app/                    # Next.js App Router (페이지 진입점)
+│   │   ├── page.tsx           # 홈 페이지
+│   │   ├── layout.tsx         # 레이아웃
+│   │   └── globals.css        # 전역 스타일
+│   ├── shared/                 # 공유 모듈 (전역)
+│   │   ├── components/        # 재사용 UI 컴포넌트
+│   │   │   ├── ui/           # 기본 UI (Button, Card, LoadingSpinner)
+│   │   │   ├── layout/       # 레이아웃 (Header, Footer)
+│   │   │   └── common/       # 공통 (Loading, Error 등)
+│   │   ├── hooks/            # 커스텀 훅
+│   │   │   ├── useLocalStorage.ts
+│   │   │   ├── useScrollPosition.ts
+│   │   │   └── useWindowSize.ts
+│   │   ├── utils/            # 유틸리티 함수
+│   │   │   └── index.ts      # 헬퍼 함수들
+│   │   ├── types/            # TypeScript 타입
+│   │   │   └── index.ts      # 타입 정의
+│   │   ├── services/         # API 서비스 (추후 업데이트)
+│   │   │   ├── apiClient.ts  # API 클라이언트
+│   │   │   └── animalService.ts # 동물 관련 API
+│   │   └── constants/        # 상수
+│   │       └── index.ts      # 상수 정의
+│   ├── features/             # 기능별 모듈
+│   │   ├── home/             # 홈 기능
+│   │   │   ├── components/   # 홈 전용 컴포넌트
+│   │   │   │   ├── HeroSection.tsx
+│   │   │   │   ├── StatsSection.tsx
+│   │   │   │   ├── ServicesSection.tsx
+│   │   │   │   └── CTASection.tsx
+│   │   │   ├── hooks/        # 홈 전용 훅
+│   │   │   └── types/        # 홈 전용 타입
+│   │   ├── gallery/          # 갤러리 기능
+│   │   │   ├── components/   # 갤러리 전용 컴포넌트
+│   │   │   │   └── GalleryPreview.tsx
+│   │   │   ├── hooks/        # 갤러리 전용 훅
+│   │   │   ├── services/     # 갤러리 전용 API
+│   │   │   └── types/        # 갤러리 전용 타입
+│   │   ├── profile/          # 프로필 기능 (예정)
+│   │   ├── apply/            # 입양신청 기능 (예정)
+│   │   └── auth/             # 인증 기능 (예정)
+│   └── assets/               # 정적 자원
+│       ├── images/           # 이미지 파일
+│       └── icons/            # 아이콘 파일
+├── public/                   # 정적 파일
+├── package.json              # 의존성 관리
+└── README.md                # 프로젝트 문서
+```
 
-## Deploy on Vercel
+## 🎯 타겟 사용자
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- 동물에 관심이 있는 남녀노소
+- 동물보호소 및 유기 동물 입양 희망자
+- 동물 추천 및 매칭 시스템 이용자
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔧 기능적 요구사항
+
+- **백엔드 연동**: API 완성 후 로그인 등 기능 구현 예정
+- **애니메이션**: 전반적인 애니메이션 사용
+- **접근성**: 유기 동물을 보여주는 탭은 사진이 크게 들어가는 갤러리 형태
