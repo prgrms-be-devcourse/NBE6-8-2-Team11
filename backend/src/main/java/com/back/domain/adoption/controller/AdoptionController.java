@@ -1,8 +1,10 @@
 package com.back.domain.adoption.controller;
 
+import com.back.domain.adoption.dto.request.AdoptionOrCareSearchRequestDto;
 import com.back.domain.adoption.dto.request.AdoptionRequestDto;
 import com.back.domain.adoption.dto.response.AdoptionResponseDto;
 import com.back.domain.adoption.dto.response.ApplicationListResponseDto;
+import com.back.domain.adoption.dto.response.ApplicationResponseDto;
 import com.back.domain.adoption.dto.response.ApplicationSimpleListResponseDto;
 import com.back.domain.adoption.service.AdoptionService;
 import com.back.global.common.ApiResponse;
@@ -52,6 +54,23 @@ public class AdoptionController {
                 = adoptionService.getMemberApplications(userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(simpleApplications)
+        );
+    }
+
+    @GetMapping
+    @Operation(summary = "회원 입양/돌봄 신청 내역 상세 조회", description = "회원의 입양 및 돌봄 신청 내역을 상세 조회합니다.")
+    public ResponseEntity<ApiResponse<ApplicationResponseDto>> getAdoptionAndCareDetail(
+            @RequestBody AdoptionOrCareSearchRequestDto requestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
+            );
+        }
+        ApplicationResponseDto applicationDetails
+                = adoptionService.getApplicationDetails(requestDto, userDetails.getUsername());
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.success(applicationDetails)
         );
     }
 

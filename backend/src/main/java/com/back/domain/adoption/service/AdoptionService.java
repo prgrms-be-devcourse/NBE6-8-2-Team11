@@ -1,8 +1,9 @@
 package com.back.domain.adoption.service;
 
+import com.back.domain.adoption.dto.request.AdoptionOrCareSearchRequestDto;
 import com.back.domain.adoption.dto.request.AdoptionRequestDto;
 import com.back.domain.adoption.dto.response.AdoptionResponseDto;
-import com.back.domain.adoption.dto.response.ApplicationListResponseDto;
+import com.back.domain.adoption.dto.response.ApplicationResponseDto;
 import com.back.domain.adoption.dto.response.ApplicationSimpleListResponseDto;
 import com.back.domain.adoption.entity.Adoption;
 import com.back.domain.adoption.enums.RequestStatus;
@@ -71,5 +72,22 @@ public class AdoptionService {
         applications.sort(Comparator.comparing(ApplicationSimpleListResponseDto::createdAt).reversed());
 
         return applications;
+    }
+
+    public ApplicationResponseDto getApplicationDetails(AdoptionOrCareSearchRequestDto requestDto, String memberEmail) {
+        Member member = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        if (requestDto.type().equals("ADOPTION")) {
+            Adoption adoption = adoptionRepository.findByIdAndMember(requestDto.id(), member)
+                    .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+            return ApplicationResponseDto.fromAdoption(adoption);
+        } else if (requestDto.type().equals("CARE")) {
+            Care care = careRepository.findByIdAndMember(requestDto.id(), member)
+                    .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+            return ApplicationResponseDto.fromCare(care);
+        } else {
+            throw new IllegalArgumentException("Invalid application type: " + requestDto.type());
+        }
     }
 }

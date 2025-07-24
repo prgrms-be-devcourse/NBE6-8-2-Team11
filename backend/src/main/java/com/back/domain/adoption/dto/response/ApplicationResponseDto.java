@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 
 @Builder
-public record ApplicationListResponseDto(
+public record ApplicationResponseDto(
     Long id,
     String title,
     String type, // "ADOPTION" 또는 "CARE"
@@ -20,8 +20,8 @@ public record ApplicationListResponseDto(
     LocalDateTime desiredEndDate    // Care인 경우에만 사용
 ) {
     
-    public static ApplicationListResponseDto fromAdoption(Adoption adoption) {
-        return ApplicationListResponseDto.builder()
+    public static ApplicationResponseDto fromAdoption(Adoption adoption) {
+        return ApplicationResponseDto.builder()
                 .id(adoption.getId())
                 .title(adoption.getTitle())
                 .type("ADOPTION")
@@ -32,8 +32,8 @@ public record ApplicationListResponseDto(
                 .build();
     }
     
-    public static ApplicationListResponseDto fromCare(Care care) {
-        return ApplicationListResponseDto.builder()
+    public static ApplicationResponseDto fromCare(Care care) {
+        return ApplicationResponseDto.builder()
                 .id(care.getId())
                 .title(care.getTitle())
                 .type("CARE")
