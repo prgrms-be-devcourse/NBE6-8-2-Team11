@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { NAV_ITEMS, BRAND_INFO } from '../../constants';
 
 export default function Header() {
@@ -26,8 +27,14 @@ export default function Header() {
           </nav>
           
           <div className="flex items-center space-x-4">
-            <button className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors">
-              로그인
+            <button className="hover:opacity-80 transition-opacity">
+              <Image
+                src="/kakao_login_medium_narrow.png"
+                alt="카카오 로그인"
+                width={183}
+                height={45}
+                className="cursor-pointer"
+              />
             </button>
           </div>
         </div>
