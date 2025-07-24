@@ -1,4 +1,8 @@
 package com.back.domain.member.dto.request;
 
-public class MemberUpdateRequestDto {
-}
+public record MemberUpdateRequestDto(
+        String name,
+        String phone,
+        String currentPassword,
+        String newPassword
+) {}

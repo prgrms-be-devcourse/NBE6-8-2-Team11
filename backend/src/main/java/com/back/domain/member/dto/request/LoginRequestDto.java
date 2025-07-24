@@ -1,4 +1,7 @@
 package com.back.domain.member.dto.request;
 
-public class LoginRequestDto {
+public record LoginRequestDto(
+        String email,
+        String password
+) {
 }

@@ -1,4 +1,10 @@
 package com.back.domain.member.dto.response;
 
-public class TokenResponseDto {
-}
+import lombok.Builder;
+
+@Builder
+public record TokenResponseDto(
+        String grantType,
+        String accessToken,
+        String refreshToken
+) {}
