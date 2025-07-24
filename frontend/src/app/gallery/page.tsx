@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Pet } from '@/shared/types';
 import { MOCK_PETS } from '@/shared/constants';
+import Header from '@/shared/components/layout/Header';
+import Footer from '@/shared/components/layout/Footer';
 import AnimalGrid from '@/features/gallery/components/AnimalGrid';
 import AnimalFilter from '@/features/gallery/components/AnimalFilter';
 import AnimalSearch from '@/features/gallery/components/AnimalSearch';
@@ -118,6 +120,8 @@ export default function GalleryPage() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-50">
+        <Header />
+        
         {/* 헤더 섹션 */}
         <div className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -188,6 +192,8 @@ export default function GalleryPage() {
             <AnimalGrid pets={filteredPets} />
           )}
         </div>
+        
+        <Footer />
       </div>
     </ErrorBoundary>
   );
