@@ -58,7 +58,7 @@ public class AdoptionController {
         );
     }
 
-    @GetMapping
+    @GetMapping("/detail")
     @Operation(summary = "회원 입양/돌봄 신청 내역 상세 조회", description = "회원의 입양 및 돌봄 신청 내역을 상세 조회합니다.")
     public ResponseEntity<ApiResponse<ApplicationResponseDto>> getAdoptionAndCareDetail(
             @RequestParam Long typeId, @RequestParam String type,
@@ -91,7 +91,7 @@ public class AdoptionController {
         );
     }
 
-    @DeleteMapping
+    @DeleteMapping("/all")
     @Operation(summary = "회원 입양/돌봄 신청 내역 전체 취소(삭제)", description = "회원의 입양 및 돌봄 신청 내역 전체를 취소합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteAdoptionAndCareAll(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -122,7 +122,7 @@ public class AdoptionController {
         );
     }
 
-    @GetMapping("/received")
+    @GetMapping("/received/detail")
     @Operation(summary = "보호자가 받은 입양/돌봄 신청 내역 상세 조회", description = "보호자가 받은 입양 및 돌봄 신청 내역을 상세 조회합니다.")
     public ResponseEntity<ApiResponse<ApplicationResponseDto>> getReceivedApplicationDetail(
             @RequestParam Long typeId, @RequestParam String type,
@@ -156,7 +156,7 @@ public class AdoptionController {
         );
     }
 
-    @DeleteMapping("/received")
+    @DeleteMapping("/received/all")
     @Operation(summary = "보호자가 받은 입양/돌봄 등록 내역 단건 취소(삭제)",
             description = "보호자가 받은 입양 및 돌봄 등록 내역 하나를 취소합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteReceivedApplication(

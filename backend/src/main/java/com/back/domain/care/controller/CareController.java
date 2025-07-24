@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/applies")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class CareController {
 
     private final CareService careService;
 
-    @PostMapping("/care")
+    @PostMapping("/applies/care")
     @Operation(summary = "돌봄 신청", description = "돌봄 신청을 처리합니다.")
     public ResponseEntity<ApiResponse<CareResponseDto>> applyCare(
             @RequestBody CareRequestDto careRequestDto) {
