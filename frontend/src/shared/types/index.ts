@@ -10,7 +10,6 @@ export interface Pet {
   shelterId: number;
   memberIdCreatedBy: number;
   createdAt: Date;
-  updatedAt?: Date;
 }
 
 // 보호소 정보 타입 (shelter 테이블 기반)
@@ -94,11 +93,6 @@ export interface Notification {
   message: string;
   isRead: boolean;
   createdAt: Date;
-}
-
-// 기존 Animal 타입은 Pet으로 대체 (하위 호환성 유지)
-export interface Animal extends Pet {
-  // 기존 Animal 타입과의 호환성을 위한 별칭
 }
 
 // 통계 정보 타입
