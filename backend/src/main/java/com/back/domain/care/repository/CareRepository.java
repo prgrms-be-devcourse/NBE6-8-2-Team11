@@ -13,4 +13,6 @@ public interface CareRepository extends JpaRepository<Care, Long> {
     List<Care> findByMemberOrderByCreatedAtDesc(Member member);
 
     Optional<Care> findByIdAndMember(Long id, Member member);
+
+    List<Care> findByMember(Member member);
 } 

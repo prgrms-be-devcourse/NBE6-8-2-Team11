@@ -53,8 +53,7 @@ public class AdoptionService {
     }
 
     public List<ApplicationSimpleListResponseDto> getMemberApplications(String memberEmail) {
-        Member member = memberRepository.findByEmail(memberEmail)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Member member = getMemberByEmail(memberEmail);
 
         List<Adoption> adoptions = adoptionRepository.findByMemberOrderByCreatedAtDesc(member);
         List<Care> cares = careRepository.findByMemberOrderByCreatedAtDesc(member);
@@ -75,19 +74,58 @@ public class AdoptionService {
     }
 
     public ApplicationResponseDto getApplicationDetails(AdoptionOrCareSearchRequestDto requestDto, String memberEmail) {
-        Member member = memberRepository.findByEmail(memberEmail)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Member member = getMemberByEmail(memberEmail);
+        Object entity = getApplicationEntity(requestDto, member);
 
-        if (requestDto.type().equals("ADOPTION")) {
-            Adoption adoption = adoptionRepository.findByIdAndMember(requestDto.id(), member)
-                    .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+        if (entity instanceof Adoption adoption) {
             return ApplicationResponseDto.fromAdoption(adoption);
-        } else if (requestDto.type().equals("CARE")) {
-            Care care = careRepository.findByIdAndMember(requestDto.id(), member)
-                    .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+        } else if (entity instanceof Care care) {
             return ApplicationResponseDto.fromCare(care);
+        }
+        throw new IllegalArgumentException("Invalid application type: " + requestDto.type());
+    }
+
+    public void deleteSingleHistory(AdoptionOrCareSearchRequestDto requestDto, String memberEmail) {
+        Member member = getMemberByEmail(memberEmail);
+        Object entity = getApplicationEntity(requestDto, member);
+
+        if (entity instanceof Adoption adoption) {
+            adoptionRepository.delete(adoption);
+        } else if (entity instanceof Care care) {
+            careRepository.delete(care);
+        }
+    }
+
+    public void deleteAllHistory(String memberEmail) {
+        Member member = getMemberByEmail(memberEmail);
+
+        List<Adoption> adoptions = adoptionRepository.findByMember(member);
+        List<Care> cares = careRepository.findByMember(member);
+
+        for (Adoption adoption : adoptions) {
+            adoptionRepository.delete(adoption);
+        }
+
+        for (Care care : cares) {
+            careRepository.delete(care);
+        }
+    }
+
+    private Member getMemberByEmail(String memberEmail) {
+        return memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    private Object getApplicationEntity(AdoptionOrCareSearchRequestDto requestDto, Member member) {
+        if (requestDto.type().equals("ADOPTION")) {
+            return adoptionRepository.findByIdAndMember(requestDto.id(), member)
+                    .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+        } else if (requestDto.type().equals("CARE")) {
+            return careRepository.findByIdAndMember(requestDto.id(), member)
+                    .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
         } else {
             throw new IllegalArgumentException("Invalid application type: " + requestDto.type());
         }
     }
+
 }

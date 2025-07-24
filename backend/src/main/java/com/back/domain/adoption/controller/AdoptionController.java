@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -71,6 +72,37 @@ public class AdoptionController {
                 = adoptionService.getApplicationDetails(requestDto, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(applicationDetails)
+        );
+    }
+
+    @DeleteMapping
+    @Operation(summary = "회원 입양/돌봄 신청 내역 단건 취소(삭제)", description = "회원의 입양 및 돌봄 신청 내역 하나를 취소합니다.")
+    public ResponseEntity<ApiResponse<Void>> deleteAdoptionAndCare(
+            @RequestBody AdoptionOrCareSearchRequestDto requestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
+            );
+        }
+        adoptionService.deleteSingleHistory(requestDto, userDetails.getUsername());
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.success(null)
+        );
+    }
+
+    @DeleteMapping
+    @Operation(summary = "회원 입양/돌봄 신청 내역 전체 취소(삭제)", description = "회원의 입양 및 돌봄 신청 내역 전체를 취소합니다.")
+    public ResponseEntity<ApiResponse<Void>> deleteAdoptionAndCareAll(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
+            );
+        }
+        adoptionService.deleteAllHistory(userDetails.getUsername());
+        return ResponseEntity.status(HttpStatus.OK).body(
+                ApiResponse.success(null)
         );
     }
 

@@ -13,4 +13,6 @@ public interface AdoptionRepository extends JpaRepository<Adoption, Long> {
     List<Adoption> findByMemberOrderByCreatedAtDesc(Member member);
 
     Optional<Adoption> findByIdAndMember(Long id, Member member);
+
+    List<Adoption> findByMember(Member member);
 } 
