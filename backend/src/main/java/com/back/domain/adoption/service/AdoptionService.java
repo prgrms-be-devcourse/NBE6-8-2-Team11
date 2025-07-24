@@ -34,9 +34,8 @@ public class AdoptionService {
     private final AdoptionRepository adoptionRepository;
     private final CareRepository careRepository;
 
-    public AdoptionResponseDto applyAdoption(AdoptionRequestDto adoptionRequestDto) {
-        Member member = memberRepository.findById(adoptionRequestDto.memberId())
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    public AdoptionResponseDto applyAdoption(AdoptionRequestDto adoptionRequestDto, String memberEmail) {
+        Member member = getMemberByEmail(memberEmail);
 
         Pet pet = petRepository.findById(adoptionRequestDto.petId())
                 .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));

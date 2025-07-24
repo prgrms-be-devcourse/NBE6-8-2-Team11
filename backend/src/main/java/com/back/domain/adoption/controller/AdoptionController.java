@@ -34,8 +34,14 @@ public class AdoptionController {
     @PostMapping("/adoption")
     @Operation(summary = "입양 신청", description = "입양 신청을 처리합니다.")
     public ResponseEntity<ApiResponse<AdoptionResponseDto>> applyAdoption(
-            @RequestBody AdoptionRequestDto adoptionRequestDto) {
-        AdoptionResponseDto adoptionResponseDto = adoptionService.applyAdoption(adoptionRequestDto);
+            @RequestBody AdoptionRequestDto adoptionRequestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
+            );
+        }
+        AdoptionResponseDto adoptionResponseDto = adoptionService.applyAdoption(adoptionRequestDto, userDetails.getUsername());
         // 알람은 추후 구현
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(adoptionResponseDto)
