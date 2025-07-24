@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +25,14 @@ public class CareController {
     @PostMapping("/applies/care")
     @Operation(summary = "돌봄 신청", description = "돌봄 신청을 처리합니다.")
     public ResponseEntity<ApiResponse<CareResponseDto>> applyCare(
-            @RequestBody CareRequestDto careRequestDto) {
-        CareResponseDto careResponseDto = careService.applyCare(careRequestDto);
+            @RequestBody CareRequestDto careRequestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
+            );
+        }
+        CareResponseDto careResponseDto = careService.applyCare(careRequestDto, userDetails.getUsername());
         // 알람은 추후 구현
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(careResponseDto)

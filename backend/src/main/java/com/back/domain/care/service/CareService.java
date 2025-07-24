@@ -23,8 +23,8 @@ public class CareService {
     private final PetRepository petRepository;
 
 
-    public CareResponseDto applyCare(CareRequestDto careRequestDto) {
-        Member member = memberRepository.findById(careRequestDto.memberId())
+    public CareResponseDto applyCare(CareRequestDto careRequestDto, String memberEmail) {
+        Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         Pet pet = petRepository.findById(careRequestDto.petId())
