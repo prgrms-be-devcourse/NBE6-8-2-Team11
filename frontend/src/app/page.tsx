@@ -1,10 +1,10 @@
-import Header from '../components/Header';
-import HeroSection from '../components/HeroSection';
-import StatsSection from '../components/StatsSection';
-import ServicesSection from '../components/ServicesSection';
-import GalleryPreview from '../components/GalleryPreview';
-import CTASection from '../components/CTASection';
-import Footer from '../components/Footer';
+import Header from '../shared/components/layout/Header';
+import HeroSection from '../features/home/components/HeroSection';
+import StatsSection from '../features/home/components/StatsSection';
+import ServicesSection from '../features/home/components/ServicesSection';
+import GalleryPreview from '../features/gallery/components/GalleryPreview';
+import CTASection from '../features/home/components/CTASection';
+import Footer from '../shared/components/layout/Footer';
 
 export default function Home() {
   return (

@@ -1,5 +1,5 @@
-import { STATS_DATA } from '../utils/constants';
-import { formatNumber } from '../utils/helpers';
+import { STATS_DATA } from '../../../shared/constants';
+import { formatNumber } from '../../../shared/utils';
 
 export default function StatsSection() {
   return (

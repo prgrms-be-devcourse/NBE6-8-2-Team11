@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { NAV_ITEMS, BRAND_INFO } from '../utils/constants';
+import { NAV_ITEMS, BRAND_INFO } from '../../constants';
 
 export default function Header() {
   return (

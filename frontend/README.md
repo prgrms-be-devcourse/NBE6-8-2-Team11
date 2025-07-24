@@ -107,30 +107,52 @@ npm start
 ```
 frontend/
 ├── src/
-│   ├── app/                    # App Router
-│   │   ├── page.tsx           # 메인 페이지
+│   ├── app/                    # Next.js App Router (페이지 진입점)
+│   │   ├── page.tsx           # 홈 페이지
 │   │   ├── layout.tsx         # 레이아웃
 │   │   └── globals.css        # 전역 스타일
-│   ├── components/             # 재사용 컴포넌트
-│   │   ├── Header.tsx         # 헤더 컴포넌트
-│   │   ├── HeroSection.tsx    # 히어로 섹션
-│   │   ├── StatsSection.tsx   # 통계 섹션
-│   │   ├── ServicesSection.tsx # 서비스 소개
-│   │   ├── GalleryPreview.tsx # 갤러리 미리보기
-│   │   ├── CTASection.tsx     # CTA 섹션
-│   │   └── Footer.tsx         # 푸터 컴포넌트
-│   ├── hooks/                  # 커스텀 훅
-│   │   ├── useLocalStorage.ts # 로컬 스토리지 훅
-│   │   ├── useScrollPosition.ts # 스크롤 위치 훅
-│   │   └── useWindowSize.ts   # 윈도우 크기 훅
-│   ├── utils/                  # 유틸리티 함수
-│   │   ├── constants.ts       # 상수 정의
-│   │   └── helpers.ts         # 헬퍼 함수들
-│   └── types/                  # TypeScript 타입
-│       └── index.ts           # 타입 정의
-├── public/                     # 정적 파일
-├── package.json                # 의존성 관리
-└── README.md                  # 프로젝트 문서
+│   ├── shared/                 # 공유 모듈 (전역)
+│   │   ├── components/        # 재사용 UI 컴포넌트
+│   │   │   ├── ui/           # 기본 UI (Button, Card, LoadingSpinner)
+│   │   │   ├── layout/       # 레이아웃 (Header, Footer)
+│   │   │   └── common/       # 공통 (Loading, Error 등)
+│   │   ├── hooks/            # 커스텀 훅
+│   │   │   ├── useLocalStorage.ts
+│   │   │   ├── useScrollPosition.ts
+│   │   │   └── useWindowSize.ts
+│   │   ├── utils/            # 유틸리티 함수
+│   │   │   └── index.ts      # 헬퍼 함수들
+│   │   ├── types/            # TypeScript 타입
+│   │   │   └── index.ts      # 타입 정의
+│   │   ├── services/         # API 서비스
+│   │   │   ├── apiClient.ts  # API 클라이언트
+│   │   │   └── animalService.ts # 동물 관련 API
+│   │   └── constants/        # 상수
+│   │       └── index.ts      # 상수 정의
+│   ├── features/             # 기능별 모듈
+│   │   ├── home/             # 홈 기능
+│   │   │   ├── components/   # 홈 전용 컴포넌트
+│   │   │   │   ├── HeroSection.tsx
+│   │   │   │   ├── StatsSection.tsx
+│   │   │   │   ├── ServicesSection.tsx
+│   │   │   │   └── CTASection.tsx
+│   │   │   ├── hooks/        # 홈 전용 훅
+│   │   │   └── types/        # 홈 전용 타입
+│   │   ├── gallery/          # 갤러리 기능
+│   │   │   ├── components/   # 갤러리 전용 컴포넌트
+│   │   │   │   └── GalleryPreview.tsx
+│   │   │   ├── hooks/        # 갤러리 전용 훅
+│   │   │   ├── services/     # 갤러리 전용 API
+│   │   │   └── types/        # 갤러리 전용 타입
+│   │   ├── profile/          # 프로필 기능 (예정)
+│   │   ├── apply/            # 입양신청 기능 (예정)
+│   │   └── auth/             # 인증 기능 (예정)
+│   └── assets/               # 정적 자원
+│       ├── images/           # 이미지 파일
+│       └── icons/            # 아이콘 파일
+├── public/                   # 정적 파일
+├── package.json              # 의존성 관리
+└── README.md                # 프로젝트 문서
 ```
 
 ## 🎯 타겟 사용자

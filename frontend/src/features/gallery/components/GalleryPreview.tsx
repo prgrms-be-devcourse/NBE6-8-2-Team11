@@ -1,5 +1,5 @@
-import { SAMPLE_ANIMALS } from '../utils/constants';
-import { formatAnimalAge, formatAnimalGender, formatAnimalSize } from '../utils/helpers';
+import { SAMPLE_ANIMALS } from '../../../shared/constants';
+import { formatAnimalAge, formatAnimalGender, formatAnimalSize } from '../../../shared/utils';
 
 export default function GalleryPreview() {
   return (

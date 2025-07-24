@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BRAND_INFO, CONTACT_INFO } from '../utils/constants';
+import { BRAND_INFO, CONTACT_INFO } from '../../constants';
 
 export default function Footer() {
   return (

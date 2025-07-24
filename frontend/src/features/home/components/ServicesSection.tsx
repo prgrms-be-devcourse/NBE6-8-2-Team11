@@ -1,4 +1,4 @@
-import { SERVICE_CARDS } from '../utils/constants';
+import { SERVICE_CARDS } from '../../../shared/constants';
 
 export default function ServicesSection() {
   return (
