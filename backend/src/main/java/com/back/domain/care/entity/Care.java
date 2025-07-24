@@ -1,7 +1,6 @@
 package com.back.domain.care.entity;
 
 import com.back.domain.adoption.enums.RequestStatus;
-import com.back.domain.care.enums.ReceivedStatus;
 import com.back.domain.member.entity.Member;
 import com.back.domain.notification.entity.Notification;
 import com.back.domain.pet.entity.Pet;
@@ -42,8 +41,8 @@ public class Care {
     @Column(name = "care_id")
     private Long id;
 
-    @Column(name = "care_received_status", nullable = false)
-    private ReceivedStatus receivedStatus;
+    @Column(name = "care_title", nullable = false)
+    private String title;
 
     @Lob
     @Column(name = "care_message", nullable = false)
@@ -74,14 +73,18 @@ public class Care {
     private List<Notification> notifications = new ArrayList<>();
 
     @Builder
-    public Care(ReceivedStatus receivedStatus, String message, LocalDateTime desiredStartDate,
+    public Care(String title, String message, LocalDateTime desiredStartDate,
                 LocalDateTime desiredEndDate, RequestStatus status, Member member, Pet pet) {
-        this.receivedStatus = receivedStatus;
+        this.title = title;
         this.message = message;
         this.desiredStartDate = desiredStartDate;
         this.desiredEndDate = desiredEndDate;
         this.status = status;
         this.member = member;
         this.pet = pet;
+    }
+
+    public void updateStatus(String status) {
+        this.status = RequestStatus.valueOf(status);
     }
 }
