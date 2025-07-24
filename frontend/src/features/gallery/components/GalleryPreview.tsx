@@ -1,5 +1,6 @@
-import { SAMPLE_ANIMALS } from '../../../shared/constants';
-import { formatAnimalAge, formatAnimalGender, formatAnimalSize } from '../../../shared/utils';
+import { MOCK_PETS } from '../../../shared/constants';
+import { Pet } from '../../../shared/types';
+import { formatAnimalAge, formatAnimalGender } from '../../../shared/utils';
 
 export default function GalleryPreview() {
   return (
@@ -15,15 +16,15 @@ export default function GalleryPreview() {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {SAMPLE_ANIMALS.map((animal) => (
-            <div key={animal.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
+          {MOCK_PETS.slice(0, 4).map((pet: Pet) => (
+            <div key={pet.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
               <div className="h-48 bg-gradient-to-br from-orange-200 to-yellow-200 flex items-center justify-center">
                 <span className="text-6xl">🐕</span>
               </div>
               <div className="p-6">
-                <h3 className="font-semibold text-gray-800 mb-2">{animal.name}</h3>
+                <h3 className="font-semibold text-gray-800 mb-2">{pet.name}</h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  {formatAnimalAge(animal.age)} • {formatAnimalGender(animal.gender)} • {formatAnimalSize(animal.size)}
+                  {formatAnimalAge(pet.age)} • {formatAnimalGender(pet.gender)}
                 </p>
                 <button className="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors">
                   상세보기

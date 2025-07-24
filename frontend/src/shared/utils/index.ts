@@ -39,34 +39,20 @@ export const formatAnimalGender = (gender: 'male' | 'female'): string => {
   return gender === 'male' ? '수컷' : '암컷';
 };
 
-// 동물 크기 표시 함수
-export const formatAnimalSize = (size: 'small' | 'medium' | 'large'): string => {
-  const sizeMap = {
-    small: '소형',
-    medium: '중형',
-    large: '대형',
-  };
-  if (!size || !sizeMap[size as keyof typeof sizeMap]) {
-    console.warn('Invalid size provided:', size);
-    return '크기 미상';
-  }
-  return sizeMap[size];
-};
-
-// 동물 타입 표시 함수
-export const formatAnimalType = (type: string): string => {
-  if (!type || typeof type !== 'string') {
-    console.warn('Invalid type provided:', type);
+// 동물 종류 표시 함수 (species 기반)
+export const formatAnimalSpecies = (species: string): string => {
+  if (!species || typeof species !== 'string') {
+    console.warn('Invalid species provided:', species);
     return '종류 미상';
   }
-  const typeMap: Record<string, string> = {
+  const speciesMap: Record<string, string> = {
     dog: '강아지',
     cat: '고양이',
     rabbit: '토끼',
     bird: '새',
     other: '기타',
   };
-  return typeMap[type] || type;
+  return speciesMap[species] || species;
 };
 
 // 클래스명 조합 함수

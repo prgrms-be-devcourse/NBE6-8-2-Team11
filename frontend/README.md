@@ -1,168 +1,273 @@
-# 🐾 펫프렌드 - 유기 동물 입양 및 돌봄 서비스
+# 🐾 돌봄즈 (PetMatching) - 유기동물 입양 플랫폼
 
-유기동물과 입양희망자를 연결하는 따뜻한 플랫폼입니다. 보호소와 입양희망자가 신청서를 통해 연결될 수 있도록 도와드립니다.
+## 🎯 프로젝트 소개
 
-## 📋 프로젝트 목적
+**돌봄즈**는 유기동물과 입양희망자를 연결하는 따뜻한 플랫폼입니다. 
+사랑스러운 반려동물들이 새로운 가족을 찾을 수 있도록 도와주는 서비스입니다.
 
-- 유기동물을 입양/돌봄할 수 있는 플랫폼 제공
-- 유기동물 보호자(동물단체나 병원 등)와 입양희망자 연결
-- 신청서를 통한 체계적인 매칭 시스템
+### 🌟 핵심 가치
+- **연결**: 유기동물과 입양희망자의 최적 매칭
+- **투명성**: 동물과 보호소 정보의 투명한 공개
+- **책임감**: 입양 후 관리와 책임 있는 반려동물 문화 조성
+- **커뮤니티**: 입양인들의 경험 공유와 상담 지원
 
-## 🛠 기술 스택
+---
+
+## 🛠️ 기술 스택
 
 ### Frontend
-- **언어**: JavaScript, TypeScript
-- **프레임워크**: React, Next.js 15
-- **스타일링**: CSS, Tailwind CSS
-- **빌드 도구**: Babel
-- **버전 관리**: Git, GitHub
+- **Framework**: Next.js 15.4.3 (App Router)
+- **Language**: TypeScript 5.0+
+- **Styling**: Tailwind CSS
+- **State Management**: React Hooks
+- **Package Manager**: npm
 
-### 주요 라이브러리
-- React 19.1.0
-- Next.js 15.4.3
-- Tailwind CSS 4.x
+### Backend (예정)
+- **Framework**: Spring Boot 3.x
+- **Language**: Java 21
+- **Database**: MySQL 8.0
+- **Security**: Spring Security + JWT
+- **Build Tool**: Gradle
 
-## 🎨 페이지 구성
+### Database Schema
+- **Pet**: 동물 정보 관리
+- **Shelter**: 보호소 정보 관리
+- **Member**: 사용자 정보 관리
+- **Adoption**: 입양 신청 관리
+- **Care**: 임시 보호 신청 관리
+- **Chat**: 채팅 시스템
+- **Notification**: 알림 시스템
 
-### 현재 구현된 페이지
-1. **메인 페이지** (`/`) - 홈페이지
-2. **입양동물 페이지** (`/gallery`) - 갤러리 형식 조회 (예정)
-3. **내 정보 페이지** (`/profile`) - 사용자 정보 (예정)
-4. **입양신청 페이지** (`/apply`) - 입양 및 돌봄 신청 (예정)
+---
 
-## ✨ 메인 페이지 특징
+## 🏗️ 프로젝트 구조
 
-### 🎨 디자인 스타일
-- **밝고 따뜻한 색감**: 오렌지/노란색 그라데이션 사용
-- **모던한 디자인**: 깔끔한 카드 레이아웃과 부드러운 그림자
-- **반응형 디자인**: 모바일부터 데스크톱까지 완벽 대응
-
-### 🏗 구성 요소
-
-#### 1. 헤더 (Navigation)
-- 로고와 브랜드명 "돌봄즈"
-- 네비게이션 메뉴 (홈, 입양동물, 내정보, 입양신청)
-- 로그인 버튼
-
-#### 2. 히어로 섹션
-- 강력한 메시지와 CTA 버튼
-- 애니메이션이 있는 동물 이미지 갤러리
-- 호버 효과와 부드러운 전환
-
-#### 3. 통계 섹션
-- 성공한 입양, 보호중인 동물, 협력 보호소, 입양희망자 수
-
-#### 4. 서비스 소개
-- 동물 검색, 입양 신청, 매칭 서비스
-- 아이콘과 설명이 포함된 카드 형태
-
-#### 5. 갤러리 미리보기
-- 입양 대기중인 동물들의 카드 형태
-- "더 많은 동물 보기" 버튼
-
-#### 6. CTA 섹션
-- 강력한 행동 유도 메시지
-- 오렌지 그라데이션 배경
-
-#### 7. 푸터
-- 서비스, 지원, 연락처 정보
-- 브랜드 정보와 저작권
-
-### ✨ 특별한 기능
-- **애니메이션**: 카드 회전 효과, 호버 스케일 효과
-- **접근성**: 명확한 색상 대비와 읽기 쉬운 폰트
-- **사용자 경험**: 직관적인 네비게이션과 명확한 CTA
-
-## 🚀 시작하기
-
-### 설치
-
-```bash
-# 의존성 설치
-npm install
-```
-
-### 개발 서버 실행
-
-```bash
-npm run dev
-```
-
-브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 결과를 확인하세요.
-
-### 빌드
-
-```bash
-npm run build
-```
-
-### 프로덕션 실행
-
-```bash
-npm start
-```
-
-## 📁 프로젝트 구조
-
+### Frontend 구조
 ```
 frontend/
 ├── src/
-│   ├── app/                    # Next.js App Router (페이지 진입점)
-│   │   ├── page.tsx           # 홈 페이지
+│   ├── app/                    # Next.js App Router
+│   │   ├── page.tsx           # 메인 페이지
+│   │   ├── gallery/           # 갤러리 페이지
 │   │   ├── layout.tsx         # 레이아웃
 │   │   └── globals.css        # 전역 스타일
-│   ├── shared/                 # 공유 모듈 (전역)
-│   │   ├── components/        # 재사용 UI 컴포넌트
-│   │   │   ├── ui/           # 기본 UI (Button, Card, LoadingSpinner)
-│   │   │   ├── layout/       # 레이아웃 (Header, Footer)
-│   │   │   └── common/       # 공통 (Loading, Error 등)
-│   │   ├── hooks/            # 커스텀 훅
-│   │   │   ├── useLocalStorage.ts
-│   │   │   ├── useScrollPosition.ts
-│   │   │   └── useWindowSize.ts
+│   ├── shared/                # 공통 모듈
+│   │   ├── components/        # 공통 컴포넌트
+│   │   │   ├── layout/        # 레이아웃 컴포넌트
+│   │   │   ├── ui/           # UI 컴포넌트
+│   │   │   └── common/       # 공통 컴포넌트
+│   │   ├── types/            # TypeScript 타입 정의
+│   │   ├── constants/        # 상수 데이터
 │   │   ├── utils/            # 유틸리티 함수
-│   │   │   └── index.ts      # 헬퍼 함수들
-│   │   ├── types/            # TypeScript 타입
-│   │   │   └── index.ts      # 타입 정의
-│   │   ├── services/         # API 서비스 (추후 업데이트)
-│   │   │   ├── apiClient.ts  # API 클라이언트
-│   │   │   └── animalService.ts # 동물 관련 API
-│   │   └── constants/        # 상수
-│   │       └── index.ts      # 상수 정의
+│   │   ├── hooks/            # 커스텀 훅
+│   │   └── services/         # API 서비스
 │   ├── features/             # 기능별 모듈
 │   │   ├── home/             # 홈 기능
-│   │   │   ├── components/   # 홈 전용 컴포넌트
-│   │   │   │   ├── HeroSection.tsx
-│   │   │   │   ├── StatsSection.tsx
-│   │   │   │   ├── ServicesSection.tsx
-│   │   │   │   └── CTASection.tsx
-│   │   │   ├── hooks/        # 홈 전용 훅
-│   │   │   └── types/        # 홈 전용 타입
+│   │   │   └── components/   # 홈 관련 컴포넌트
 │   │   ├── gallery/          # 갤러리 기능
-│   │   │   ├── components/   # 갤러리 전용 컴포넌트
-│   │   │   │   └── GalleryPreview.tsx
-│   │   │   ├── hooks/        # 갤러리 전용 훅
-│   │   │   ├── services/     # 갤러리 전용 API
-│   │   │   └── types/        # 갤러리 전용 타입
-│   │   ├── profile/          # 프로필 기능 (예정)
-│   │   ├── apply/            # 입양신청 기능 (예정)
-│   │   └── auth/             # 인증 기능 (예정)
+│   │   │   └── components/   # 갤러리 관련 컴포넌트
+│   │   ├── auth/             # 인증 기능
+│   │   ├── apply/            # 입양 신청 기능
+│   │   └── profile/          # 프로필 기능
 │   └── assets/               # 정적 자원
-│       ├── images/           # 이미지 파일
-│       └── icons/            # 아이콘 파일
 ├── public/                   # 정적 파일
 ├── package.json              # 의존성 관리
-└── README.md                # 프로젝트 문서
+└── next.config.ts           # Next.js 설정
 ```
 
-## 🎯 타겟 사용자
+### 주요 컴포넌트
+- **Header**: 네비게이션 및 로그인 버튼
+- **Footer**: 서비스 정보 및 연락처
+- **HeroSection**: 메인 페이지 히어로 섹션
+- **StatsSection**: 통계 정보 표시
+- **ServicesSection**: 서비스 소개
+- **GalleryPreview**: 갤러리 미리보기
+- **CTASection**: 행동 유도 섹션
+- **AnimalGrid**: 동물 카드 그리드
+- **AnimalCard**: 개별 동물 카드
+- **AnimalFilter**: 동물 필터링
+- **AnimalSearch**: 동물 검색
 
-- 동물에 관심이 있는 남녀노소
-- 동물보호소 및 유기 동물 입양 희망자
-- 동물 추천 및 매칭 시스템 이용자
+---
 
-## 🔧 기능적 요구사항
+## ✨ 주요 기능
 
-- **백엔드 연동**: API 완성 후 로그인 등 기능 구현 예정
-- **애니메이션**: 전반적인 애니메이션 사용
-- **접근성**: 유기 동물을 보여주는 탭은 사진이 크게 들어가는 갤러리 형태
+### 🏠 메인 페이지
+- **히어로 섹션**: 서비스 소개 및 CTA 버튼
+- **통계 정보**: 입양 성과 및 서비스 현황
+- **서비스 소개**: 주요 기능 안내
+- **갤러리 미리보기**: 입양 가능한 동물 미리보기
+- **행동 유도**: 입양 신청 유도
+
+### 🐾 갤러리 페이지
+- **동물 목록**: 입양 가능한 동물들의 카드 형태 표시
+- **검색 기능**: 이름, 설명으로 실시간 검색
+- **필터링**: 종류, 성별, 나이별 필터링
+- **상세 정보**: 각 동물의 상세 정보 표시
+- **입양 신청**: 관심 있는 동물에 대한 입양 신청
+
+### 🔍 검색 및 필터링
+- **실시간 검색**: 타이핑과 동시에 결과 업데이트
+- **다중 필터**: 종류, 성별, 나이 동시 필터링
+- **결과 카운트**: 필터링된 결과 수 표시
+- **필터 초기화**: 모든 필터 한 번에 초기화
+
+### 📱 반응형 디자인
+- **모바일 최적화**: 모바일에서도 편리한 사용
+- **태블릿 지원**: 태블릿 화면 최적화
+- **데스크톱**: 대화면에서의 최적화된 레이아웃
+
+---
+
+## 🚀 설치 및 실행
+
+### 필수 요구사항
+- **Node.js**: 20.x LTS
+- **npm**: 10.x 이상
+
+### 설치 방법
+
+```bash
+# 1. 저장소 클론
+git clone <repository-url>
+cd frontend
+
+# 2. 의존성 설치
+npm install
+
+# 3. 개발 서버 실행
+npm run dev
+```
+
+### 사용 가능한 스크립트
+
+```bash
+# 개발 서버 실행
+npm run dev
+
+# 프로덕션 빌드
+npm run build
+
+# 프로덕션 서버 실행
+npm start
+
+# 린트 검사
+npm run lint
+
+# 타입 체크
+npm run type-check
+```
+
+### 환경 변수 설정
+```bash
+# .env.local (선택사항)
+NEXT_PUBLIC_API_URL=http://localhost:3001/api
+```
+
+---
+
+## 🛠️ 개발 가이드
+
+### Git Flow 전략
+```
+main (배포용)
+├── develop (개발 메인)
+    ├── feature/* (기능 개발)
+    └── hotfix/* (긴급 수정)
+```
+
+### 브랜치 명명 규칙
+- `feature/기능명`: 새로운 기능 개발
+- `fix/버그명`: 버그 수정
+- `hotfix/긴급수정`: 긴급 수정사항
+
+### 커밋 컨벤션
+```
+<type>(<scope>): <subject>
+
+feat(gallery): 동물 검색 기능 추가
+fix(ui): 헤더 반응형 레이아웃 수정
+docs(readme): 설치 가이드 업데이트
+```
+
+### 코드 스타일
+- **TypeScript**: 엄격한 타입 체크
+- **ESLint**: 코드 품질 관리
+- **Prettier**: 코드 포맷팅
+- **Tailwind CSS**: 유틸리티 퍼스트 CSS
+
+---
+
+## 📊 현재 구현 상태
+
+### ✅ 완료된 기능
+- [x] **메인 페이지**: 히어로, 통계, 서비스 소개
+- [x] **갤러리 페이지**: 동물 목록, 검색, 필터링
+- [x] **반응형 디자인**: 모바일, 태블릿, 데스크톱
+- [x] **타입 안전성**: TypeScript 완전 적용
+- [x] **Mock 데이터**: 6마리 동물, 3개 보호소
+- [x] **컴포넌트 시스템**: 재사용 가능한 컴포넌트
+- [x] **에러 처리**: Error Boundary 적용
+- [x] **로딩 상태**: 스피너 및 로딩 UI
+
+### 🚧 진행 중인 기능
+- [ ] **상세 페이지**: 동물 상세 정보 페이지
+- [ ] **입양 신청**: 입양 신청 폼 및 프로세스
+- [ ] **사용자 인증**: 로그인/회원가입
+- [ ] **프로필 페이지**: 사용자 프로필 관리
+
+### 📋 예정된 기능
+- [ ] **채팅 시스템**: 입양인과 보호소 간 소통
+- [ ] **알림 시스템**: 입양 상태 알림
+- [ ] **리뷰 시스템**: 입양 후기 및 평가
+- [ ] **관리자 페이지**: 보호소 관리 기능
+
+---
+
+## 🔗 API 문서
+
+### 현재 Mock 데이터 구조
+
+#### Pet (동물 정보)
+```typescript
+interface Pet {
+  id: number;
+  name: string;
+  species: string; // dog, cat, rabbit, bird, other
+  age: number;
+  gender: 'male' | 'female';
+  description: string;
+  imageUrl?: string;
+  shelterId: number;
+  memberIdCreatedBy: number;
+  createdAt: Date;
+}
+```
+
+#### Shelter (보호소 정보)
+```typescript
+interface Shelter {
+  id: number;
+  name: string;
+  address: string;
+  city: string;
+  state?: string;
+  zipCode?: string;
+  phone?: string;
+  createdAt: Date;
+}
+```
+
+#### Member (사용자 정보)
+```typescript
+interface Member {
+  id: number;
+  member: string; // username
+  email: string;
+  password: string;
+  name: string;
+  role: 'user' | 'admin' | 'shelter_manager';
+  phone?: string;
+  createdAt: Date;
+}
+```

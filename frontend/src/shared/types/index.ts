@@ -1,51 +1,98 @@
-// 동물 정보 타입
-export interface Animal {
-  id: string;
+// 동물 정보 타입 (pet 테이블 기반)
+export interface Pet {
+  id: number;
   name: string;
-  type: 'dog' | 'cat' | 'rabbit' | 'bird' | 'other';
+  species: string; // dog, cat, rabbit, bird, other
   age: number;
   gender: 'male' | 'female';
-  size: 'small' | 'medium' | 'large';
-  description: string;
-  imageUrl: string;
-  shelterId: string;
-  status: 'available' | 'adopted' | 'pending';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// 보호소 정보 타입
-export interface Shelter {
-  id: string;
-  name: string;
-  address: string;
-  phone: string;
-  email: string;
   description: string;
   imageUrl?: string;
+  shelterId: number;
+  memberIdCreatedBy: number;
+  createdAt: Date;
 }
 
-// 사용자 정보 타입
-export interface User {
-  id: string;
+// 보호소 정보 타입 (shelter 테이블 기반)
+export interface Shelter {
+  id: number;
   name: string;
-  email: string;
-  phone: string;
   address: string;
-  profileImage?: string;
+  city: string;
+  state?: string;
+  zipCode?: string;
+  phone?: string;
   createdAt: Date;
-  updatedAt: Date;
 }
 
-// 입양 신청 타입
-export interface AdoptionApplication {
-  id: string;
-  userId: string;
-  animalId: string;
-  status: 'pending' | 'approved' | 'rejected';
-  message: string;
+// 사용자 정보 타입 (member 테이블 기반)
+export interface Member {
+  id: number;
+  member: string; // username/login ID
+  email: string;
+  password: string;
+  name: string;
+  role: 'user' | 'admin' | 'shelter_manager';
+  phone?: string;
   createdAt: Date;
-  updatedAt: Date;
+}
+
+// 입양 신청 타입 (adoption 테이블 기반)
+export interface Adoption {
+  id: number;
+  memberId: number;
+  petId: number;
+  message: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: Date;
+}
+
+// 임시 보호 신청 타입 (care 테이블 기반)
+export interface Care {
+  id: number;
+  memberId: number;
+  petId: number;
+  message: string;
+  desiredStartDate: Date;
+  desiredEndDate: Date;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: Date;
+}
+
+// 동물 상태 타입 (pet_status 테이블 기반)
+export interface PetStatus {
+  id: number;
+  petId: number;
+  status: 'available' | 'adopted' | 'in_care';
+  createdAt: Date;
+}
+
+// 채팅방 타입 (chat_room 테이블 기반)
+export interface ChatRoom {
+  id: number;
+  member1Id: number;
+  member2Id: number;
+  createdAt: Date;
+}
+
+// 채팅 메시지 타입 (chat_message 테이블 기반)
+export interface ChatMessage {
+  id: number;
+  chatRoomId: number;
+  senderId: number;
+  message: string;
+  sentAt: Date;
+}
+
+// 알림 타입 (notification 테이블 기반)
+export interface Notification {
+  id: number;
+  memberId: number;
+  adoptionId?: number;
+  careId?: number;
+  type: string;
+  message: string;
+  isRead: boolean;
+  createdAt: Date;
 }
 
 // 통계 정보 타입
