@@ -3,12 +3,15 @@ package com.back.domain.member.entity;
 
 import com.back.domain.adoption.entity.Adoption;
 import com.back.domain.care.entity.Care;
+import com.back.domain.member.enums.UserRole;
 import com.back.domain.notification.entity.Notification;
 import com.back.domain.pet.entity.Pet;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -51,6 +54,10 @@ public class Member implements UserDetails {
     @Column(name = "member_phone", nullable = false, unique = true)
     private String phone;
 
+    @Column(name = "member_role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
     @CreatedDate
     private LocalDateTime createdAt;
 
@@ -67,12 +74,13 @@ public class Member implements UserDetails {
     private List<Notification> notifications = new ArrayList<>();
 
     @Builder
-    public Member(Long id, String email, String password, String name, String phone) {
+    public Member(Long id, String email, String password, String name, String phone, UserRole role) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.name = name;
         this.phone = phone;
+        this.role = role;
     }
 
     @Override

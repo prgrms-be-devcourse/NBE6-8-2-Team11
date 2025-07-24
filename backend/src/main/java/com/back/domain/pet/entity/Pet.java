@@ -4,6 +4,7 @@ import com.back.domain.adoption.entity.Adoption;
 import com.back.domain.care.entity.Care;
 import com.back.domain.member.entity.Member;
 import com.back.domain.pet.enums.Gender;
+import com.back.domain.pet.enums.PetStatusType;
 import com.back.domain.shelter.entity.Shelter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -81,7 +82,7 @@ public class Pet {
     private List<Care> cares = new ArrayList<>();
 
     @Builder
-    public Pet(Long id, String name, String species, int age, Gender gender,
+    public Pet(Long id, String name, String species, int age, Gender gender, List<PetStatus> petStatuses,
                String description, String imageUrl, Shelter shelter, Member member) {
         this.id = id;
         this.name = name;
@@ -92,6 +93,10 @@ public class Pet {
         this.imageUrl = imageUrl;
         this.shelter = shelter;
         this.member = member;
+        this.petStatuses = petStatuses;
     }
 
+    public void setPetStatuses(List<PetStatus> testPetStatus) {
+        this.petStatuses = testPetStatus;
+    }
 }

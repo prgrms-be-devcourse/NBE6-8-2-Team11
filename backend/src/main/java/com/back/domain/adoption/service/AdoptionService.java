@@ -15,6 +15,8 @@ import com.back.domain.member.exception.MemberErrorCode;
 import com.back.domain.member.exception.MemberException;
 import com.back.domain.member.repository.MemberRepository;
 import com.back.domain.pet.entity.Pet;
+import com.back.domain.pet.entity.PetStatus;
+import com.back.domain.pet.enums.PetStatusType;
 import com.back.domain.pet.exception.PetErrorCode;
 import com.back.domain.pet.exception.PetException;
 import com.back.domain.pet.repository.PetRepository;
@@ -34,12 +36,18 @@ public class AdoptionService {
     private final AdoptionRepository adoptionRepository;
     private final CareRepository careRepository;
 
-    public AdoptionResponseDto applyAdoption(AdoptionRequestDto adoptionRequestDto) {
-        Member member = memberRepository.findById(adoptionRequestDto.memberId())
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    public AdoptionResponseDto applyAdoption(AdoptionRequestDto adoptionRequestDto, String memberEmail) {
+        Member member = getMemberByEmail(memberEmail);
 
         Pet pet = petRepository.findById(adoptionRequestDto.petId())
                 .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+
+        boolean isAvailableForAdoption = pet.getStatuses().stream()
+                .anyMatch(status -> status.getStatus().equals(PetStatusType.AVAILABLE_FOR_ADOPTION));
+
+        if (!isAvailableForAdoption) {
+            throw new PetException(PetErrorCode.PET_NOT_AVAILABLE_FOR_CARE);
+        }
 
         Adoption adoption = Adoption.builder()
                 .member(member)
@@ -149,15 +157,15 @@ public class AdoptionService {
         Member member = getMemberByEmail(memberEmail);
         Object entity = getApplicationEntity(requestDto, member);
 
-        if (entity instanceof Adoption adoption) {
-            adoption.updateStatus(requestDto.status());
-            adoptionRepository.save(adoption);
-        } else if (entity instanceof Care care) {
-            care.updateStatus(requestDto.status());
-            careRepository.save(care);
-        } else {
-            throw new IllegalArgumentException("Invalid application type: " + requestDto.type());
+        RequestStatus newStatus = RequestStatus.valueOf(requestDto.status());
+
+        if (newStatus == RequestStatus.REJECTED) {
+            updateApplicationStatus(entity, newStatus);
+            return;
         }
+
+        // ACCEPTED인 경우 PetStatus도 함께 업데이트
+        updateApplicationStatusWithPetStatus(entity, newStatus);
     }
 
     public void deleteOwnerAllHistory(String memberEmail) {
@@ -195,6 +203,42 @@ public class AdoptionService {
 
     private Object getApplicationEntity(AdoptionCareStatusUpdateRequestDto requestDto, Member member) {
         return getApplicationEntity(requestDto.type(), requestDto.id(), member);
+    }
+
+    private void updateApplicationStatus(Object entity, RequestStatus status) {
+        if (entity instanceof Adoption adoption) {
+            adoption.updateStatus(status);
+            adoptionRepository.save(adoption);
+        } else if (entity instanceof Care care) {
+            care.updateStatus(status);
+            careRepository.save(care);
+        } else {
+            throw new IllegalArgumentException("Invalid application type");
+        }
+    }
+
+    private void updateApplicationStatusWithPetStatus(Object entity, RequestStatus status) {
+        if (entity instanceof Adoption adoption) {
+            adoption.updateStatus(status);
+            updatePetStatus(adoption.getPet(), PetStatusType.ADOPTED);
+            adoptionRepository.save(adoption);
+        } else if (entity instanceof Care care) {
+            care.updateStatus(status);
+            updatePetStatus(care.getPet(), PetStatusType.CARE_COMPLETED);
+            careRepository.save(care);
+        } else {
+            throw new IllegalArgumentException("Invalid application type");
+        }
+    }
+
+    private void updatePetStatus(Pet pet, PetStatusType newStatus) {
+        pet.getPetStatuses().clear();
+        pet.getPetStatuses().add(
+                PetStatus.builder()
+                        .status(newStatus)
+                        .pet(pet)
+                        .build()
+        );
     }
 
 }

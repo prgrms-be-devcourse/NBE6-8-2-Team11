@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum PetErrorCode {
 
-    PET_NOT_FOUND(HttpStatus.NOT_FOUND, "PET-404", "해당 동물을 찾을 수 없습니다.");
+    PET_NOT_FOUND(HttpStatus.NOT_FOUND, "PET-404", "해당 동물을 찾을 수 없습니다."),
+    PET_NOT_AVAILABLE_FOR_CARE(HttpStatus.BAD_REQUEST, "PET-400", "해당 동물을 돌봄할 수 있는 상태가 아닙니다."),;
 
     private final HttpStatus httpStatus;
     private final String code;

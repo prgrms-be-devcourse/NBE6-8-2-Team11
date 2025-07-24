@@ -34,8 +34,9 @@ public class AdoptionController {
     @PostMapping("/adoption")
     @Operation(summary = "입양 신청", description = "입양 신청을 처리합니다.")
     public ResponseEntity<ApiResponse<AdoptionResponseDto>> applyAdoption(
-            @RequestBody AdoptionRequestDto adoptionRequestDto) {
-        AdoptionResponseDto adoptionResponseDto = adoptionService.applyAdoption(adoptionRequestDto);
+            @RequestBody AdoptionRequestDto adoptionRequestDto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        AdoptionResponseDto adoptionResponseDto = adoptionService.applyAdoption(adoptionRequestDto, userDetails.getUsername());
         // 알람은 추후 구현
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(adoptionResponseDto)
@@ -46,11 +47,6 @@ public class AdoptionController {
     @Operation(summary = "회원 입양/돌봄 신청 목록 조회", description = "회원의 입양 및 돌봄 신청 목록을 조회합니다.")
     public ResponseEntity<ApiResponse<List<ApplicationSimpleListResponseDto>>> getAdoptionAndCareList(
             @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
-            );
-        }
         List<ApplicationSimpleListResponseDto> simpleApplications
                 = adoptionService.getMemberApplications(userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -63,11 +59,6 @@ public class AdoptionController {
     public ResponseEntity<ApiResponse<ApplicationResponseDto>> getAdoptionAndCareDetail(
             @RequestParam Long typeId, @RequestParam String type,
             @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
-            );
-        }
         ApplicationResponseDto applicationDetails
                 = adoptionService.getApplicationDetails(typeId, type, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -80,11 +71,6 @@ public class AdoptionController {
     public ResponseEntity<ApiResponse<Void>> deleteAdoptionAndCare(
             @RequestParam Long typeId, @RequestParam String type,
             @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
-            );
-        }
         adoptionService.deleteSingleHistory(typeId, type, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(null)
@@ -95,11 +81,6 @@ public class AdoptionController {
     @Operation(summary = "회원 입양/돌봄 신청 내역 전체 취소(삭제)", description = "회원의 입양 및 돌봄 신청 내역 전체를 취소합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteAdoptionAndCareAll(
             @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
-            );
-        }
         adoptionService.deleteAllHistory(userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(null)
@@ -110,11 +91,6 @@ public class AdoptionController {
     @Operation(summary = "보호자가 받은 입양/돌봄 신청 내역 리스트 조회", description = "보호자가 받은 입양 및 돌봄 신청 내역 리스트를 조회합니다.")
     public ResponseEntity<ApiResponse<List<ApplicationSimpleListResponseDto>>> getReceivedApplications(
             @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
-            );
-        }
         List<ApplicationSimpleListResponseDto> receivedApplications
                 = adoptionService.getReceivedApplications(userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -127,11 +103,6 @@ public class AdoptionController {
     public ResponseEntity<ApiResponse<ApplicationResponseDto>> getReceivedApplicationDetail(
             @RequestParam Long typeId, @RequestParam String type,
             @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
-            );
-        }
         ApplicationResponseDto applicationDetails
                 = adoptionService.getReceivedApplicationDetails(typeId, type, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -145,11 +116,6 @@ public class AdoptionController {
     public ResponseEntity<ApiResponse<Void>> updateReceivedApplicationStatus(
             @RequestBody AdoptionCareStatusUpdateRequestDto requestDto,
             @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
-            );
-        }
         adoptionService.updateReceivedApplicationStatus(requestDto, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(null)
@@ -162,11 +128,6 @@ public class AdoptionController {
     public ResponseEntity<ApiResponse<Void>> deleteReceivedApplication(
             @RequestParam Long typeId, @RequestParam String type,
             @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
-            );
-        }
         adoptionService.deleteSingleHistory(typeId, type, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(null)
@@ -178,11 +139,6 @@ public class AdoptionController {
             description = "보호자가 받은 입양 및 돌봄 등록 내역 전체를 취소합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteReceivedApplicationsAll(
             @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    ApiResponse.fail("AUTH-403", "로그인이 필요합니다.")
-            );
-        }
         adoptionService.deleteOwnerAllHistory(userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(null)

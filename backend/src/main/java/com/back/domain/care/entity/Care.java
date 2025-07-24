@@ -84,7 +84,7 @@ public class Care {
         this.pet = pet;
     }
 
-    public void updateStatus(String status) {
-        this.status = RequestStatus.valueOf(status);
+    public void updateStatus(RequestStatus status) {
+        this.status = status;
     }
 }
