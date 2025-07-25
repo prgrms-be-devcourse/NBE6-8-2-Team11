@@ -32,7 +32,7 @@ public class JwtProvider {
                        @Value("${jwt.access-token-expiration}") String accessTokenExpiration,
                        @Value("${jwt.refresh-token-expiration}") String refreshTokenExpiration) {
 
-        // Base64 디코딩 대신, 문자열을 바로 byte 배열로 변환
+
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         this.key = Keys.hmacShaKeyFor(keyBytes);
 

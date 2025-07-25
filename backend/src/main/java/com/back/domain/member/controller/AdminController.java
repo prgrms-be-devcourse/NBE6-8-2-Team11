@@ -36,4 +36,6 @@ public class AdminController {
         adminService.deleteMember(memberId);
         return ResponseEntity.ok(ApiResponse.success("해당 회원을 삭제했습니다.", null));
     }
+
+
 }
