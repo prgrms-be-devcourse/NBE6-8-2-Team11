@@ -32,7 +32,7 @@ public class MemberService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         if (!memberToUpdate.getEmail().equals(userDetails.getUsername())) {
-            throw new RuntimeException("수정할 권한이 없습니다.");
+            throw new MemberException(MemberErrorCode.FORBIDDEN_ACCESS);
         }
 
         memberToUpdate.updateInfo(requestDto.name(), requestDto.phone());
