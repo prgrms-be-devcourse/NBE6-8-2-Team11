@@ -139,11 +139,13 @@ export default function AnimalDetailPage() {
           </div>
 
           {/* 입양·돌봄 신청 버튼 */}
-          <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center">
-            <button className="w-60 bg-orange-500 text-white py-4 rounded-lg text-lg font-semibold border-0 outline outline-1 outline-white/50 transition-all duration-[1250ms] ease-[cubic-bezier(0.19,1,0.22,1)] 
-            hover:border hover:border-solid hover:outline-offset-[15px] hover:outline-white/0 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.5),0_0_20px_rgba(255,255,255,0.2)] hover:text-shadow hover:scale-105">
-              입양 · 돌봄 신청하기
-            </button>
+          <div className="mt-10 mb-10 pt-6 border-t border-gray-200 flex justify-center">
+            <div className="w-60 h-16 flex items-center justify-center">
+              <button className="w-full h-full bg-orange-500 text-white py-4 rounded-lg text-lg font-semibold border-0 outline outline-1 outline-white/50 transition-all duration-[1250ms] ease-[cubic-bezier(0.19,1,0.22,1)] 
+              hover:border hover:border-solid hover:outline-offset-[15px] hover:outline-white/0 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.5),0_0_20px_rgba(255,255,255,0.2)] hover:text-shadow hover:scale-105">
+                입양 · 돌봄 신청하기
+              </button>
+            </div>
           </div>
         </div>
       </main>
