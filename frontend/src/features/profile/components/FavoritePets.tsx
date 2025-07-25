@@ -52,7 +52,7 @@ export default function FavoritePets() {
             id: 4,
             petId: 7,
             petName: '루시',
-            petImage: 'https://images.unsplash.com/photo-1543852786-1cf6624b998d?w=200&h=200&fit=crop',
+            petImage: 'https://images.unsplash.com/photo-1597626133663-53df9633b799?w=200&h=200&fit=crop',
             species: 'cat',
             age: 4,
             gender: 'female',
