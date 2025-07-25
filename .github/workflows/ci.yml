@@ -91,22 +91,22 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      # :흰색_확인_표시: GitHub CLI 설치 (gh 명령어 사용을 위해 필요)
       - name: Install GitHub CLI
-        run: sudo apt-get update && sudo apt-get install -y gh
+        run: sudo apt-get update && sudo apt-get install -y gh jq
       - name: Send Slack Notification
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # GitHub API를 통해 리뷰어 로그인 ID 목록 가져오기
-          reviewers=$(gh pr view ${{ github.event.pull_request.number }} --json requestedReviewers -q '.requestedReviewers[].login' | jq -R -s -c 'split("\n")[:-1] | map("@" + .) | join(", ")')
-          # Slack 메시지 생성
-          TEXT=$(jq -n --arg title "${{ github.event.pull_request.title }}" \
-                      --arg url "${{ github.event.pull_request.html_url }}" \
-                      --arg reviewers "$reviewers" \
-                      --arg newline '\n' \
-                      '{"text": ":종: *PR 리뷰 요청이 도착했습니다!*" + $newline + "*제목:* " + $title + $newline + "*링크:* " + $url + $newline + "*리뷰어:* " + $reviewers}')
-          echo "$TEXT"
+          # 리뷰어 목록 가져오기
+          reviewers=$(gh pr view ${{ github.event.pull_request.number }} --json reviewRequests -q '.reviewRequests[].requestedReviewer.login' 2>/dev/null || echo "리뷰어 없음")
+          # 슬랙 메시지 구성
+          MESSAGE=":종: *PR 리뷰 요청이 도착했습니다!*\n"
+          MESSAGE+="*제목:* ${{ github.event.pull_request.title }}\n"
+          MESSAGE+="*링크:* ${{ github.event.pull_request.html_url }}\n"
+          MESSAGE+="*리뷰어:* ${reviewers:-리뷰어 없음}"
+          # JSON 포맷으로 변환
+          TEXT=$(jq -n --arg text "$MESSAGE" '{text: $text}')
+          echo "$TEXT"  # 로그에 출력 (디버깅용)
           # 슬랙으로 전송
           curl -X POST -H 'Content-type: application/json' \
             --data "$TEXT" \
