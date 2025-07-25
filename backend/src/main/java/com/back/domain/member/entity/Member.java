@@ -97,4 +97,15 @@ public class Member implements UserDetails {
     public String getUsername() {
         return this.email;
     }
+
+    //비지니스 로직
+    public void updateInfo(String name, String phone) {
+        this.name = name;
+        this.phone = phone;
+    }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
 }
