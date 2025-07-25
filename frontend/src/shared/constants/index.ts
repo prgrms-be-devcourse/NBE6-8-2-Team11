@@ -2,7 +2,6 @@
 export const NAV_ITEMS = [
   { label: '홈', href: '/' },
   { label: '입양동물', href: '/gallery' },
-  { label: '내정보', href: '/profile' },
   { label: '입양신청', href: '/apply' },
 ];
 
