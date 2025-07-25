@@ -49,6 +49,9 @@ dependencies {
     //lombok 의존성 추가
     testCompileOnly ("org.projectlombok:lombok") // 테스트 의존성 추가
     testAnnotationProcessor ("org.projectlombok:lombok") // 테스트 의존성 추가
+
+    // WebSocket
+    implementation ("org.springframework.boot:spring-boot-starter-websocket")
 }
 
 tasks.withType<Test> {

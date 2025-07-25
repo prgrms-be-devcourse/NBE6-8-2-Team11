@@ -1,0 +1,62 @@
+package com.back.domain.member.service;
+
+import com.back.domain.member.dto.request.LoginRequestDto;
+import com.back.domain.member.dto.request.SignUpRequestDto;
+import com.back.domain.member.dto.response.MemberResponseDto;
+import com.back.domain.member.dto.response.TokenResponseDto;
+import com.back.domain.member.entity.Member;
+import com.back.domain.member.enums.UserRole;
+import com.back.domain.member.exception.MemberErrorCode;
+import com.back.domain.member.exception.MemberException;
+import com.back.domain.member.repository.MemberRepository;
+import com.back.global.security.JwtProvider;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class AuthService {
+
+    private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final JwtProvider jwtProvider;
+
+    public MemberResponseDto signUp(SignUpRequestDto requestDto) {
+        if (memberRepository.findByEmail(requestDto.email()).isPresent()) {
+            throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+
+        String encodedPassword = passwordEncoder.encode(requestDto.password());
+        Member newMember = Member.builder()
+                .email(requestDto.email())
+                .password(encodedPassword)
+                .name(requestDto.name())
+                .phone(requestDto.phone())
+                .role(UserRole.USER)
+                .build();
+
+        return MemberResponseDto.from(memberRepository.save(newMember));
+    }
+
+    public TokenResponseDto login(LoginRequestDto requestDto) {
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(requestDto.email(), requestDto.password());
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+
+        return jwtProvider.generateToken(authentication);
+    }
+
+    public void deleteMember(Long memberId, UserDetails userDetails) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        memberRepository.delete(member);
+    }
+}

@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -45,4 +46,13 @@ public class ChatMessage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     private Member sender;
+
+
+    @Builder
+    public ChatMessage(String content, ChatRoom chatRoom, Member sender) {
+        this.content = content;
+        this.chatRoom = chatRoom;
+        this.sender = sender;
+        this.sentAt = LocalDateTime.now();
+    }
 }
