@@ -82,41 +82,6 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
           </p>
         </div>
       </div>
-
-      {/* 선호도 정보 */}
-      {user.preferences && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">선호도</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">선호 동물</h4>
-              <div className="flex flex-wrap gap-2">
-                {user.preferences.preferredSpecies.map((species) => (
-                  <span key={species} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                    {species === 'dog' ? '강아지' : species === 'cat' ? '고양이' : species}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">선호 나이</h4>
-              <span className="text-sm text-gray-700">
-                {user.preferences.preferredAge === 'young' ? '어린 동물' : 
-                 user.preferences.preferredAge === 'adult' ? '성체' : '모든 나이'}
-              </span>
-            </div>
-            
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">선호 크기</h4>
-              <span className="text-sm text-gray-700">
-                {user.preferences.preferredSize === 'small' ? '소형' :
-                 user.preferences.preferredSize === 'medium' ? '중형' : '대형'}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 

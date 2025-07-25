@@ -8,11 +8,6 @@ export interface User {
   memberType: 'adopter' | 'shelter';
   createdAt: Date;
   bio?: string;
-  preferences?: {
-    preferredSpecies: string[];
-    preferredAge: string;
-    preferredSize: string;
-  };
 }
 
 export interface AdoptionRecord {

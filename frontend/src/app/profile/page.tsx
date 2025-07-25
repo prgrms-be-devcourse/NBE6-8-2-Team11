@@ -24,7 +24,7 @@ export default function ProfilePage() {
         // 모의 로딩 시간
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // 모의 사용자 데이터
+        // 모의 사용자 데이터 (김동물로 설정)
         const mockUser: User = {
           id: 1,
           name: '김동물',
@@ -34,12 +34,7 @@ export default function ProfilePage() {
           profileImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
           memberType: 'adopter', // adopter, shelter
           createdAt: new Date('2024-01-15'),
-          bio: '동물을 사랑하는 사람입니다. 새로운 가족을 찾고 있어요!',
-          preferences: {
-            preferredSpecies: ['dog', 'cat'],
-            preferredAge: 'young',
-            preferredSize: 'medium'
-          }
+          bio: '동물을 사랑하는 사람입니다. 새로운 가족을 찾고 있어요!'
         };
         
         setUser(mockUser);

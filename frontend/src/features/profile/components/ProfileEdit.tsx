@@ -14,29 +14,17 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
     email: user?.email || '',
     phone: user?.phone || '',
     address: user?.address || '',
-    bio: user?.bio || '',
-    preferredSpecies: user?.preferences?.preferredSpecies || [],
-    preferredAge: user?.preferences?.preferredAge || 'all',
-    preferredSize: user?.preferences?.preferredSize || 'all'
+    bio: user?.bio || ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }));
-  };
-
-  const handleSpeciesChange = (species: string) => {
-    setFormData(prev => ({
-      ...prev,
-      preferredSpecies: prev.preferredSpecies.includes(species)
-        ? prev.preferredSpecies.filter(s => s !== species)
-        : [...prev.preferredSpecies, species]
     }));
   };
 
@@ -56,12 +44,7 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
           email: formData.email,
           phone: formData.phone,
           address: formData.address,
-          bio: formData.bio,
-          preferences: {
-            preferredSpecies: formData.preferredSpecies,
-            preferredAge: formData.preferredAge,
-            preferredSize: formData.preferredSize
-          }
+          bio: formData.bio
         };
         
         setUser(updatedUser);
@@ -176,75 +159,6 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
         </div>
       </div>
 
-      {/* 선호도 설정 */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">선호도 설정</h3>
-        
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              선호하는 동물 종류
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {['dog', 'cat', 'rabbit', 'bird', 'other'].map((species) => (
-                <button
-                  key={species}
-                  type="button"
-                  onClick={() => handleSpeciesChange(species)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    formData.preferredSpecies.includes(species)
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {species === 'dog' ? '강아지' : 
-                   species === 'cat' ? '고양이' : 
-                   species === 'rabbit' ? '토끼' : 
-                   species === 'bird' ? '새' : '기타'}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="preferredAge" className="block text-sm font-medium text-gray-700 mb-1">
-                선호하는 나이
-              </label>
-              <select
-                id="preferredAge"
-                name="preferredAge"
-                value={formData.preferredAge}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-              >
-                <option value="all">모든 나이</option>
-                <option value="young">어린 동물</option>
-                <option value="adult">성체</option>
-              </select>
-            </div>
-            
-            <div>
-              <label htmlFor="preferredSize" className="block text-sm font-medium text-gray-700 mb-1">
-                선호하는 크기
-              </label>
-              <select
-                id="preferredSize"
-                name="preferredSize"
-                value={formData.preferredSize}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-              >
-                <option value="all">모든 크기</option>
-                <option value="small">소형</option>
-                <option value="medium">중형</option>
-                <option value="large">대형</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* 제출 버튼 */}
       <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
         <button
@@ -255,10 +169,7 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
               email: user.email,
               phone: user.phone,
               address: user.address,
-              bio: user.bio || '',
-              preferredSpecies: user.preferences?.preferredSpecies || [],
-              preferredAge: user.preferences?.preferredAge || 'all',
-              preferredSize: user.preferences?.preferredSize || 'all'
+              bio: user.bio || ''
             });
             setMessage('');
           }}
