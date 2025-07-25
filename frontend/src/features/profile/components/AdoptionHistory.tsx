@@ -143,7 +143,7 @@ export default function AdoptionHistory() {
           </div>
         ) : (
           filteredRecords.map((record) => (
-            <div key={record.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div key={record.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow relative">
               <div className="flex items-start space-x-4">
                 {/* 동물 이미지 */}
                 <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
@@ -186,13 +186,17 @@ export default function AdoptionHistory() {
                   <button className="text-sm text-orange-600 hover:text-orange-700 font-medium">
                     상세보기
                   </button>
-                  {record.status === 'pending' && (
-                    <button className="text-sm text-red-600 hover:text-red-700">
-                      신청 취소
-                    </button>
-                  )}
                 </div>
               </div>
+
+              {/* 신청 취소 버튼 - 우측 하단에 배치 */}
+              {record.status === 'pending' && (
+                <div className="absolute bottom-4 right-4">
+                  <button className="text-sm text-red-600 hover:text-red-700 font-medium bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-colors">
+                    입양 취소
+                  </button>
+                </div>
+              )}
             </div>
           ))
         )}
