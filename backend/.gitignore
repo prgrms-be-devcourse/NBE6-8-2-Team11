@@ -40,3 +40,5 @@ out/
 
 .DS_Store
 
+###custom###
+db_dev.mv.db

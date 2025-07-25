@@ -2,7 +2,7 @@ name: CI
 on:
   pull_request:
     branches:
-      - develop
+      - main
 jobs:
   backend-build:
     name: Backend - Build
@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
       - name: Gradle Cache
         uses: actions/cache@v4
         with:
@@ -43,7 +43,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
       - name: Gradle Cache
         uses: actions/cache@v4
         with:
@@ -81,37 +81,3 @@ jobs:
         run: npm run lint
       - name: Build Frontend
         run: npm run build
-  notify-slack:
-    name: Notify Slack
-    runs-on: ubuntu-latest
-    needs:
-      - backend-test
-      - frontend-check
-    if: ${{ success() && github.event_name == 'pull_request' }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      # GitHub CLI 설치 (gh 명령어 사용을 위해 필요)
-      - name: Install GitHub CLI
-        run: sudo apt-get update && sudo apt-get install -y gh
-      - name: Send Slack Notification
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          # 리뷰어 목록 가져오기 (없으면 기본 메시지)
-          reviewers=$(gh pr view ${{ github.event.pull_request.number }} --json reviewRequests -q '.reviewRequests[].requestedReviewer.login' 2>/dev/null)
-          if [ -z "$reviewers" ]; then
-            reviewers="리뷰어 없음"
-          fi
-          # 메시지 생성 (줄바꿈 포함)
-          MESSAGE=$(printf ":종: *PR 리뷰 요청이 도착했습니다!*\n*제목:* %s\n*링크:* %s\n*리뷰어:* %s" \
-            "${{ github.event.pull_request.title }}" \
-            "${{ github.event.pull_request.html_url }}" \
-            "$reviewers")
-          # JSON 형식으로 변환
-          TEXT="{\"text\": \"$MESSAGE\"}"
-          # 슬랙 전송
-          curl -X POST -H 'Content-type: application/json' \
-            --data "$TEXT" \
-            "$SLACK_WEBHOOK_URL"
