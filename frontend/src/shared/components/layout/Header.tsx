@@ -13,11 +13,12 @@ const useAuth = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    // 현재 페이지가 프로필 페이지인지 확인
-    const isProfilePage = pathname === '/profile';
+    // 로그인된 상태로 표시할 페이지들
+    const loggedInPages = ['/profile', '/apply'];
+    const isLoggedInPage = loggedInPages.includes(pathname);
     
-    if (isProfilePage) {
-      // 프로필 페이지에서는 로그인된 상태로 가정
+    if (isLoggedInPage) {
+      // 로그인된 페이지에서는 로그인된 상태로 가정
       setUser({ name: '김동물' });
     } else {
       // 다른 페이지에서는 로그인하지 않은 상태로 가정
@@ -32,6 +33,7 @@ const useAuth = () => {
 
 export default function Header() {
   const { user, isLoading } = useAuth();
+  const pathname = usePathname();
 
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50">
@@ -67,7 +69,11 @@ export default function Header() {
                     </span>
                     <Link
                       href="/profile"
-                      className="text-sm text-orange-600 hover:text-orange-700 font-medium transition-colors"
+                      className={`text-sm font-medium transition-colors ${
+                        pathname === '/profile'
+                          ? 'text-orange-600'
+                          : 'text-gray-700 hover:text-orange-500'
+                      }`}
                     >
                       내 프로필
                     </Link>
