@@ -1,12 +1,11 @@
 name: PR Notification
-# pull_request_target: fork에서 PR을 보내도 본 저장소 권한으로 실행되어 secrets 접근 가능
+
 on:
   pull_request_target:
     types: [opened, ready_for_review, synchronize]
     branches:
       - main
       - develop
-  # 수동 트리거 추가 (테스트용)
   workflow_dispatch:
     inputs:
       pr_number:
@@ -25,61 +24,33 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          cat << EOF > manual_test.json
-{
-  "blocks": [
-    {
-      "type": "header",
-      "text": {
-        "type": "plain_text",
-        "text": "🧪 수동 테스트 - Slack 알림"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*제목*\n\`\`\`수동 테스트: Slack 알림 기능 확인\`\`\`"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*작성자*\n👤 @${{ github.actor }}"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*PR 번호*\n<https://github.com/${{ github.repository }}/pull/${{ inputs.pr_number }}|#${{ inputs.pr_number }}>"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*상태*\n✅ 수동 테스트 성공"
-      }
-    },
-    {
-      "type": "actions",
-      "elements": [
-        {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "text": "PR 확인하기 🚀"
-          },
-          "style": "primary",
-          "url": "https://github.com/${{ github.repository }}/pull/${{ inputs.pr_number }}"
-        }
-      ]
-    }
-  ]
-}
-EOF
+          cat << 'EOF' > manual_test.json
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🧪 수동 테스트 - Slack 알림"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*PR 번호*\n<https://github.com/${{ github.repository }}/pull/${{ inputs.pr_number }}|#${{ inputs.pr_number }}>"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*상태*\n✅ 수동 테스트 성공"
+                }
+              }
+            ]
+          }
+          EOF
           
           curl -X POST -H 'Content-type: application/json' \
             --data @manual_test.json \
@@ -91,7 +62,7 @@ EOF
   wait-for-ci:
     name: Wait for CI Completion
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.draft }}  # 드래프트 PR은 제외
+    if: ${{ github.event_name == 'pull_request_target' && !github.event.pull_request.draft }}
     steps:
       - name: Wait for CI workflows
         uses: lewagon/wait-on-check-action@v1.3.4
@@ -116,13 +87,11 @@ EOF
     name: Notify Slack
     runs-on: ubuntu-latest
     needs: wait-for-ci
-    if: ${{ !github.event.pull_request.draft && success() }}
+    if: ${{ github.event_name == 'pull_request_target' && !github.event.pull_request.draft && success() }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # pull_request_target에서는 base 브랜치를 체크아웃하므로 
-          # PR의 head를 명시적으로 체크아웃
           ref: ${{ github.event.pull_request.base.ref }}
 
       - name: Install GitHub CLI
@@ -154,10 +123,6 @@ EOF
           
           # PR이 fork에서 온 것인지 확인
           is_fork="${{ github.event.pull_request.head.repo.fork }}"
-          fork_info=""
-          if [ "$is_fork" = "true" ]; then
-            fork_info=" (Fork에서 생성)"
-          fi
           
           # 리뷰어 포맷팅
           if [ "$reviewers" = "리뷰어 미지정" ]; then
@@ -176,93 +141,100 @@ EOF
           # PR 제목 이스케이프 처리
           title_escaped=$(echo "${{ github.event.pull_request.title }}" | sed 's/"/\\"/g')
           
-          # Slack Block Kit 메시지 생성 (한 줄씩 세로 배치)
-          cat << EOF > slack_message.json
-{
-  "blocks": [
-    {
-      "type": "header",
-      "text": {
-        "type": "plain_text",
-        "text": "🔔 새로운 PR 리뷰 요청"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*제목*\n\`\`\`${title_escaped}\`\`\`"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*작성자*\n👤 @${author}"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*리뷰어*\n${reviewer_text}"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*PR 번호*\n<${{ github.event.pull_request.html_url }}|#$PR_NUMBER>"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*상태*\n✅ CI 테스트 통과"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*소스*\n${fork_badge}"
-      }
-    },
-    {
-      "type": "actions",
-      "elements": [
-        {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "text": "리뷰하러 가기 🚀"
-          },
-          "style": "primary",
-          "url": "${{ github.event.pull_request.html_url }}"
-        },
-        {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "text": "변경사항 보기 📝"
-          },
-          "url": "${{ github.event.pull_request.html_url }}/files"
-        }
-      ]
-    },
-    {
-      "type": "context",
-      "elements": [
-        {
-          "type": "mrkdwn",
-          "text": "💡 빠른 리뷰로 팀 개발 속도를 높여보세요!"
-        }
-      ]
-    }
-  ]
-}
-EOF
+          # Slack Block Kit 메시지 생성
+          cat << 'EOF' > slack_message.json
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🔔 새로운 PR 리뷰 요청"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*제목*\n```TITLE_PLACEHOLDER```"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*작성자*\n👤 @AUTHOR_PLACEHOLDER"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*리뷰어*\nREVIEWER_PLACEHOLDER"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*PR 번호*\n<${{ github.event.pull_request.html_url }}|#PR_NUMBER_PLACEHOLDER>"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*상태*\n✅ CI 테스트 통과"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*소스*\nFORK_PLACEHOLDER"
+                }
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "리뷰하러 가기 🚀"
+                    },
+                    "style": "primary",
+                    "url": "${{ github.event.pull_request.html_url }}"
+                  },
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "변경사항 보기 📝"
+                    },
+                    "url": "${{ github.event.pull_request.html_url }}/files"
+                  }
+                ]
+              },
+              {
+                "type": "context",
+                "elements": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "💡 빠른 리뷰로 팀 개발 속도를 높여보세요!"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+          
+          # 플레이스홀더 교체
+          sed -i "s/TITLE_PLACEHOLDER/$title_escaped/g" slack_message.json
+          sed -i "s/AUTHOR_PLACEHOLDER/$author/g" slack_message.json
+          sed -i "s/REVIEWER_PLACEHOLDER/$reviewer_text/g" slack_message.json
+          sed -i "s/PR_NUMBER_PLACEHOLDER/$PR_NUMBER/g" slack_message.json
+          sed -i "s/FORK_PLACEHOLDER/$fork_badge/g" slack_message.json
           
           # 슬랙 전송
           curl -X POST -H 'Content-type: application/json' \
@@ -271,92 +243,17 @@ EOF
           
           echo "Slack 알림이 성공적으로 전송되었습니다."
 
-  # CI 실패 시 별도 알림 (선택사항)
+  # CI 실패 시 별도 알림
   notify-failure:
     name: Notify CI Failure
     runs-on: ubuntu-latest
     needs: wait-for-ci
-    if: ${{ !github.event.pull_request.draft && failure() }}
+    if: ${{ github.event_name == 'pull_request_target' && !github.event.pull_request.draft && failure() }}
     steps:
       - name: Send Failure Notification
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          # PR 제목 이스케이프 처리
-          title_escaped=$(echo "${{ github.event.pull_request.title }}" | sed 's/"/\\"/g')
-          
-          # Slack Block Kit 실패 메시지 생성 (한 줄씩 세로 배치)
-          cat << EOF > slack_failure.json
-{
-  "blocks": [
-    {
-      "type": "header",
-      "text": {
-        "type": "plain_text",
-        "text": "❌ PR CI 테스트 실패"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*제목*\n\`\`\`${title_escaped}\`\`\`"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*작성자*\n👤 @${{ github.event.pull_request.user.login }}"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*PR 번호*\n<${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }}>"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "*상태*\n🚨 CI 테스트 실패"
-      }
-    },
-    {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "⚠️ *CI 테스트에서 오류가 발생했습니다.*\n코드를 확인하고 수정이 필요합니다."
-      }
-    },
-    {
-      "type": "actions",
-      "elements": [
-        {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "text": "오류 확인하기 🔍"
-          },
-          "style": "danger",
-          "url": "${{ github.event.pull_request.html_url }}/checks"
-        },
-        {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "text": "PR 보기 📝"
-          },
-          "url": "${{ github.event.pull_request.html_url }}"
-        }
-      ]
-    }
-  ]
-}
-EOF
-          
           curl -X POST -H 'Content-type: application/json' \
-            --data @slack_failure.json \
+            --data '{"text":"❌ PR CI 테스트 실패: ${{ github.event.pull_request.html_url }}"}' \
             "$SLACK_WEBHOOK_URL"
