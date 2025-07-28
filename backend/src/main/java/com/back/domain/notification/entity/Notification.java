@@ -43,6 +43,9 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
+    @Column(name = "notification_title", nullable = false)
+    private String title;
+
     @Lob
     @Column(name = "notification_message", nullable = false)
     private String message;
@@ -66,8 +69,9 @@ public class Notification {
     private Care care;
 
     @Builder
-    public Notification(NotificationType type, String message, Member member, Adoption adoption, Care care) {
+    public Notification(NotificationType type, String title, String message, Member member, Adoption adoption, Care care) {
         this.type = type;
+        this.title = title;
         this.message = message;
         this.member = member;
         this.adoption = adoption;

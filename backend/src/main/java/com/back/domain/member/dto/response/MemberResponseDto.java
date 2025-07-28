@@ -1,9 +1,7 @@
 package com.back.domain.member.dto.response;
 
-
 import com.back.domain.member.entity.Member;
 import lombok.Builder;
-
 
 //회원가입 성공하고 줄 데이터
 

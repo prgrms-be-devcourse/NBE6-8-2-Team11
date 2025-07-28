@@ -81,6 +81,7 @@ public class JwtProvider {
 
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get("auth").toString().split(","))
+                        .filter(auth -> auth != null && !auth.trim().isEmpty())
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
