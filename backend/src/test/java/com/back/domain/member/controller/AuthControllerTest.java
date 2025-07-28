@@ -3,6 +3,7 @@ package com.back.domain.member.controller;
 import com.back.domain.member.dto.request.LoginRequestDto;
 import com.back.domain.member.dto.request.SignUpRequestDto;
 import com.back.domain.member.entity.Member;
+import com.back.domain.member.enums.UserRole;
 import com.back.domain.member.repository.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +59,7 @@ class AuthControllerTest {
     }
 
     @Test
-    @DisplayName("로그인에 성공하고 JWT 토큰을 발급받는다")
+    @DisplayName("로그인에 성공. JWT 토큰을 발급받는다")
     void t2() throws Exception {
         // given
         memberRepository.save(Member.builder()
@@ -66,7 +67,7 @@ class AuthControllerTest {
                 .password(passwordEncoder.encode("password123"))
                 .name("테스터")
                 .phone("010-1234-5678")
-                .role(com.back.domain.member.enums.UserRole.USER)
+                .role(UserRole.USER)
                 .build());
 
         LoginRequestDto request = new LoginRequestDto("test@test.com", "password123");

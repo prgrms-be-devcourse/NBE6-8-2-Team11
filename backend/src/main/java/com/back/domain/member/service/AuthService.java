@@ -51,7 +51,21 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(requestDto.email(), requestDto.password());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        return jwtProvider.generateToken(authentication);
+        Member member = memberRepository.findByEmail(requestDto.email())
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 토큰 생성
+        TokenResponseDto tokenResponse = jwtProvider.generateToken(authentication);
+
+        // 사용자 정보 포함하여 반환
+        return TokenResponseDto.builder()
+                .grantType(tokenResponse.grantType())
+                .accessToken(tokenResponse.accessToken())
+                .refreshToken(tokenResponse.refreshToken())
+                .userId(member.getId())
+                .userEmail(member.getEmail())
+                .userName(member.getName())
+                .build();
     }
 
     public void deleteMember(Long memberId, UserDetails userDetails) {

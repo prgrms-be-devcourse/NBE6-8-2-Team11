@@ -26,10 +26,15 @@ spring:
             scope:
               - profile_nickname
               - account_email
-        # ✅ provider 상세 정보를 여기에 모두 추가
+
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+
+jwt:
+  secret: 'MyTestJwtSecretKeyIsVeryVeryLongAndAbsolutelySecureForTestingPurpose'
+  access-token-expiration: PT10M
+  refresh-token-expiration: PT1H
