@@ -94,9 +94,11 @@ jobs:
       - backend-test
       - frontend-check
     # 조건: CI 성공 + Secrets 있음 + (Fork면 pull_request_target, 본저장소면 pull_request)
-    if: ${{ success() && secrets.SLACK_WEBHOOK_URL != '' && ((github.event_name == 'pull_request_target') || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false)) }}
+    if: ${{ success() && (github.event_name == 'pull_request_target' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false)) }}
     steps:
       - name: Send Slack Notification
+        # secrets 체크를 step 레벨에서 진행
+        if: ${{ env.SLACK_WEBHOOK_URL != '' }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
