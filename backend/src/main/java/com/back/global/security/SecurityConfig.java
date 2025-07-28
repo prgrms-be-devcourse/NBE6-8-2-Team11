@@ -62,7 +62,10 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**",
-                                "/api/auth/**" // 회원가입, 로그인 등 포함
+                                "/api/auth/**", // 회원가입, 로그인 등 포함
+                                "/ws-chat/**", // WebSocket 엔드포인트 허용
+                                "/login/oauth2/code/**",
+                                "/oauth2/**"
                         ).permitAll()
 
                         // 관리자 전용 경로
