@@ -47,6 +47,8 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
     // Spring doc
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.0")
+    // Actuator for health checks and monitoring
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
 
     //lombok 의존성 추가
     testCompileOnly ("org.projectlombok:lombok") // 테스트 의존성 추가
@@ -63,6 +65,3 @@ tasks.withType<Test> {
 tasks.withType<JavaCompile> {
     options.compilerArgs.add("-parameters")
 }
-
-    // Actuator for health checks and monitoring
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
