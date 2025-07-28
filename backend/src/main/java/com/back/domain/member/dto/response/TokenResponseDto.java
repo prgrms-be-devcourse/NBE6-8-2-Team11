@@ -6,5 +6,8 @@ import lombok.Builder;
 public record TokenResponseDto(
         String grantType,
         String accessToken,
-        String refreshToken
+        String refreshToken,
+        Long userId,
+        String userEmail,
+        String userName
 ) {}
