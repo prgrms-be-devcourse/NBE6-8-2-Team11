@@ -1,1 +1,10 @@
-# 중복 동작을 방지하여 같은 yml로 동작 이동
+name: Disabled Workflow
+on:
+  workflow_dispatch: {}  # 수동 실행만 가능
+jobs:
+  disabled:
+    runs-on: ubuntu-latest
+    if: false  # 절대 실행되지 않음
+    steps:
+      - name: This job never runs
+        run: echo "disabled"
