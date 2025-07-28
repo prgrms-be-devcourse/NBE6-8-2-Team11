@@ -9,6 +9,7 @@ import com.back.global.security.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -24,24 +25,26 @@ public class PetController {
 
     @PostMapping
     @Operation(summary = "동물 생성")
-    public ResponseEntity<PetInfoResponseDto> createPet(
+    public ResponseEntity<ApiResponse<PetInfoResponseDto>> createPet(
             @RequestBody PetCreateRequestDto dto,
-            @AuthenticationPrincipal CustomOAuth2User principal // 또는 Principal, Authentication 사용 가능
+            @AuthenticationPrincipal CustomOAuth2User principal
     ) {
         String userEmail = principal.getEmail();
         PetInfoResponseDto createdPet = petService.createPet(dto, userEmail);
-        return ResponseEntity.ok(createdPet);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(createdPet));
     }
 
     @DeleteMapping("/{petId}")
     @Operation(summary = "동물 삭제")
-    public ResponseEntity<Void> deletePet(
+    public ResponseEntity<ApiResponse<Void>> deletePet(
             @PathVariable Long petId,
             @AuthenticationPrincipal CustomOAuth2User principal
     ) {
         String userEmail = principal.getEmail();
         petService.deletePet(petId, userEmail);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success("펫 삭제 성공", null));
     }
 
     @PutMapping("/{petId}")
@@ -53,23 +56,23 @@ public class PetController {
     ) {
         String userEmail = principal.getEmail();
         PetInfoResponseDto updated = petService.updatePet(petId, userEmail, requestDto);
-        return ResponseEntity.ok(ApiResponse.success("펫 수정 성공", updated));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(updated));
     }
-
 
     @GetMapping("/{petId}")
     @Operation(summary = "동물 단건 조회")
-    public ResponseEntity<PetInfoResponseDto> getPet(@PathVariable Long petId){
+    public ResponseEntity<ApiResponse<PetInfoResponseDto>> getPet(@PathVariable Long petId) {
         PetInfoResponseDto pet = petService.getPetById(petId);
-        return ResponseEntity.ok(pet);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(pet));
     }
 
     @GetMapping
     @Operation(summary = "동물 전체 조회")
-    public ResponseEntity<List<PetInfoResponseDto>> getAllPets() {
+    public ResponseEntity<ApiResponse<List<PetInfoResponseDto>>> getAllPets() {
         List<PetInfoResponseDto> pets = petService.getAllPets();
-        return ResponseEntity.ok(pets);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(pets));
     }
-
-
 }
