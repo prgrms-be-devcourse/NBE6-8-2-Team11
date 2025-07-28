@@ -3,6 +3,9 @@ package com.back.domain.pet.dto.response;
 import com.back.domain.pet.entity.Pet;
 import lombok.Builder;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Builder
 public record PetInfoResponseDto(
         Long id,
@@ -12,7 +15,8 @@ public record PetInfoResponseDto(
         String gender,
         String description,
         String imageUrl,
-        String shelterName
+        String shelterName,
+        List<String> petStatuses
 ) {
     public static PetInfoResponseDto from(Pet pet) {
         return PetInfoResponseDto.builder()
@@ -24,6 +28,11 @@ public record PetInfoResponseDto(
                 .description(pet.getDescription())
                 .imageUrl(pet.getImageUrl())
                 .shelterName(getShelterName(pet))
+                .petStatuses(
+                        pet.getPetStatuses().stream()
+                                .map(ps -> ps.getStatus().name())
+                                .collect(Collectors.toList())
+                )
                 .build();
     }
 
