@@ -2,7 +2,7 @@ spring:
   application:
     name: springboot-jpa
   profiles:
-    active: dev_1
+    active: dev
   config:
     import: optional:file:.env
   jpa:
