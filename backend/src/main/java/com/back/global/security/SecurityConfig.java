@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/api/auth/**", // 회원가입, 로그인 등 포함
+                                "/api/pets/**",
                                 "/ws-chat/**", // WebSocket 엔드포인트 허용
                                 "/login/oauth2/code/**",
                                 "/oauth2/**",
