@@ -52,6 +52,18 @@ public class NotificationService {
         notificationRepository.delete(notification);
     }
 
+    public void deleteAllNotification(String username) {
+        Member member = memberRepository.findByEmail(username)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        List<Notification> notifications = notificationRepository.findByMember(member);
+        if (notifications.isEmpty()) {
+            return;
+        }
+
+        notificationRepository.deleteAll(notifications);
+    }
+
     public NotificationResponseDto getNotificationDetail(String username, Long notificationId) {
         Member member = memberRepository.findByEmail(username)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));

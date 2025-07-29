@@ -50,4 +50,12 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.success("알림이 삭제되었습니다.", null));
     }
 
+    @DeleteMapping("/all")
+    @Operation(summary = "알림 전체 삭제", description = "사용자의 알림을 전체 삭제합니다")
+    public ResponseEntity<ApiResponse<Void>> deleteNotification(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        notificationService.deleteAllNotification(userDetails.getUsername());
+        return ResponseEntity.ok(ApiResponse.success("알림이 삭제되었습니다.", null));
+    }
+
 }
