@@ -14,6 +14,7 @@ import com.back.domain.member.entity.Member;
 import com.back.domain.member.exception.MemberErrorCode;
 import com.back.domain.member.exception.MemberException;
 import com.back.domain.member.repository.MemberRepository;
+import com.back.domain.notification.service.NotificationService;
 import com.back.domain.pet.entity.Pet;
 import com.back.domain.pet.entity.PetStatus;
 import com.back.domain.pet.enums.PetStatusType;
@@ -35,6 +36,7 @@ public class AdoptionService {
     private final PetRepository petRepository;
     private final AdoptionRepository adoptionRepository;
     private final CareRepository careRepository;
+    private final NotificationService notificationService;
 
     public AdoptionResponseDto applyAdoption(AdoptionRequestDto adoptionRequestDto, String memberEmail) {
         Member member = getMemberByEmail(memberEmail);
@@ -56,6 +58,8 @@ public class AdoptionService {
                 .message(adoptionRequestDto.message())
                 .status(RequestStatus.PENDING)
                 .build();
+        adoptionRepository.save(adoption);
+        notificationService.sendAdoptionRequestNotification(pet.getMember().getUsername(), "입양 신청이 도착하였습니다.", member.getName());
 
         return AdoptionResponseDto.from(adoption);
     }
@@ -161,11 +165,19 @@ public class AdoptionService {
 
         if (newStatus == RequestStatus.REJECTED) {
             updateApplicationStatus(entity, newStatus);
+            notificationService.sendResponseNotification(
+                    member.getUsername(),
+                    "신청이 거절되었습니다.",
+                    requestDto.type(),
+                    false
+            );
             return;
         }
 
         // ACCEPTED인 경우 PetStatus도 함께 업데이트
         updateApplicationStatusWithPetStatus(entity, newStatus);
+        notificationService.sendResponseNotification(member.getUsername(),
+                requestDto.type(), "신청이 승인되었습니다.", true);
     }
 
     public void deleteOwnerAllHistory(String memberEmail) {

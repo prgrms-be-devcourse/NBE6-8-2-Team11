@@ -30,17 +30,19 @@ public class ChatController {
     private final RedisSubscriber redisSubscriber;
 
     @MessageMapping("/chat.sendMessage")
+    @Operation(summary = "채팅 메시지 전송", description = "채팅방에 메시지를 전송합니다.")
     public void sendMessage(@Payload ChatMessageRequestDto chatMessageRequest) {
         log.info("Received message: {}", chatMessageRequest.content());
         chatService.sendMessage(chatMessageRequest);
     }
 
     @MessageMapping("/chat.addUser")
+    @Operation(summary = "채팅방에 사용자 추가", description = "사용자를 채팅방에 추가하고 Redis 채널을 구독합니다.")
     public void addUser(@Payload ChatMessageRequestDto chatMessageRequest,
                        SimpMessageHeaderAccessor headerAccessor,
                         @AuthenticationPrincipal UserDetails userDetails) {
-        // 사용자를 WebSocket 세션에 추가
-        headerAccessor.getSessionAttributes().put("username", chatMessageRequest.senderId());
+        // 사용자를 WebSocket 세션에 추가 - 이메일로 통일
+        headerAccessor.getSessionAttributes().put("username", userDetails.getUsername());
         headerAccessor.getSessionAttributes().put("roomId", chatMessageRequest.roomId());
 
         // Redis 채널 구독

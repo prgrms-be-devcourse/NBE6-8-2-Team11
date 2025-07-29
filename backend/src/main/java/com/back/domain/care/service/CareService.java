@@ -4,10 +4,15 @@ import com.back.domain.adoption.enums.RequestStatus;
 import com.back.domain.care.dto.request.CareRequestDto;
 import com.back.domain.care.dto.response.CareResponseDto;
 import com.back.domain.care.entity.Care;
+import com.back.domain.care.repository.CareRepository;
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.exception.MemberErrorCode;
 import com.back.domain.member.exception.MemberException;
 import com.back.domain.member.repository.MemberRepository;
+import com.back.domain.notification.entity.Notification;
+import com.back.domain.notification.enums.NotificationType;
+import com.back.domain.notification.repository.NotificationRepository;
+import com.back.domain.notification.service.NotificationService;
 import com.back.domain.pet.entity.Pet;
 import com.back.domain.pet.entity.PetStatus;
 import com.back.domain.pet.enums.PetStatusType;
@@ -15,6 +20,7 @@ import com.back.domain.pet.exception.PetErrorCode;
 import com.back.domain.pet.exception.PetException;
 import com.back.domain.pet.repository.PetRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +29,9 @@ public class CareService {
 
     private final MemberRepository memberRepository;
     private final PetRepository petRepository;
+    private final CareRepository careRepository;
+    private final NotificationService notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
 
 
     public CareResponseDto applyCare(CareRequestDto careRequestDto, String memberEmail) {
@@ -48,6 +57,9 @@ public class CareService {
                 .desiredEndDate(careRequestDto.desiredEndDate())
                 .status(RequestStatus.PENDING)
                 .build();
+        careRepository.save(care);
+
+       notificationService.sendCareRequestNotification(pet.getMember().getUsername(), "동물 돌봄 신청이 도착하였습니다", member.getName());
 
         return CareResponseDto.from(care);
     }
