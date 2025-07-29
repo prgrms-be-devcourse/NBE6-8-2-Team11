@@ -73,7 +73,11 @@ public class ChatService {
                     .type(NotificationType.NEW_MESSAGE)
                     .build();
             notificationRepository.save(roomInfo);
-            messagingTemplate.convertAndSend("/queue/notify/" + opponentId, roomInfo.getTitle());
+            messagingTemplate.convertAndSendToUser(
+                    opponent.getName(),           // 사용자명
+                    "/queue/notifications", // 개인 큐
+                    roomInfo.getTitle()
+            );
 
             log.info("New chat room {} created, notified opponent {}", chatRoom.getId(), opponentId);
         }
@@ -104,7 +108,7 @@ public class ChatService {
                 .type(NotificationType.NEW_MESSAGE)
                 .build();
         notificationRepository.save(notificationMessage);
-        messagingTemplate.convertAndSend("/queue/notify/" + opponent.getId(), notificationMessage.getTitle());
+        messagingTemplate.convertAndSend("/queue/notifications" + opponent.getId(), notificationMessage.getTitle());
 
         log.info("User {} entered room {}, notified opponent {}", userId, roomId, opponent.getId());
     }
@@ -221,9 +225,16 @@ public class ChatService {
         notificationRepository.save(deleteNotification);
         deleteNotification.setMember(chatRoom.getSecondMember());
         notificationRepository.save(deleteNotification);
-        messagingTemplate.convertAndSend("/queue/notify/" + chatRoom.getFirstMember().getId(), deleteNotification.getTitle());
-        messagingTemplate.convertAndSend("/queue/notify/" + chatRoom.getSecondMember().getId(), deleteNotification.getTitle());
-
+        messagingTemplate.convertAndSendToUser(
+                chatRoom.getFirstMember().getName(),           // 사용자명
+                "/queue/notifications", // 개인 큐
+                deleteNotification.getTitle()
+        );
+        messagingTemplate.convertAndSendToUser(
+                chatRoom.getSecondMember().getName(),           // 사용자명
+                "/queue/notifications", // 개인 큐
+                deleteNotification.getTitle()
+        );
         log.info("Chat room {} deleted, cleaned Redis data and notified users", roomId);
     }
 }

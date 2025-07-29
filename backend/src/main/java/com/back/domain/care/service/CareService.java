@@ -4,10 +4,14 @@ import com.back.domain.adoption.enums.RequestStatus;
 import com.back.domain.care.dto.request.CareRequestDto;
 import com.back.domain.care.dto.response.CareResponseDto;
 import com.back.domain.care.entity.Care;
+import com.back.domain.care.repository.CareRepository;
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.exception.MemberErrorCode;
 import com.back.domain.member.exception.MemberException;
 import com.back.domain.member.repository.MemberRepository;
+import com.back.domain.notification.entity.Notification;
+import com.back.domain.notification.enums.NotificationType;
+import com.back.domain.notification.repository.NotificationRepository;
 import com.back.domain.pet.entity.Pet;
 import com.back.domain.pet.entity.PetStatus;
 import com.back.domain.pet.enums.PetStatusType;
@@ -15,6 +19,7 @@ import com.back.domain.pet.exception.PetErrorCode;
 import com.back.domain.pet.exception.PetException;
 import com.back.domain.pet.repository.PetRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +28,9 @@ public class CareService {
 
     private final MemberRepository memberRepository;
     private final PetRepository petRepository;
+    private final CareRepository careRepository;
+    private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
 
     public CareResponseDto applyCare(CareRequestDto careRequestDto, String memberEmail) {
@@ -48,6 +56,17 @@ public class CareService {
                 .desiredEndDate(careRequestDto.desiredEndDate())
                 .status(RequestStatus.PENDING)
                 .build();
+        careRepository.save(care);
+
+        Notification notification = Notification.builder()
+                .member(pet.getMember())
+                .title("돌봄 신청이 도착했습니다")
+                .message(careRequestDto.message())
+                .care(care)
+                .type(NotificationType.CARE_REQUESTED)
+                .build();
+        notificationRepository.save(notification);
+        messagingTemplate.convertAndSend("/queue/notify/" + pet.getMember().getId(), notification);
 
         return CareResponseDto.from(care);
     }
