@@ -73,16 +73,16 @@ public class NotificationService {
         // DB에 알림 저장
         Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-        
+
         Notification notification = Notification.builder()
                 .member(member)
                 .type(type)
                 .message(message)
                 .title(title)
                 .build();
-        
+
         notificationRepository.save(notification);
-        
+
         // WebSocket으로 실시간 전송
         NotificationResponseDto notificationDto = NotificationResponseDto.from(notification);
         messagingTemplate.convertAndSendToUser(
@@ -90,7 +90,7 @@ public class NotificationService {
             "/queue/notifications",
             notificationDto
         );
-        
+
         log.info("Real-time notification sent to user: {}", member.getName());
     }
 
@@ -98,14 +98,8 @@ public class NotificationService {
      * 채팅방에 알림 전송
      */
     public void sendMessageToUserEnterChatRoom(Member opponent) {
-        Notification notificationMessage = Notification.builder()
-                .title("새 채팅방 입장")
-                .message("새로운 채팅방에 입장하었습니다. 채팅을 시작하세요!")
-                .member(opponent)
-                .type(NotificationType.NEW_MESSAGE)
-                .build();
-        notificationRepository.save(notificationMessage);
-        messagingTemplate.convertAndSend("/queue/notifications" + opponent.getId(), notificationMessage.getTitle());
+        String message = "상대방이 채팅방에 입장했습니다.";
+        sendRealTimeNotification(opponent.getUsername(), NotificationType.NEW_MESSAGE, "채팅방 입장 알림", message);
     }
 
     /**
