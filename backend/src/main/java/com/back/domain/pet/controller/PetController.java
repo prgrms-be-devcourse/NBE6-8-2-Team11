@@ -5,13 +5,13 @@ import com.back.domain.pet.dto.request.PetUpdateRequestDto;
 import com.back.domain.pet.dto.response.PetInfoResponseDto;
 import com.back.domain.pet.service.PetService;
 import com.back.global.common.ApiResponse;
-import com.back.global.security.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,9 +27,9 @@ public class PetController {
     @Operation(summary = "동물 생성")
     public ResponseEntity<ApiResponse<PetInfoResponseDto>> createPet(
             @RequestBody PetCreateRequestDto dto,
-            @AuthenticationPrincipal CustomOAuth2User principal
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        String userEmail = principal.getEmail();
+        String userEmail = userDetails.getUsername();
         PetInfoResponseDto createdPet = petService.createPet(dto, userEmail);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(createdPet));
@@ -39,9 +39,9 @@ public class PetController {
     @Operation(summary = "동물 삭제")
     public ResponseEntity<ApiResponse<Void>> deletePet(
             @PathVariable Long petId,
-            @AuthenticationPrincipal CustomOAuth2User principal
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        String userEmail = principal.getEmail();
+        String userEmail = userDetails.getUsername();
         petService.deletePet(petId, userEmail);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success("펫 삭제 성공", null));
@@ -52,9 +52,9 @@ public class PetController {
     public ResponseEntity<ApiResponse<PetInfoResponseDto>> updatePet(
             @PathVariable Long petId,
             @RequestBody @Valid PetUpdateRequestDto requestDto,
-            @AuthenticationPrincipal CustomOAuth2User principal
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        String userEmail = principal.getEmail();
+        String userEmail = userDetails.getUsername();
         PetInfoResponseDto updated = petService.updatePet(petId, userEmail, requestDto);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(updated));
