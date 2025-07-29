@@ -78,4 +78,7 @@ public class Notification {
         this.care = care;
     }
 
+    public void setMember(Member firstMember) {
+        this.member = firstMember;
+    }
 }

@@ -14,6 +14,7 @@ import com.back.domain.member.exception.MemberException;
 import com.back.domain.member.repository.MemberRepository;
 import com.back.domain.notification.entity.Notification;
 import com.back.domain.notification.enums.NotificationType;
+import com.back.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -38,6 +39,7 @@ public class ChatService {
     private final SimpMessagingTemplate messagingTemplate;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisSubscriber redisSubscriber;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public ChatRoomResponseDto createOrGetChatRoom(Long member1Id, Long member2Id) {
@@ -70,7 +72,8 @@ public class ChatService {
                     .member(opponent)
                     .type(NotificationType.NEW_MESSAGE)
                     .build();
-            messagingTemplate.convertAndSend("/queue/user/" + opponentId, roomInfo.getMessage());
+            notificationRepository.save(roomInfo);
+            messagingTemplate.convertAndSend("/queue/notify/" + opponentId, roomInfo.getTitle());
 
             log.info("New chat room {} created, notified opponent {}", chatRoom.getId(), opponentId);
         }
@@ -100,7 +103,8 @@ public class ChatService {
                 .member(opponent)
                 .type(NotificationType.NEW_MESSAGE)
                 .build();
-        messagingTemplate.convertAndSend("/queue/user/" + opponent.getId(), notificationMessage.getMessage());
+        notificationRepository.save(notificationMessage);
+        messagingTemplate.convertAndSend("/queue/notify/" + opponent.getId(), notificationMessage.getTitle());
 
         log.info("User {} entered room {}, notified opponent {}", userId, roomId, opponent.getId());
     }
@@ -208,9 +212,17 @@ public class ChatService {
         chatRoomRepository.delete(chatRoom);
 
         // 양쪽 사용자에게 채팅방 삭제 알림
-        String deleteNotification = "채팅방이 삭제되었습니다.";
-        messagingTemplate.convertAndSend("/queue/user/" + chatRoom.getFirstMember().getId(), deleteNotification);
-        messagingTemplate.convertAndSend("/queue/user/" + chatRoom.getSecondMember().getId(), deleteNotification);
+        Notification deleteNotification = Notification.builder()
+                .title("채팅방 삭제")
+                .message("채팅방이 삭제되었습니다.")
+                .type(NotificationType.CHAT_ROOM_DELETED)
+                .build();
+        deleteNotification.setMember(chatRoom.getFirstMember());
+        notificationRepository.save(deleteNotification);
+        deleteNotification.setMember(chatRoom.getSecondMember());
+        notificationRepository.save(deleteNotification);
+        messagingTemplate.convertAndSend("/queue/notify/" + chatRoom.getFirstMember().getId(), deleteNotification.getTitle());
+        messagingTemplate.convertAndSend("/queue/notify/" + chatRoom.getSecondMember().getId(), deleteNotification.getTitle());
 
         log.info("Chat room {} deleted, cleaned Redis data and notified users", roomId);
     }
