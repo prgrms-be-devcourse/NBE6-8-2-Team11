@@ -21,6 +21,7 @@ import com.back.domain.pet.enums.PetStatusType;
 import com.back.domain.pet.exception.PetErrorCode;
 import com.back.domain.pet.exception.PetException;
 import com.back.domain.pet.repository.PetRepository;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AdoptionService {
 
     private final MemberRepository memberRepository;
@@ -64,6 +66,7 @@ public class AdoptionService {
         return AdoptionResponseDto.from(adoption);
     }
 
+    @Transactional(readOnly = true)
     public List<ApplicationSimpleListResponseDto> getMemberApplications(String memberEmail) {
         Member member = getMemberByEmail(memberEmail);
 
@@ -85,6 +88,7 @@ public class AdoptionService {
         return applications;
     }
 
+    @Transactional(readOnly = true)
     public ApplicationResponseDto getApplicationDetails(Long typeId, String type, String memberEmail) {
         Member member = getMemberByEmail(memberEmail);
         Object entity = getApplicationEntity(type, typeId, member);
@@ -123,6 +127,7 @@ public class AdoptionService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ApplicationSimpleListResponseDto> getReceivedApplications(String memberEmail) {
         Member member = getMemberByEmail(memberEmail);
 
@@ -144,6 +149,7 @@ public class AdoptionService {
         return applications;
     }
 
+    @Transactional(readOnly = true)
     public ApplicationResponseDto getReceivedApplicationDetails(
             Long typeId, String type, String memberEmail) {
         Member member = getMemberByEmail(memberEmail);
@@ -195,12 +201,13 @@ public class AdoptionService {
         }
     }
 
-
+    @Transactional(readOnly = true)
     private Member getMemberByEmail(String memberEmail) {
         return memberRepository.findByEmail(memberEmail)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 
+    @Transactional(readOnly = true)
     private Object getApplicationEntity(String type, Long id, Member member) {
         if (type.equals("ADOPTION")) {
             return adoptionRepository.findByIdAndMember(id, member)
@@ -213,6 +220,7 @@ public class AdoptionService {
         }
     }
 
+    @Transactional(readOnly = true)
     private Object getApplicationEntity(AdoptionCareStatusUpdateRequestDto requestDto, Member member) {
         return getApplicationEntity(requestDto.type(), requestDto.id(), member);
     }
