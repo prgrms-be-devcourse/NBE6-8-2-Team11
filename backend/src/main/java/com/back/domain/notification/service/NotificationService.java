@@ -6,6 +6,7 @@ import com.back.domain.member.exception.MemberErrorCode;
 import com.back.domain.member.exception.MemberException;
 import com.back.domain.member.repository.MemberRepository;
 import com.back.domain.notification.dto.response.NotificationResponseDto;
+import com.back.domain.notification.dto.response.NotificationSimpleResponseDto;
 import com.back.domain.notification.entity.Notification;
 import com.back.domain.notification.repository.NotificationRepository;
 import com.back.global.exception.CustomException;
@@ -25,13 +26,13 @@ public class NotificationService {
     private final MemberRepository memberRepository;
 
     @Transactional(readOnly = true)
-    public List<NotificationResponseDto> getNotificationsList(String memberEmail) {
+    public List<NotificationSimpleResponseDto> getNotificationsList(String memberEmail) {
         Member member = memberRepository.findByEmail(memberEmail)
                 .orElseThrow(()->new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
         List<Notification> notifications = notificationRepository.findByMemberOrderByCreatedAtDesc(member);
         return notifications.stream()
-                .map(NotificationResponseDto::from)
+                .map(NotificationSimpleResponseDto::from)
                 .collect(Collectors.toList());
     }
 
@@ -46,4 +47,17 @@ public class NotificationService {
         notificationRepository.delete(notification);
     }
 
+    public NotificationResponseDto getNotificationDetail(String username, Long notificationId) {
+        Member member = memberRepository.findByEmail(username)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        Notification notification = notificationRepository.findByIdAndMember(notificationId, member)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTI_NOT_FOUND));
+
+        // 알림을 읽음 처리
+        notification.markAsRead();
+        notificationRepository.save(notification);
+
+        return NotificationResponseDto.from(notification);
+    }
 }

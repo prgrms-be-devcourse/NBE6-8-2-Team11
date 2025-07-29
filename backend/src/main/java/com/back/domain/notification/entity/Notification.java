@@ -81,4 +81,12 @@ public class Notification {
     public void setMember(Member firstMember) {
         this.member = firstMember;
     }
+
+    public void markAsRead() {
+        if (!isRead) {
+            this.isRead = true;
+        } else {
+            this.isRead = false;
+        }
+    }
 }
