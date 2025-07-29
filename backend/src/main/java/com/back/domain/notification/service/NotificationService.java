@@ -69,16 +69,16 @@ public class NotificationService {
     /**
      * 실시간 알림 전송 - 개별 사용자
      */
-    public void sendRealTimeNotification(String username, NotificationType type, String message) {
+    public void sendRealTimeNotification(String memberEmail, NotificationType type, String title, String message) {
         // DB에 알림 저장
-        Member member = memberRepository.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+        Member member = memberRepository.findByEmail(memberEmail)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
         
         Notification notification = Notification.builder()
                 .member(member)
                 .type(type)
                 .message(message)
-                .isRead(false)
+                .title(title)
                 .build();
         
         notificationRepository.save(notification);
@@ -86,49 +86,75 @@ public class NotificationService {
         // WebSocket으로 실시간 전송
         NotificationResponseDto notificationDto = NotificationResponseDto.from(notification);
         messagingTemplate.convertAndSendToUser(
-            username,
+            memberEmail,  // WebSocket 세션에 저장된 사용자 식별자와 일치해야 함
             "/queue/notifications",
             notificationDto
         );
         
-        log.info("Real-time notification sent to user: {}", username);
+        log.info("Real-time notification sent to user: {}", member.getName());
     }
 
     /**
-     * 실시간 알림 전송 - 전체 브로드캐스트
+     * 채팅방에 알림 전송
      */
-    public void sendBroadcastNotification(NotificationType type, String message) {
-        // WebSocket으로 전체 브로드캐스트
-        messagingTemplate.convertAndSend(
-            "/topic/notifications",
-            new NotificationResponseDto(null, type, message, false)
-        );
-        
-        log.info("Broadcast notification sent to all users");
+    public void sendMessageToUserEnterChatRoom(Member opponent) {
+        Notification notificationMessage = Notification.builder()
+                .title("새 채팅방 입장")
+                .message("새로운 채팅방에 입장하었습니다. 채팅을 시작하세요!")
+                .member(opponent)
+                .type(NotificationType.NEW_MESSAGE)
+                .build();
+        notificationRepository.save(notificationMessage);
+        messagingTemplate.convertAndSend("/queue/notifications" + opponent.getId(), notificationMessage.getTitle());
     }
 
     /**
      * 돌봄 신청 알림 전송
      */
-    public void sendCareRequestNotification(String recipientUsername, String requesterName) {
+    public void sendAdoptionRequestNotification(String recipientUsername, String title, String requesterName) {
         String message = requesterName + "님이 돌봄을 신청했습니다.";
-        sendRealTimeNotification(recipientUsername, NotificationType.CARE_REQUESTED, message);
+        sendRealTimeNotification(recipientUsername, NotificationType.ADOPTION_REQUESTED, title, message);
     }
 
     /**
      * 돌봄 승인/거절 알림 전송
      */
-    public void sendCareResponseNotification(String recipientUsername, String responderName, boolean isAccepted) {
+    public void sendAdoptionResponseNotification(String recipientUsername, String responderName, String title, boolean isAccepted) {
+        NotificationType type = isAccepted ? NotificationType.ADOPTION_ACCEPTED : NotificationType.ADOPTION_REJECTED;
+        String message = responderName + "님이 돌봄 신청을 " + (isAccepted ? "승인" : "거절") + "했습니다.";
+        sendRealTimeNotification(recipientUsername, type, title, message);
+    }
+
+    /**
+     * 돌봄 신청 알림 전송
+     */
+    public void sendCareRequestNotification(String recipientUsername, String title, String requesterName) {
+        String message = requesterName + "님이 돌봄을 신청했습니다.";
+        sendRealTimeNotification(recipientUsername, NotificationType.CARE_REQUESTED, title, message);
+    }
+
+    /**
+     * 돌봄 승인/거절 알림 전송
+     */
+    public void sendCareResponseNotification(String recipientUsername, String responderName, String title, boolean isAccepted) {
         NotificationType type = isAccepted ? NotificationType.CARE_ACCEPTED : NotificationType.CARE_REJECTED;
         String message = responderName + "님이 돌봄 신청을 " + (isAccepted ? "승인" : "거절") + "했습니다.";
-        sendRealTimeNotification(recipientUsername, type, message);
+        sendRealTimeNotification(recipientUsername, type, title, message);
     }
 
     /**
      * 채팅 메시지 알림 전송
      */
-    public void sendChatNotification(String recipientUsername, String senderName, String roomId) {
+    public void sendChatNotification(String recipientUsername, String senderName, String title, Long roomId) {
         String message = senderName + "님이 메시지를 보냈습니다.";
-        sendRealTimeNotification(recipientUsername, NotificationType.NEW_MESSAGE, message);
+        sendRealTimeNotification(recipientUsername, NotificationType.NEW_MESSAGE, title, message);
+    }
+
+    /**
+     * 채팅 메시지 알림 전송
+     */
+    public void sendChatDeleteNotification(String recipientUsername, String title, Long roomId) {
+        String message = "채팅방이 삭제되었습니다.";
+        sendRealTimeNotification(recipientUsername, NotificationType.CHAT_ROOM_DELETED, title, message);
     }
 }

@@ -41,8 +41,8 @@ public class ChatController {
     public void addUser(@Payload ChatMessageRequestDto chatMessageRequest,
                        SimpMessageHeaderAccessor headerAccessor,
                         @AuthenticationPrincipal UserDetails userDetails) {
-        // 사용자를 WebSocket 세션에 추가
-        headerAccessor.getSessionAttributes().put("username", chatMessageRequest.senderId());
+        // 사용자를 WebSocket 세션에 추가 - 이메일로 통일
+        headerAccessor.getSessionAttributes().put("username", userDetails.getUsername());
         headerAccessor.getSessionAttributes().put("roomId", chatMessageRequest.roomId());
 
         // Redis 채널 구독
