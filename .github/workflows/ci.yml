@@ -82,18 +82,17 @@ jobs:
       - name: Build Frontend
         run: npm run build
 
-  # CI 완료 후 Slack 알림
-  notify-slack:
-    name: Notify Slack
+  # CI 완료 후 Slack 알림 (일반 저장소)
+  notify-slack-main:
+    name: Notify Slack (Main Repo)
     runs-on: ubuntu-latest
     needs:
       - backend-test
       - frontend-check
-    # 본저장소에서만 실행 (secrets 접근 가능할 때만)
-    if: ${{ success() }}
+    # 일반 저장소에서만 실행 (Fork가 아닐 때)
+    if: ${{ success() && github.event.pull_request.head.repo.fork != true }}
     steps:
       - name: Send Slack Notification
-        # secrets 체크를 step 레벨에서 진행
         if: ${{ env.SLACK_WEBHOOK_URL != '' }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -102,13 +101,6 @@ jobs:
           pr_url="${{ github.event.pull_request.html_url }}"
           pr_author="${{ github.event.pull_request.user.login }}"
           pr_number="${{ github.event.pull_request.number }}"
-          
-          # Fork 여부 확인
-          if [ "${{ github.event.pull_request.head.repo.fork }}" = "true" ]; then
-            source_info="🔀 Fork"
-          else
-            source_info="🏠 Main Repo"
-          fi
           
           # 예쁜 Block Kit 메시지 생성
           cat << 'EOF' > slack_message.json
@@ -141,7 +133,7 @@ jobs:
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "*소스*\nSOURCE_PLACEHOLDER"
+                    "text": "*소스*\n🏠 Main Repo"
                   },
                   {
                     "type": "mrkdwn",
@@ -184,15 +176,110 @@ jobs:
           }
           EOF
           
-          # 플레이스홀더 교체
-          sed -i "s|TITLE_PLACEHOLDER|$pr_title|g" slack_message.json
-          sed -i "s|AUTHOR_PLACEHOLDER|$pr_author|g" slack_message.json
+          # 플레이스홀더 교체 (특수문자 안전 처리)
+          escaped_title=$(printf '%s\n' "$pr_title" | sed 's/[[\.*^$()+?{|]/\\&/g')
+          escaped_author=$(printf '%s\n' "$pr_author" | sed 's/[[\.*^$()+?{|]/\\&/g')
+          escaped_url=$(printf '%s\n' "$pr_url" | sed 's/[[\.*^$()+?{|]/\\&/g')
+          
+          sed -i "s|TITLE_PLACEHOLDER|$escaped_title|g" slack_message.json
+          sed -i "s|AUTHOR_PLACEHOLDER|$escaped_author|g" slack_message.json
           sed -i "s|NUMBER_PLACEHOLDER|$pr_number|g" slack_message.json
-          sed -i "s|URL_PLACEHOLDER|$pr_url|g" slack_message.json
-          sed -i "s|SOURCE_PLACEHOLDER|$source_info|g" slack_message.json
+          sed -i "s|URL_PLACEHOLDER|$escaped_url|g" slack_message.json
           
           curl -X POST -H 'Content-type: application/json' \
             --data @slack_message.json \
             "$SLACK_WEBHOOK_URL"
           
-          echo "✅ CI 완료 후 Slack 알림 전송 완료!"
+          echo "✅ Main Repo PR 알림 전송 완료!"
+
+  # CI 완료 후 Slack 알림 (Fork)
+  notify-slack-fork:
+    name: Notify Slack (Fork)
+    runs-on: ubuntu-latest
+    needs:
+      - backend-test
+      - frontend-check
+    # Fork에서만 실행
+    if: ${{ success() && github.event.pull_request.head.repo.fork == true }}
+    steps:
+      - name: Send Fork Slack Notification
+        if: ${{ env.SLACK_WEBHOOK_URL != '' }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          pr_title="${{ github.event.pull_request.title }}"
+          pr_url="${{ github.event.pull_request.html_url }}"
+          pr_author="${{ github.event.pull_request.user.login }}"
+          pr_number="${{ github.event.pull_request.number }}"
+          
+          cat << 'EOF' > slack_message.json
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🔔 Fork PR 리뷰 요청!"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*제목*\n```TITLE_PLACEHOLDER```"
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*작성자*\n👤 @AUTHOR_PLACEHOLDER"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*PR 번호*\n<URL_PLACEHOLDER|#NUMBER_PLACEHOLDER>"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*소스*\n🔀 Fork"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*상태*\n✅ CI 완료 후 리뷰 대기"
+                  }
+                ]
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "리뷰하러 가기 🚀"
+                    },
+                    "style": "primary",
+                    "url": "URL_PLACEHOLDER"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+          
+          # 플레이스홀더 교체 (특수문자 안전 처리)
+          escaped_title=$(printf '%s\n' "$pr_title" | sed 's/[[\.*^$()+?{|]/\\&/g')
+          escaped_author=$(printf '%s\n' "$pr_author" | sed 's/[[\.*^$()+?{|]/\\&/g')
+          escaped_url=$(printf '%s\n' "$pr_url" | sed 's/[[\.*^$()+?{|]/\\&/g')
+          
+          sed -i "s|TITLE_PLACEHOLDER|$escaped_title|g" slack_message.json
+          sed -i "s|AUTHOR_PLACEHOLDER|$escaped_author|g" slack_message.json
+          sed -i "s|NUMBER_PLACEHOLDER|$pr_number|g" slack_message.json
+          sed -i "s|URL_PLACEHOLDER|$escaped_url|g" slack_message.json
+          
+          curl -X POST -H 'Content-type: application/json' \
+            --data @slack_message.json \
+            "$SLACK_WEBHOOK_URL"
+          
+          echo "Fork PR 알림 전송 완료!"
