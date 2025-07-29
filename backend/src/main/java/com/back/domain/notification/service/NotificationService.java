@@ -117,15 +117,6 @@ public class NotificationService {
     }
 
     /**
-     * 돌봄 승인/거절 알림 전송
-     */
-    public void sendAdoptionResponseNotification(String recipientUsername, String responderName, String title, boolean isAccepted) {
-        NotificationType type = isAccepted ? NotificationType.ADOPTION_ACCEPTED : NotificationType.ADOPTION_REJECTED;
-        String message = responderName + "님이 돌봄 신청을 " + (isAccepted ? "승인" : "거절") + "했습니다.";
-        sendRealTimeNotification(recipientUsername, type, title, message);
-    }
-
-    /**
      * 돌봄 신청 알림 전송
      */
     public void sendCareRequestNotification(String recipientUsername, String title, String requesterName) {
@@ -136,10 +127,15 @@ public class NotificationService {
     /**
      * 돌봄 승인/거절 알림 전송
      */
-    public void sendCareResponseNotification(String recipientUsername, String responderName, String title, boolean isAccepted) {
-        NotificationType type = isAccepted ? NotificationType.CARE_ACCEPTED : NotificationType.CARE_REJECTED;
-        String message = responderName + "님이 돌봄 신청을 " + (isAccepted ? "승인" : "거절") + "했습니다.";
-        sendRealTimeNotification(recipientUsername, type, title, message);
+    public void sendResponseNotification(String recipientUsername, String title, String type, boolean isAccepted) {
+        NotificationType notificationType = null;
+        if (type.equals("ADOPTION")) {
+            notificationType = isAccepted ? NotificationType.ADOPTION_ACCEPTED : NotificationType.ADOPTION_REJECTED;
+        } else  {
+            notificationType = isAccepted ? NotificationType.CARE_ACCEPTED : NotificationType.CARE_REJECTED;
+        }
+        String message = "신청이 " + (isAccepted ? "승인" : "거절") + "되었습니다.";
+        sendRealTimeNotification(recipientUsername, notificationType, title, message);
     }
 
     /**
