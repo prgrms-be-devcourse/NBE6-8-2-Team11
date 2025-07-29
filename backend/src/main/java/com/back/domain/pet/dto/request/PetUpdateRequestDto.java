@@ -31,6 +31,6 @@ public class PetUpdateRequestDto {
 
     private String shelterName;
 
-    List<String> Petstatuses;
+    List<String> statuses;
 
 }
