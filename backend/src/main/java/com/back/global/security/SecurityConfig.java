@@ -65,6 +65,7 @@ public class SecurityConfig {
                                 "/api/auth/**", // 회원가입, 로그인 등 포함
                                 "/ws-chat/**",
                                 "/ws-notification",// WebSocket 엔드포인트 허용
+                                "/api/pets/**", 
                                 "/login/oauth2/code/**",
                                 "/oauth2/**",
                                 "/actuator/health", // Docker 헬스체크용(도커체크용)
