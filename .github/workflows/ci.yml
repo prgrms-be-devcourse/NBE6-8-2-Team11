@@ -199,87 +199,17 @@ jobs:
     needs:
       - backend-test
       - frontend-check
-    # Fork에서만 실행
+    # Fork에서만 실행하되, secrets 접근 불가로 인해 실제로는 skipped
     if: ${{ success() && github.event.pull_request.head.repo.fork == true }}
     steps:
-      - name: Send Fork Slack Notification
-        if: ${{ env.SLACK_WEBHOOK_URL != '' }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Fork Notification Info
         run: |
-          pr_title="${{ github.event.pull_request.title }}"
-          pr_url="${{ github.event.pull_request.html_url }}"
-          pr_author="${{ github.event.pull_request.user.login }}"
-          pr_number="${{ github.event.pull_request.number }}"
-          
-          cat << 'EOF' > slack_message.json
-          {
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "🔔 Fork PR 리뷰 요청!"
-                }
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "*제목*\n```TITLE_PLACEHOLDER```"
-                }
-              },
-              {
-                "type": "section",
-                "fields": [
-                  {
-                    "type": "mrkdwn",
-                    "text": "*작성자*\n👤 @AUTHOR_PLACEHOLDER"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*PR 번호*\n<URL_PLACEHOLDER|#NUMBER_PLACEHOLDER>"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*소스*\n🔀 Fork"
-                  },
-                  {
-                    "type": "mrkdwn",
-                    "text": "*상태*\n✅ CI 완료 후 리뷰 대기"
-                  }
-                ]
-              },
-              {
-                "type": "actions",
-                "elements": [
-                  {
-                    "type": "button",
-                    "text": {
-                      "type": "plain_text",
-                      "text": "리뷰하러 가기 🚀"
-                    },
-                    "style": "primary",
-                    "url": "URL_PLACEHOLDER"
-                  }
-                ]
-              }
-            ]
-          }
-          EOF
-          
-          # 플레이스홀더 교체 (특수문자 안전 처리)
-          escaped_title=$(printf '%s\n' "$pr_title" | sed 's/[[\.*^$()+?{|]/\\&/g')
-          escaped_author=$(printf '%s\n' "$pr_author" | sed 's/[[\.*^$()+?{|]/\\&/g')
-          escaped_url=$(printf '%s\n' "$pr_url" | sed 's/[[\.*^$()+?{|]/\\&/g')
-          
-          sed -i "s|TITLE_PLACEHOLDER|$escaped_title|g" slack_message.json
-          sed -i "s|AUTHOR_PLACEHOLDER|$escaped_author|g" slack_message.json
-          sed -i "s|NUMBER_PLACEHOLDER|$pr_number|g" slack_message.json
-          sed -i "s|URL_PLACEHOLDER|$escaped_url|g" slack_message.json
-          
-          curl -X POST -H 'Content-type: application/json' \
-            --data @slack_message.json \
-            "$SLACK_WEBHOOK_URL"
-          
-          echo "Fork PR 알림 전송 완료!"
+          echo "🔀 Fork PR 감지됨"
+          echo "⚠️ Fork에서는 secrets 접근 불가로 슬랙 알림을 보낼 수 없습니다."
+          echo "PR 정보:"
+          echo "- 제목: ${{ github.event.pull_request.title }}"
+          echo "- 작성자: ${{ github.event.pull_request.user.login }}"
+          echo "- PR 번호: ${{ github.event.pull_request.number }}"
+          echo "- URL: ${{ github.event.pull_request.html_url }}"
+          echo ""
+          echo "💡 Fork PR의 슬랙 알림은 별도 워크플로우에서 처리됩니다."
