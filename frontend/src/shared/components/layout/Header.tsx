@@ -92,13 +92,13 @@ export default function Header() {
                     </button>
                   </div>
                 ) : (
-                  // 로그인하지 않은 상태: 로그인 링크
+                  // 로그인하지 않은 상태: 로그인 버튼
                   <Link
                     href="/login"
-                    className={`text-sm font-medium transition-colors ${
+                    className={`px-4 py-2 rounded-full font-semibold text-sm transition-all duration-200 ${
                       pathname === '/login'
-                        ? 'text-orange-600'
-                        : 'text-gray-700 hover:text-orange-500'
+                        ? 'bg-orange-500 text-white shadow-md'
+                        : 'bg-orange-100 text-orange-600 hover:bg-orange-200 hover:shadow-md hover:scale-105'
                     }`}
                   >
                     로그인
