@@ -5,18 +5,11 @@ import { useRouter } from 'next/navigation';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
 
-type UserType = 'individual' | 'shelter';
-
 interface SignupFormData {
   email: string;
   password: string;
   confirmPassword: string;
   phone: string;
-  userType: UserType;
-  // 보호기관 추가 정보
-  shelterName: string;
-  shelterAddress: string;
-  shelterPhone: string;
 }
 
 export default function SignupPage() {
@@ -30,10 +23,6 @@ export default function SignupPage() {
     password: '',
     confirmPassword: '',
     phone: '',
-    userType: 'individual',
-    shelterName: '',
-    shelterAddress: '',
-    shelterPhone: '',
   });
 
   const handleInputChange = (
@@ -43,13 +32,6 @@ export default function SignupPage() {
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }));
-  };
-
-  const handleUserTypeChange = (userType: UserType) => {
-    setFormData(prev => ({
-      ...prev,
-      userType
     }));
   };
 
@@ -84,14 +66,6 @@ export default function SignupPage() {
     if (!phoneRegex.test(formData.phone)) {
       setError('올바른 전화번호 형식을 입력해주세요.');
       return false;
-    }
-
-    // 보호기관 선택 시 추가 필드 검증
-    if (formData.userType === 'shelter') {
-      if (!formData.shelterName || !formData.shelterAddress || !formData.shelterPhone) {
-        setError('보호기관 정보를 모두 입력해주세요.');
-        return false;
-      }
     }
 
     return true;
@@ -143,37 +117,6 @@ export default function SignupPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* 사용자 타입 선택 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  회원 유형
-                </label>
-                <div className="space-y-3">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="userType"
-                      value="individual"
-                      checked={formData.userType === 'individual'}
-                      onChange={() => handleUserTypeChange('individual')}
-                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300"
-                    />
-                    <span className="ml-3 text-sm text-gray-700">개인 이용자</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="userType"
-                      value="shelter"
-                      checked={formData.userType === 'shelter'}
-                      onChange={() => handleUserTypeChange('shelter')}
-                      className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300"
-                    />
-                    <span className="ml-3 text-sm text-gray-700">보호기관</span>
-                  </label>
-                </div>
-              </div>
-
               {/* 이메일 입력 */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -241,66 +184,6 @@ export default function SignupPage() {
                   placeholder="010-1234-5678"
                 />
               </div>
-
-              {/* 보호기관 추가 정보 */}
-              {formData.userType === 'shelter' && (
-                <div className="space-y-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                  <h3 className="text-lg font-semibold text-orange-800 mb-3">
-                    보호기관 정보
-                  </h3>
-                  
-                  {/* 보호기관 이름 */}
-                  <div>
-                    <label htmlFor="shelterName" className="block text-sm font-medium text-gray-700 mb-2">
-                      보호기관 이름 *
-                    </label>
-                    <input
-                      id="shelterName"
-                      name="shelterName"
-                      type="text"
-                      required
-                      value={formData.shelterName}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                      placeholder="보호기관 이름을 입력하세요"
-                    />
-                  </div>
-
-                  {/* 보호기관 주소 */}
-                  <div>
-                    <label htmlFor="shelterAddress" className="block text-sm font-medium text-gray-700 mb-2">
-                      보호기관 주소 *
-                    </label>
-                    <textarea
-                      id="shelterAddress"
-                      name="shelterAddress"
-                      required
-                      value={formData.shelterAddress}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                      placeholder="보호기관 주소를 입력하세요"
-                    />
-                  </div>
-
-                  {/* 보호기관 전화번호 */}
-                  <div>
-                    <label htmlFor="shelterPhone" className="block text-sm font-medium text-gray-700 mb-2">
-                      보호기관 전화번호 *
-                    </label>
-                    <input
-                      id="shelterPhone"
-                      name="shelterPhone"
-                      type="tel"
-                      required
-                      value={formData.shelterPhone}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                      placeholder="02-1234-5678"
-                    />
-                  </div>
-                </div>
-              )}
 
               {/* 에러 메시지 */}
               {error && (

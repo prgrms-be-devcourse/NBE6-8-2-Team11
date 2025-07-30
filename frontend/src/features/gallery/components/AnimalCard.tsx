@@ -67,13 +67,10 @@ export default function AnimalCard({ pet }: AnimalCardProps) {
         <div className="flex gap-2">
           <Link
             href={`/gallery/${pet.id}`}
-            className="flex-1 bg-orange-500 text-white text-center py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+            className="w-full bg-orange-500 text-white text-center py-2 px-4 rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
           >
             상세보기
           </Link>
-          <button className="bg-gray-100 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-            ♥
-          </button>
         </div>
       </div>
     </div>

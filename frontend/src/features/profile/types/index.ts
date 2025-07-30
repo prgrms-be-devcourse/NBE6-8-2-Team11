@@ -19,15 +19,4 @@ export interface AdoptionRecord {
   status: 'pending' | 'approved' | 'rejected' | 'completed';
   appliedAt: Date;
   updatedAt?: Date;
-}
-
-export interface FavoritePet {
-  id: number;
-  petId: number;
-  petName: string;
-  petImage?: string;
-  species: string;
-  age: number;
-  gender: 'male' | 'female';
-  addedAt: Date;
 } 

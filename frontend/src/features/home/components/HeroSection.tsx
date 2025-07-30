@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function HeroSection() {
   return (
     <section className="relative py-20 px-4 sm:px-6 lg:px-8">
@@ -14,12 +16,16 @@ export default function HeroSection() {
               모든 동물이 사랑받는 가정에서 살 수 있도록 도와드립니다.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="bg-orange-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-all transform hover:scale-105">
-                입양동물 보기
-              </button>
-              <button className="border-2 border-orange-500 text-orange-500 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-orange-500 hover:text-white transition-all">
-                입양신청하기
-              </button>
+              <Link href="/gallery">
+                <button className="bg-orange-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-all transform hover:scale-105">
+                  보호중인 아이들 보러가기
+                </button>
+              </Link>
+              <Link href="/signup">
+                <button className="bg-orange-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-all transform hover:scale-105">
+                  회원가입
+                </button>
+              </Link>
             </div>
           </div>
           

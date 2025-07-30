@@ -127,11 +127,11 @@ export default function GalleryPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center">
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                입양 가능한 동물들
+                보호중인 동물들
               </h1>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 사랑스러운 반려동물들이 새로운 가족을 기다리고 있습니다. 
-                마음에 드는 동물을 찾아 입양해보세요.
+                마음에 드는 동물을 찾아 입양/돌봄을 신청해보세요.
               </p>
             </div>
           </div>

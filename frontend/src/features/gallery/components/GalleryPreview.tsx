@@ -33,12 +33,6 @@ export default function GalleryPreview() {
             </div>
           ))}
         </div>
-        
-        <div className="text-center mt-12">
-          <button className="bg-orange-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-all">
-            더 많은 동물 보기
-          </button>
-        </div>
       </div>
     </section>
   );
