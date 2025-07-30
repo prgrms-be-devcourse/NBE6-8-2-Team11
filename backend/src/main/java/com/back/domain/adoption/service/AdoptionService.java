@@ -46,7 +46,7 @@ public class AdoptionService {
         Pet pet = petRepository.findById(adoptionRequestDto.petId())
                 .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
 
-        boolean isAvailableForAdoption = pet.getStatuses().stream()
+        boolean isAvailableForAdoption = pet.getPetStatuses().stream()
                 .anyMatch(status -> status.getStatus().equals(PetStatusType.AVAILABLE_FOR_ADOPTION));
 
         if (!isAvailableForAdoption) {
@@ -153,7 +153,7 @@ public class AdoptionService {
     public ApplicationResponseDto getReceivedApplicationDetails(
             Long typeId, String type, String memberEmail) {
         Member member = getMemberByEmail(memberEmail);
-        Object entity = getApplicationEntity(type, typeId, member);
+        Object entity = getReceivedApplicationEntity(type, typeId, member);
 
         if (entity instanceof Adoption adoption) {
             return ApplicationResponseDto.fromAdoption(adoption);
@@ -165,7 +165,7 @@ public class AdoptionService {
 
     public void updateReceivedApplicationStatus(AdoptionCareStatusUpdateRequestDto requestDto, String memberEmail) {
         Member member = getMemberByEmail(memberEmail);
-        Object entity = getApplicationEntity(requestDto, member);
+        Object entity = getReceivedApplicationEntity(requestDto.type(), requestDto.id(), member);
 
         RequestStatus newStatus = RequestStatus.valueOf(requestDto.status());
 
@@ -184,6 +184,17 @@ public class AdoptionService {
         updateApplicationStatusWithPetStatus(entity, newStatus);
         notificationService.sendResponseNotification(member.getUsername(),
                 requestDto.type(), "신청이 승인되었습니다.", true);
+    }
+
+    public void deleteReceivedSingleHistory(Long typeId, String type, String memberEmail) {
+        Member member = getMemberByEmail(memberEmail);
+        Object entity = getReceivedApplicationEntity(type, typeId, member);
+
+        if (entity instanceof Adoption adoption) {
+            adoptionRepository.delete(adoption);
+        } else if (entity instanceof Care care) {
+            careRepository.delete(care);
+        }
     }
 
     public void deleteOwnerAllHistory(String memberEmail) {
@@ -221,8 +232,16 @@ public class AdoptionService {
     }
 
     @Transactional(readOnly = true)
-    private Object getApplicationEntity(AdoptionCareStatusUpdateRequestDto requestDto, Member member) {
-        return getApplicationEntity(requestDto.type(), requestDto.id(), member);
+    private Object getReceivedApplicationEntity(String type, Long id, Member member) {
+        if (type.equals("ADOPTION")) {
+            return adoptionRepository.findByIdAndPet_Member(id, member)
+                    .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+        } else if (type.equals("CARE")) {
+            return careRepository.findByIdAndPet_Member(id, member)
+                    .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
+        } else {
+            throw new IllegalArgumentException("Invalid application type: " + type);
+        }
     }
 
     private void updateApplicationStatus(Object entity, RequestStatus status) {

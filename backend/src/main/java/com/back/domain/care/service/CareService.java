@@ -39,7 +39,7 @@ public class CareService {
         Pet pet = petRepository.findById(careRequestDto.petId())
                 .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
 
-        boolean isAvailableForCare = pet.getStatuses().stream()
+        boolean isAvailableForCare = pet.getPetStatuses().stream()
                 .anyMatch(status -> status.getStatus().equals(PetStatusType.AVAILABLE_FOR_CARE));
 
         if (!isAvailableForCare) {

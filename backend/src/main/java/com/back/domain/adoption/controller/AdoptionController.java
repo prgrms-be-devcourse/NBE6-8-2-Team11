@@ -128,7 +128,7 @@ public class AdoptionController {
     public ResponseEntity<ApiResponse<Void>> deleteReceivedApplication(
             @RequestParam Long typeId, @RequestParam String type,
             @AuthenticationPrincipal UserDetails userDetails) {
-        adoptionService.deleteSingleHistory(typeId, type, userDetails.getUsername());
+        adoptionService.deleteReceivedSingleHistory(typeId, type, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(null)
         );

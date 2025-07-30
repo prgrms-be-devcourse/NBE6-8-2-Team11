@@ -14,6 +14,8 @@ public interface CareRepository extends JpaRepository<Care, Long> {
 
     Optional<Care> findByIdAndMember(Long id, Member member);
 
+    Optional<Care> findByIdAndPet_Member(Long id, Member member);
+
     List<Care> findByMember(Member member);
 
     List<Care> findByPet_MemberOrderByCreatedAtDesc(Member member);

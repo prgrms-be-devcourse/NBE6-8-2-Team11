@@ -41,4 +41,7 @@ public class PetStatus {
         this.pet = pet;
     }
 
+    public void updateStatus(PetStatusType petStatusType) {
+        this.status = petStatusType;
+    }
 }
