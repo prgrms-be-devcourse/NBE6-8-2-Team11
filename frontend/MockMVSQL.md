@@ -13,10 +13,10 @@
 ```
 1. src/shared/services/ 에 API 엔드포인트 함수들 생성
    - petService.ts (이미 존재) - [0730] 완료
-   - shelterService.ts (신규)
-   - memberService.ts (신규)
-   - adoptionService.ts (신규)
-   - careService.ts (신규)
+   - shelterService.ts (신규) - [0730] 컨트롤러 없음 - 생략
+   - memberService.ts (신규) - [0730] 완료
+   - adoptionService.ts (신규) - [0730] 완료
+   - careService.ts (신규) - [0730] adoptionService.ts 에 병합 (1줄) 완료
    - chatService.ts (신규)
 
 2. src/shared/types/ 에 Backend 응답 타입 정의

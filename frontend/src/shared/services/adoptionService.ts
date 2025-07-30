@@ -33,6 +33,13 @@ export interface CreateAdoptionRequest {
   message: string;
 }
 
+export interface CreateCareRequest {
+  petId: string;
+  message: string;
+  desiredStartDate: Date;
+  desiredEndDate: Date;
+}
+
 export interface UpdateAdoptionStatusRequest {
   status: 'ACCEPTED' | 'REJECTED';
 }
@@ -41,6 +48,13 @@ export const adoptionService = {
   // 입양 신청
   async createAdoption(applicationData: CreateAdoptionRequest): Promise<AdoptionApplication> {
     const response = await apiClient.post<AdoptionApplication>('/api/applies/adoption', applicationData);
+    return response.data;
+  },
+
+  // 돌봄 신청 -> 해당 컨트롤러는 분리되어 있음
+  // 기능 확장시 careService.ts 로 분리 예정
+  async createCare(applicationData: CreateCareRequest): Promise<AdoptionApplication> {
+    const response = await apiClient.post<AdoptionApplication>('/api/applies/care', applicationData);
     return response.data;
   },
 
