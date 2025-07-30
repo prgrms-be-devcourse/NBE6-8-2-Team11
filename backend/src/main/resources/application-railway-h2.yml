@@ -17,16 +17,16 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
-    defer-datasource-initialization: true
+    defer-datasource-initialization: true  # 이 설정이 핵심!
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: false
 
-  # SQL 초기화 활성화 (H2에서는 가능)
+  # SQL 초기화 비활성화 (테이블 생성 문제 방지)
   sql:
     init:
-      mode: always
+      mode: never
 
   # Redis 설정 비활성화
   # data:
