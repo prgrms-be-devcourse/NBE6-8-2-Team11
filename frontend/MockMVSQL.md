@@ -17,7 +17,7 @@
    - memberService.ts (신규) - [0730] 완료
    - adoptionService.ts (신규) - [0730] 완료
    - careService.ts (신규) - [0730] adoptionService.ts 에 병합 (1줄) 완료
-   - chatService.ts (신규)
+   - chatService.ts (신규) - [0730] 혜민님이 담당해주시기로  함
 
 2. src/shared/types/ 에 Backend 응답 타입 정의
    - Backend API 응답 구조에 맞는 인터페이스 생성
