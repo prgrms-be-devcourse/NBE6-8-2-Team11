@@ -30,11 +30,16 @@ spring:
     init:
       mode: never
 
-  # Redis 설정 (선택사항 - Railway Redis 추가 시에만 사용)
-  # data:
-  #   redis:
-  #     url: ${REDIS_URL}
-  #     timeout: 6000ms
+  # Redis 설정 (Railway에서는 비활성화)
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
+      timeout: 6000ms
+  # Redis 자동 설정 비활성화 (Railway 전용)
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 
   # 보안 설정
   security:

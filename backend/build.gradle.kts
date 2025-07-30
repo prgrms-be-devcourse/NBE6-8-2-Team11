@@ -41,7 +41,7 @@ dependencies {
     runtimeOnly("com.mysql:mysql-connector-j")
     // PostgreSQL connector for Railway (버전 명시)
     implementation("org.postgresql:postgresql:42.7.2")
-    // Redis
+    // Redis - 환경별 조건부 활성화
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     // JWT dependencies
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
