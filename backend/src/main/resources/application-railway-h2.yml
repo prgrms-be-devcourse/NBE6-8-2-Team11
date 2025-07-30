@@ -1,0 +1,85 @@
+spring:
+  profiles: railway-h2
+  
+  # 임시 H2 데이터베이스 설정 (PostgreSQL 문제 해결 전까지)
+  datasource:
+    url: jdbc:h2:mem:railwaydb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+    
+  h2:
+    console:
+      enabled: false
+      
+  # JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: false
+
+  # SQL 초기화 활성화 (H2에서는 가능)
+  sql:
+    init:
+      mode: always
+
+  # Redis 설정 비활성화
+  # data:
+  #   redis:
+  #     url: ${REDIS_URL}
+
+  # 보안 설정
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET:dummy}
+            scope: profile_nickname, profile_image, account_email
+            client-name: Kakao
+            authorization-grant-type: authorization_code
+            redirect-uri: 'https://nbe6-8-2-team11-production.up.railway.app/login/oauth2/code/kakao'
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+# JWT 설정
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:PT15M}
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:PT168H}
+
+# 쿠키 설정 (HTTPS 환경)
+cookie:
+  secure: true
+
+# 서버 설정
+server:
+  port: ${PORT:8080}
+
+# 로깅 설정 (프로덕션)
+logging:
+  level:
+    com.back: INFO
+    org.hibernate.SQL: WARN
+    org.springframework.transaction.interceptor: WARN
+    org.springframework.security: WARN
+
+# Actuator 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
