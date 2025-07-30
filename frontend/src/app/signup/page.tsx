@@ -103,7 +103,12 @@ export default function SignupPage() {
         success: boolean;
         code: string;
         message: string;
-        content?: any;
+        content?: {
+          id: number;
+          email: string;
+          name: string;
+          phone: string;
+        };
       };
       
       console.log('회원가입 응답:', response);
