@@ -3,11 +3,7 @@ nixPkgs = ["openjdk21"]
 
 [phases.build]
 dependsOn = ["setup"]
-cmds = ["chmod +x gradlew", "./gradlew clean build -x test --no-daemon"]
-
-[phases.install]
-dependsOn = ["build"]
-cmds = ["echo 'PostgreSQL driver installation check'", "find . -name 'postgresql*.jar'"]
+cmds = ["chmod +x gradlew", "./gradlew clean build -x test --no-daemon --refresh-dependencies"]
 
 [start]
-cmd = "java -Dspring.profiles.active=railway -cp 'build/libs/*:build/libs/postgresql-*.jar' org.springframework.boot.loader.launch.JarLauncher"
+cmd = "java -Dspring.profiles.active=railway -jar build/libs/*.jar"

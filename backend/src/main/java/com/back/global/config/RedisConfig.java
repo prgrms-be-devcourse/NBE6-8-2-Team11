@@ -14,7 +14,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @Profile("!railway") // Railway 환경에서는 Redis 비활성화
-@ConditionalOnProperty(name = "spring.data.redis.host", matchIfMissing = false)
+@ConditionalOnProperty(name = "spring.data.redis.host", havingValue = "localhost", matchIfMissing = false)
 public class RedisConfig {
 
     @Bean
