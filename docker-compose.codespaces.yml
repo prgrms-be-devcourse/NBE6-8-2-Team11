@@ -1,0 +1,148 @@
+# GitHub Codespaces 최적화된 Docker Compose 설정
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: petmatching-mysql-codespaces
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-codespaces_root_2025}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-petmatching_dev}
+      MYSQL_USER: ${MYSQL_USERNAME:-dev_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-codespaces_dev_2025}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_codespaces_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --innodb-buffer-pool-size=128M
+    networks:
+      - petmatching-codespaces
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-codespaces_root_2025}"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: petmatching-redis-codespaces
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_codespaces_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - petmatching-codespaces
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 5s
+      retries: 5
+      interval: 30s
+
+  # Backend Spring Boot Application
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - BUILD_PROFILE=codespaces
+    container_name: petmatching-backend-codespaces
+    restart: unless-stopped
+    environment:
+      # Spring profiles
+      SPRING_PROFILES_ACTIVE: codespaces
+      
+      # Database configuration
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-petmatching_dev}
+      MYSQL_USERNAME: ${MYSQL_USERNAME:-dev_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-codespaces_dev_2025}
+      
+      # Redis configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      # JWT configuration
+      JWT_SECRET: ${JWT_SECRET:-codespaces_jwt_secret_key_for_development_environment_very_long_and_secure_2025}
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-PT1H}
+      JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-PT720H}
+      
+      # OAuth configuration
+      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID:-27f36d6e010908844fbe8b200a8e25d8}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET:-your-kakao-secret}
+      
+      # 개발 환경 설정
+      SPRING_DEVTOOLS_RESTART_ENABLED: true
+      SPRING_JPA_SHOW_SQL: true
+      SPRING_JPA_FORMAT_SQL: true
+      LOGGING_LEVEL_COM_BACK: DEBUG
+      
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - petmatching-codespaces
+    volumes:
+      - ./backend/logs:/app/logs
+      - ./backend/src:/app/src:ro  # 소스 코드 변경 감지용 (개발환경)
+
+  # Frontend Next.js Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development  # 개발용 스테이지 사용
+      args:
+        - NODE_ENV=development
+    container_name: petmatching-frontend-codespaces
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+      WATCHPACK_POLLING: true  # Codespaces에서 파일 변경 감지 개선
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - petmatching-codespaces
+    volumes:
+      - ./frontend/src:/app/src:ro  # 소스 코드 변경 감지용
+      - ./frontend/public:/app/public:ro
+      - /app/node_modules  # node_modules는 컨테이너 내부 것 사용
+
+  # Redis Commander (개발 도구)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: petmatching-redis-commander-codespaces
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+      - HTTP_USER=admin
+      - HTTP_PASSWORD=codespaces2025
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - petmatching-codespaces
+
+volumes:
+  mysql_codespaces_data:
+    driver: local
+  redis_codespaces_data:
+    driver: local
+
+networks:
+  petmatching-codespaces:
+    driver: bridge

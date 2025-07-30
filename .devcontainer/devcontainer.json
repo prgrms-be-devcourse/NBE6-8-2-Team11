@@ -1,0 +1,66 @@
+{
+  "name": "PetMatching Development",
+  "dockerComposeFile": "../docker-compose.dev.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-docker",
+        "redhat.java",
+        "vscjava.vscode-spring-initializr",
+        "vscjava.vscode-spring-boot-dashboard",
+        "ms-vscode.vscode-json"
+      ],
+      "settings": {
+        "java.home": "/opt/java/openjdk",
+        "java.import.gradle.enabled": true,
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "typescript.preferences.importModuleSpecifier": "relative"
+      }
+    }
+  },
+  "forwardPorts": [3000, 8080, 3306, 6379, 8081],
+  "portsAttributes": {
+    "3000": {
+      "label": "Frontend (Next.js)",
+      "protocol": "http"
+    },
+    "8080": {
+      "label": "Backend (Spring Boot)",
+      "protocol": "http"
+    },
+    "3306": {
+      "label": "MySQL Database",
+      "protocol": "mysql"
+    },
+    "6379": {
+      "label": "Redis Cache",
+      "protocol": "redis"
+    },
+    "8081": {
+      "label": "Redis Commander",
+      "protocol": "http"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installGradle": true
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  }
+}

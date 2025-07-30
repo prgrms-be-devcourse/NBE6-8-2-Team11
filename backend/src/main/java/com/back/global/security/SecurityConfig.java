@@ -102,14 +102,24 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 프론트엔드 서버 주소 허용
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080"));
+        // 허용할 오리진 설정 (Railway + Vercel 지원)
+        configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:3000",              // 로컬 개발
+            "http://localhost:8080",              // 로컬 백엔드
+            "https://*.vercel.app",               // Vercel 배포
+            "https://vercel.app",                 // Vercel 도메인
+            "http://localhost:3001",              // 스테이징 환경 (선택사항)
+            "http://localhost:3002"               // 릴리즈 환경 (선택사항)
+        ));
+        
         // 허용할 HTTP 메서드
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // 허용할 헤더
         configuration.setAllowedHeaders(List.of("*"));
         // 자격 증명(쿠키 등) 허용
         configuration.setAllowCredentials(true);
+        // preflight 요청 캐시 시간 (초)
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 CORS 설정 적용
