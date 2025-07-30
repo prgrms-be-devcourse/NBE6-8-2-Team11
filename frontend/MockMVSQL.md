@@ -12,7 +12,7 @@
 ### **1단계: API 클라이언트 및 타입 준비**
 ```
 1. src/shared/services/ 에 API 엔드포인트 함수들 생성
-   - animalService.ts (이미 존재)
+   - petService.ts (이미 존재) - [0730] 완료
    - shelterService.ts (신규)
    - memberService.ts (신규)
    - adoptionService.ts (신규)
