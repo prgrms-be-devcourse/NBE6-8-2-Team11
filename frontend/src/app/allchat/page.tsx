@@ -49,32 +49,16 @@ export default function AllChatPage() {
       id: 1,
       guardianName: '김보호',
       shelterName: '사랑의 동물보호소',
-      lastMessage: '멍멍이 입양에 대해 궁금한 점이 있어요.',
+      lastMessage: '어떤 점이 궁금하신가요?',
       lastMessageTime: new Date(),
-      unreadCount: 1
+      unreadCount: 0
     },
     {
       id: 2,
-      guardianName: '이돌봄',
-      shelterName: '희망의 동물보호소',
-      lastMessage: '나비 입양 절차를 안내드리겠습니다.',
-      lastMessageTime: new Date(Date.now() - 3600000),
-      unreadCount: 0
-    },
-    {
-      id: 3,
-      guardianName: '박사랑',
-      shelterName: '따뜻한 동물보호소',
-      lastMessage: '토토의 건강상태는 양호합니다.',
-      lastMessageTime: new Date(Date.now() - 7200000),
-      unreadCount: 2
-    },
-    {
-      id: 4,
       guardianName: '최동물',
       lastMessage: '새로운 가족을 찾고 있어요.',
       lastMessageTime: new Date(Date.now() - 10800000),
-      unreadCount: 0
+      unreadCount: 2
     }
   ]);
 
@@ -107,7 +91,7 @@ export default function AllChatPage() {
           <div className="flex h-[600px]">
             {/* 채팅방 목록 */}
             <div className="w-1/3 border-r border-gray-200">
-              <div className="p-4 border-b border-gray-200">
+              <div className="p-4 border-b border-gray-200 h-20 flex flex-col justify-center">
                 <h2 className="text-lg font-semibold text-gray-900">채팅</h2>
                 <p className="text-sm text-gray-600">보호자와 1:1 상담</p>
               </div>
@@ -151,7 +135,7 @@ export default function AllChatPage() {
               {selectedChat ? (
                 <>
                   {/* 채팅 헤더 */}
-                  <div className="p-4 border-b border-gray-200">
+                  <div className="p-4 border-b border-gray-200 h-20 flex flex-col justify-center">
                     <h3 className="font-semibold text-gray-900">
                       {chatRooms.find(room => room.id === selectedChat)?.guardianName}
                     </h3>
