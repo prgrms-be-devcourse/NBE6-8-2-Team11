@@ -42,6 +42,11 @@ export default function Header() {
   const { user, isLoading, logout } = useAuth();
   const pathname = usePathname();
 
+  const handleNotificationClick = () => {
+    // 알림 기능은 추후 구현
+    console.log('알림 버튼 클릭됨');
+  };
+
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -77,11 +82,39 @@ export default function Header() {
             {!isLoading && (
               <>
                 {user ? (
-                  // 로그인된 상태: 사용자 이름, 내 프로필, 로그아웃 버튼
+                  // 로그인된 상태: 사용자 이름, 알림, 내 프로필, 로그아웃 버튼
                   <div className="flex items-center space-x-3">
                     <span className="text-sm text-gray-700 font-medium">
                       {user.name} 님
                     </span>
+                    
+                    {/* 알림 버튼 */}
+                    <button
+                      onClick={handleNotificationClick}
+                      className="relative p-2 text-gray-600 hover:text-orange-500 transition-colors"
+                      title="알림"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5} // 버튼 두께 조정
+                          d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"
+                        />
+                      </svg>
+                      
+                      {/* 알림 표시 배지 (새 알림이 있을 때만 표시) */}
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full opacity-0">
+                        {/* 추후 알림 개수에 따라 표시 */}
+                      </span>
+                    </button>
+                    
                     <Link
                       href="/profile"
                       className={`text-sm font-medium transition-colors ${
