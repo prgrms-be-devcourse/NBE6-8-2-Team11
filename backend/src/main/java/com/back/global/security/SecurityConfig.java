@@ -3,17 +3,17 @@ package com.back.global.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // HttpMethod를 사용하기 위해 import
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -42,7 +42,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // CORS 설정 적용 ⭐ 이 부분 추가
+                // CORS 설정 적용
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // H2 콘솔 사용을 위한 설정
@@ -52,7 +52,7 @@ public class SecurityConfig {
 
                 // API 경로별 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 개발 편의 기능 및 인증 없이 접근해야 하는 경로들
+                        // 인증 없이 접근해야 하는 공통 경로들
                         .requestMatchers(
                                 "/",
                                 "/favicon.ico",
@@ -62,16 +62,18 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
                                 "/webjars/**",
-                                "/api/auth/**", // 회원가입, 로그인 등 포함
+                                "/api/auth/**", // 회원가입, 로그인 등
                                 "/ws-chat/**",
-                                "/ws-notification",// WebSocket 엔드포인트 허용
-                                "/api/pets/**", 
+                                "/ws-notification",// WebSocket 엔드포인트
                                 "/login/oauth2/code/**",
                                 "/oauth2/**",
-                                "/actuator/health", // Docker 헬스체크용(도커체크용)
-                                "/health",          // 커스텀 헬스체크(도커체크용)
-                                "/ping"            // 단순 ping(도커체크용)
+                                "/actuator/health", // Docker 헬스체크
+                                "/health",
+                                "/ping"
                         ).permitAll()
+
+                        // 동물(Pet) 관련 API는 GET(조회) 요청만 모두에게 허용
+                        .requestMatchers(HttpMethod.GET, "/api/pets/**").permitAll()
 
                         // 관리자 전용 경로
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -96,16 +98,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 허용할 오리진 설정 (Railway + Vercel 지원)
+        // 허용할 오리진 설정
         configuration.setAllowedOriginPatterns(List.of(
-            "http://localhost:3000",              // 로컬 개발
-            "http://localhost:8080",              // 로컬 백엔드
-            "https://*.vercel.app",               // Vercel 배포
-            "https://vercel.app",                 // Vercel 도메인
-            "http://localhost:3001",              // 스테이징 환경 (선택사항)
-            "http://localhost:3002"               // 릴리즈 환경 (선택사항)
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "https://*.vercel.app",
+                "https://vercel.app",
+                "http://localhost:3001",
+                "http://localhost:3002"
         ));
-        
+
         // 허용할 HTTP 메서드
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // 허용할 헤더

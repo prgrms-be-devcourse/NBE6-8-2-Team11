@@ -17,6 +17,11 @@ class ApiClient {
     this.baseURL = baseURL;
   }
 
+  private getAuthHeaders(): Record<string, string> {
+    const token = localStorage.getItem('accessToken');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -28,6 +33,7 @@ class ApiClient {
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
+        ...this.getAuthHeaders(),
         ...options.headers,
       },
       credentials: 'include', // Include cookies for authentication
@@ -38,6 +44,20 @@ class ApiClient {
       const response = await fetch(url, config);
       
       if (!response.ok) {
+        // 401 Unauthorized 에러 처리
+        if (response.status === 401) {
+          // 토큰이 만료되었거나 유효하지 않은 경우
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('userId');
+          localStorage.removeItem('userEmail');
+          localStorage.removeItem('userName');
+          
+          // 로그인 페이지로 리다이렉트
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       

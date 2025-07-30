@@ -6,23 +6,21 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { NAV_ITEMS, BRAND_INFO } from '../../constants';
 
-// 실제 토큰 기반 로그인 상태 관리
+// 실제 토큰과 사용자 이름 기반 로그인 상태 관리
 const useAuth = () => {
   const [user, setUser] = useState<{ name: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // localStorage에서 토큰 확인
+    // localStorage에서 토큰과 사용자 이름 확인
     const accessToken = localStorage.getItem('accessToken');
     const refreshToken = localStorage.getItem('refreshToken');
+    const userName = localStorage.getItem('userName');
     
-    if (accessToken && refreshToken) {
-      // 토큰이 있으면 로그인된 상태로 설정
-      // 실제로는 토큰을 디코드하여 사용자 정보를 가져와야 하지만,
-      // 여기서는 간단히 토큰 존재 여부만 확인
-      setUser({ name: '사용자' });
+    if (accessToken && refreshToken && userName) {
+      // 실제 사용자 이름으로 상태 설정
+      setUser({ name: userName });
     } else {
-      // 토큰이 없으면 로그인하지 않은 상태
       setUser(null);
     }
     
@@ -30,8 +28,12 @@ const useAuth = () => {
   }, []);
 
   const logout = () => {
+    // 로그아웃 시 모든 관련 정보 삭제
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userEmail');
     setUser(null);
   };
 
@@ -42,6 +44,7 @@ export default function Header() {
   const { user, isLoading, logout } = useAuth();
   const pathname = usePathname();
 
+  // 팀원이 추가한 알림 버튼 클릭 핸들러
   const handleNotificationClick = () => {
     // 알림 기능은 추후 구현
     console.log('알림 버튼 클릭됨');
@@ -82,13 +85,13 @@ export default function Header() {
             {!isLoading && (
               <>
                 {user ? (
-                  // 로그인된 상태: 사용자 이름, 알림, 내 프로필, 로그아웃 버튼
+                  // 로그인된 상태: 실제 사용자 이름, 알림 버튼, 채팅 버튼, 내 프로필, 로그아웃 버튼
                   <div className="flex items-center space-x-3">
                     <span className="text-sm text-gray-700 font-medium">
                       {user.name} 님
                     </span>
-                    
-                    {/* 알림 버튼 */}
+
+                    {/* ▼▼▼▼▼ 팀원이 추가한 알림 버튼 ▼▼▼▼▼ */}
                     <button
                       onClick={handleNotificationClick}
                       className="relative p-2 text-gray-600 hover:text-orange-500 transition-colors"
@@ -108,13 +111,10 @@ export default function Header() {
                           d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"
                         />
                       </svg>
-                      
-                      {/* 알림 표시 배지 (새 알림이 있을 때만 표시) */}
                       <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full opacity-0">
-                        {/* 추후 알림 개수에 따라 표시 */}
                       </span>
                     </button>
-                    
+
                     {/* 채팅 버튼 */}
                     <Link
                       href="/allchat"
@@ -135,13 +135,13 @@ export default function Header() {
                           d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                         />
                       </svg>
-                      
+
                       {/* 새 메시지 표시 배지 (새 메시지가 있을 때만 표시) */}
                       <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full opacity-0">
                         {/* 추후 새 메시지 개수에 따라 표시 */}
                       </span>
                     </Link>
-                    
+
                     <Link
                       href="/profile"
                       className={`text-sm font-medium transition-colors ${
@@ -179,4 +179,4 @@ export default function Header() {
       </div>
     </header>
   );
-} 
+}

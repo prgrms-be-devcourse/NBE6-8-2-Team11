@@ -44,7 +44,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .email(email)
                     .name(nickname)
                     .password("OAUTH2_USER_PASSWORD")
-                    .phone("010-0000-0000") // 필수값이어서 채움
                     .role(UserRole.USER)
                     .build();
             memberRepository.save(member);

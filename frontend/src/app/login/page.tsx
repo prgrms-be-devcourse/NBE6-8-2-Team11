@@ -5,9 +5,21 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
+import { apiClient } from '../../shared/services/apiClient';
+import { useAuth } from '../../shared/hooks/useAuth';
+
+interface LoginResponse {
+  grantType: string;
+  accessToken: string;
+  refreshToken: string;
+  userId: number;
+  userEmail: string;
+  userName: string;
+}
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -27,23 +39,55 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
+  
     try {
-      // Mock 로그인 로직 (실제로는 API 호출)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await apiClient.post<LoginResponse>('/auth/login', {
+        email: formData.username,
+        password: formData.password,
+      }) as unknown as {
+        success: boolean;
+        code: string;
+        message: string;
+        content: LoginResponse;
+      };
       
-      // 간단한 검증
-      if (formData.username && formData.password) {
-        // Mock 토큰 저장
-        localStorage.setItem('accessToken', 'mock-access-token');
-        localStorage.setItem('refreshToken', 'mock-refresh-token');
+      if (response.success && response.content) {
+        console.log('로그인 성공:', response.content);
         
-        // 홈페이지로 리다이렉트
+        // useAuth의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
+        login(
+          { 
+            id: response.content.userId, 
+            email: response.content.userEmail, 
+            name: response.content.userName 
+          },
+          { 
+            accessToken: response.content.accessToken, 
+            refreshToken: response.content.refreshToken 
+          }
+        );
+        
+        console.log('로그인 상태 업데이트 완료, 홈페이지로 이동합니다.');
+        
+        // 로그인 성공 시 즉시 홈페이지로 이동
         router.push('/');
+        
+        // router.push가 작동하지 않을 경우를 대비해 강제 이동
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 100);
       } else {
-        setError('아이디와 비밀번호를 모두 입력해주세요.');
+        console.log('로그인 실패:', response);
+        console.log('응답 구조:', {
+          success: response.success,
+          message: response.message,
+          content: response.content,
+          전체응답: response
+        });
+        setError(response.message || '아이디 또는 비밀번호가 일치하지 않습니다.');
       }
-    } catch (err) {
+    } catch (error) {
+      console.log('로그인 에러:', error);
       setError('로그인에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsLoading(false);

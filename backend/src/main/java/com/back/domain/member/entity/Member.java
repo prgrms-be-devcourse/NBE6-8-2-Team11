@@ -43,7 +43,7 @@ public class Member implements UserDetails {
     @Column(name = "member_name", nullable = false)
     private String name;
 
-    @Column(name = "member_phone", nullable = false, unique = true)
+    @Column(name = "member_phone")
     private String phone;
 
     @Column(name = "member_role", nullable = false)
