@@ -85,7 +85,7 @@ export default function Header() {
             {!isLoading && (
               <>
                 {user ? (
-                  // 로그인된 상태: 실제 사용자 이름, 알림 버튼, 내 프로필, 로그아웃 버튼
+                  // 로그인된 상태: 실제 사용자 이름, 알림 버튼, 채팅 버튼, 내 프로필, 로그아웃 버튼
                   <div className="flex items-center space-x-3">
                     <span className="text-sm text-gray-700 font-medium">
                       {user.name} 님
@@ -115,6 +115,33 @@ export default function Header() {
                       </span>
                     </button>
                     {/* ▲▲▲▲▲ 팀원이 추가한 알림 버튼 ▲▲▲▲▲ */}
+
+                    {/* 채팅 버튼 */}
+                    <Link
+                      href="/allchat"
+                      className="relative p-2 text-gray-600 hover:text-orange-500 transition-colors"
+                      title="채팅"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                      </svg>
+
+                      {/* 새 메시지 표시 배지 (새 메시지가 있을 때만 표시) */}
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full opacity-0">
+                        {/* 추후 새 메시지 개수에 따라 표시 */}
+                      </span>
+                    </Link>
 
                     <Link
                       href="/profile"
