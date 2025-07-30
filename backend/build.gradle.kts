@@ -39,8 +39,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     //mySQL connector for JPA
     runtimeOnly("com.mysql:mysql-connector-j")
-    // PostgreSQL connector for Railway
-    runtimeOnly("org.postgresql:postgresql")
+    // PostgreSQL connector for Railway (버전 명시)
+    implementation("org.postgresql:postgresql:42.7.2")
     // Redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     // JWT dependencies

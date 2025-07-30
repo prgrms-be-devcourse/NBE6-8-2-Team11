@@ -1,40 +1,37 @@
 spring:
-  profiles: railway
+  profiles: railway-h2
   
-  # Railway PostgreSQL 데이터베이스 설정
+  # 임시 H2 데이터베이스 설정 (PostgreSQL 문제 해결 전까지)
   datasource:
-    url: jdbc:${DATABASE_URL:postgresql://localhost:5432/petcare}
-    driver-class-name: org.postgresql.Driver
-    hikari:
-      auto-commit: false
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      maximum-pool-size: 10
-
+    url: jdbc:h2:mem:railwaydb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+    
+  h2:
+    console:
+      enabled: false
+      
   # JPA 설정
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: false
-    defer-datasource-initialization: false
+    defer-datasource-initialization: true  # 이 설정이 핵심!
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.H2Dialect
         format_sql: false
-        highlight_sql: false
-        use_sql_comments: false
 
-  # SQL 초기화 비활성화 (Railway용)
+  # SQL 초기화 비활성화 (테이블 생성 문제 방지)
   sql:
     init:
       mode: never
 
-  # Redis 설정 (선택사항 - Railway Redis 추가 시에만 사용)
+  # Redis 설정 비활성화
   # data:
   #   redis:
   #     url: ${REDIS_URL}
-  #     timeout: 6000ms
 
   # 보안 설정
   security:
@@ -43,11 +40,11 @@ spring:
         registration:
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
-            client-secret: ${KAKAO_CLIENT_SECRET}
+            client-secret: ${KAKAO_CLIENT_SECRET:dummy}
             scope: profile_nickname, profile_image, account_email
             client-name: Kakao
             authorization-grant-type: authorization_code
-            redirect-uri: '${FRONTEND_URL}/api/auth/callback/kakao'
+            redirect-uri: 'https://nbe6-8-2-team11-production.up.railway.app/login/oauth2/code/kakao'
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -74,11 +71,8 @@ logging:
   level:
     com.back: INFO
     org.hibernate.SQL: WARN
-    org.hibernate.orm.jdbc.bind: WARN
     org.springframework.transaction.interceptor: WARN
     org.springframework.security: WARN
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 # Actuator 설정
 management:
