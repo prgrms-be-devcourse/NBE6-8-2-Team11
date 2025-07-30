@@ -26,8 +26,8 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-4">서비스</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="/gallery" className="hover:text-white transition-colors">입양동물 보기</Link></li>
-              <li><Link href="/apply" className="hover:text-white transition-colors">입양신청</Link></li>
+              <li><Link href="/gallery" className="hover:text-white transition-colors">보호중인 동물 보기</Link></li>
+              <li><Link href="/apply" className="hover:text-white transition-colors">입양 및 돌봄 신청</Link></li>
               <li><Link href="/profile" className="hover:text-white transition-colors">내정보</Link></li>
             </ul>
           </div>

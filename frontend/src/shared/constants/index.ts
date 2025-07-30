@@ -1,8 +1,8 @@
 // 네비게이션 메뉴 상수
 export const NAV_ITEMS = [
   { label: '홈', href: '/' },
-  { label: '입양동물', href: '/gallery' },
-  { label: '입양신청', href: '/apply' },
+  { label: '보호중인 동물', href: '/gallery' },
+  { label: '입양/돌봄 신청', href: '/apply' },
 ];
 
 // 서비스 카드 데이터
@@ -15,8 +15,8 @@ export const SERVICE_CARDS = [
   },
   {
     id: 'apply',
-    title: '입양 신청',
-    description: '간편한 신청서를 통해 원하는 동물에 대한 입양을 신청할 수 있습니다.',
+    title: '입양/돌봄 신청',
+    description: '간편한 신청서를 통해 원하는 동물에 대한 입양 및 돌봄을 신청할 수 있습니다.',
     icon: '📝',
   },
   {
@@ -29,10 +29,10 @@ export const SERVICE_CARDS = [
 
 // 통계 데이터
 export const STATS_DATA = [
-  { label: '성공한 입양', value: 1234 },
+  { label: '성공한 입양 및 돌봄', value: 1234 },
   { label: '보호중인 동물', value: 567 },
   { label: '협력 보호소', value: 89 },
-  { label: '입양희망자', value: 2345 },
+  { label: '입양/돌봄 희망자', value: 2345 },
 ];
 
 // Mock 보호소 데이터 (shelter 테이블 기반)

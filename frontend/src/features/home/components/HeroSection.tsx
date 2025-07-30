@@ -15,10 +15,10 @@ export default function HeroSection() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button className="bg-orange-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-all transform hover:scale-105">
-                입양동물 보기
+                보호중인 동물 보기
               </button>
               <button className="border-2 border-orange-500 text-orange-500 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-orange-500 hover:text-white transition-all">
-                입양신청하기
+                입양/돌봄 신청하기
               </button>
             </div>
           </div>
