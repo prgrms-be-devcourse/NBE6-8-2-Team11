@@ -15,14 +15,20 @@ spring:
   # JPA 설정
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: false
+    defer-datasource-initialization: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
         highlight_sql: false
         use_sql_comments: false
+
+  # SQL 초기화 비활성화 (Railway용)
+  sql:
+    init:
+      mode: never
 
   # Redis 설정 (선택사항 - Railway Redis 추가 시에만 사용)
   # data:
