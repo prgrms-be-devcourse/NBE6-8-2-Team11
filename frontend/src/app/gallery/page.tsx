@@ -28,12 +28,14 @@ export default function GalleryPage() {
     const loadPets = async () => {
       try {
         setLoading(true);
+        console.log('API 에서 펫 정보 fetch...');
         const petsData = await petService.getPets();
+        console.log('API 응답:', petsData);
         setPets(petsData);
         setFilteredPets(petsData);
       } catch (err) {
+        console.error('API 에러:', err);
         setError('동물 정보를 불러오는데 실패했습니다.');
-        console.error('Failed to load pets:', err);
       } finally {
         setLoading(false);
       }
@@ -45,7 +47,7 @@ export default function GalleryPage() {
   // 필터링 및 검색 적용
   useEffect(() => {
     if (!pets || pets.length === 0) return;
-
+    
     let filtered = [...pets];
 
     // 검색 필터
