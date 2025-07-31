@@ -1,5 +1,7 @@
 spring:
-  profiles: railway-h2
+  config:
+    activate:
+      on-profile: railway-h2
   
   # 임시 H2 데이터베이스 설정 (PostgreSQL 문제 해결 전까지)
   datasource:
