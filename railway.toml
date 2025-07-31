@@ -1,6 +1,5 @@
 [build]
-builder = "dockerfile"
-dockerfilePath = "backend/Dockerfile.railway"
+builder = "nixpacks"
 
 [deploy]
 startCommand = "java -Dspring.profiles.active=railway -jar app.jar"
