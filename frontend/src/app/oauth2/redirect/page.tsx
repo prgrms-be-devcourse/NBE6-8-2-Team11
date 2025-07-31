@@ -12,7 +12,7 @@ function OAuth2RedirectContent() {
 
   useEffect(() => {
     // URL 파라미터에서 모든 값들을 로그로 확인
-    const allParams = {};
+    const allParams: Record<string, string> = {}; // 타입을 명시적으로 지정
     searchParams.forEach((value, key) => {
       allParams[key] = value;
     });
