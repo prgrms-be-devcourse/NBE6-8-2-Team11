@@ -102,8 +102,8 @@ const createChatStore = () => {
       setChatRooms: (rooms) => set({ chatRooms: rooms }),
       setCurrentRoom: (room) => set({ currentRoom: room }),
       setLoading: (loading) => set({ isLoading: loading }),
-      clearMessages: (roomId) => set((state) => ({ 
-        messages: { ...state.messages, [roomId]: [] } 
+      clearMessages: (roomId) => set((_state) => ({ 
+        messages: { ..._state.messages, [roomId]: [] } 
       })),
       
       loadRoomMessages: async (roomId: number) => {

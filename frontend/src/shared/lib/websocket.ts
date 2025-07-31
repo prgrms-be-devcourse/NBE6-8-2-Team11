@@ -51,7 +51,7 @@ class WebSocketClient {
       heartbeatOutgoing: 4000,
     });
 
-    this.client.onConnect = (_frame: StompFrame) => {
+    this.client.onConnect = () => {
       console.log('WebSocket connected');
       const wasConnected = this.isConnected;
       this.isConnected = true;

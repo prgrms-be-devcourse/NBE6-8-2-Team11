@@ -19,7 +19,7 @@ export default function AllChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   
   const currentUserId = getCurrentUserIdSync();
-  const { addMessage, setMessages: setStoreMessages, loadRoomMessages, messages: storeMessages } = useChatStore();
+  const { addMessage, setMessages: _setStoreMessages, loadRoomMessages, messages: storeMessages } = useChatStore();
 
   // 현재 선택된 채팅방의 메시지
   const messages = selectedChat ? (storeMessages[selectedChat] || []) : [];
@@ -153,7 +153,7 @@ export default function AllChatPage() {
   };
 
   // 메시지 시간 포맷팅 함수
-  const formatMessageTime = (timestamp: any): string => {
+  const formatMessageTime = (timestamp: string | number | Array<number>): string => {
     console.log('formatMessageTime called with timestamp:', timestamp);
     
     try {
@@ -186,8 +186,8 @@ export default function AllChatPage() {
       const minutes = date.getMinutes().toString().padStart(2, '0');
       const result = `${hours}:${minutes}`;
       return result;
-    } catch (error) {
-      console.error('Date parsing error:', error, 'for date:', timestamp);
+    } catch (_error) {
+      console.error('Date parsing error:', _error, 'for date:', timestamp);
       return '알 수 없는 시간';
     }
   };
