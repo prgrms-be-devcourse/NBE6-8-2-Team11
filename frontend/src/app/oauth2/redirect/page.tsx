@@ -2,64 +2,118 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '../../../shared/hooks/useAuth';
 
 function OAuth2RedirectContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
-    const accessToken = searchParams.get('accessToken');
-    const refreshToken = searchParams.get('refreshToken');
+    const handleOAuth2Redirect = async () => {
+      try {
+        // URL 파라미터에서 토큰 및 사용자 정보 추출
+        const accessToken = searchParams.get('accessToken');
+        const refreshToken = searchParams.get('refreshToken');
+        const userId = searchParams.get('userId');
+        const userEmail = searchParams.get('userEmail');
+        const userName = searchParams.get('userName');
 
-    if (accessToken && refreshToken) {
-      // 토큰을 로컬 스토리지에 저장
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+        console.log('OAuth2 리다이렉트 파라미터:', {
+          accessToken: accessToken ? '존재' : '없음',
+          refreshToken: refreshToken ? '존재' : '없음',
+          userId,
+          userEmail,
+          userName
+        });
 
-      // 메인 페이지로 리다이렉트
-      router.push('/');
-    } else {
-      // 토큰이 없으면 에러 상태로 설정하고 3초 후 홈으로 리다이렉트
-      setError('로그인에 실패했습니다. 다시 시도해주세요.');
-      
-      // 3초 후 홈으로 리다이렉트
-      setTimeout(() => {
-        router.push('/');
-      }, 3000);
-    }
-  }, [searchParams, router]);
+        if (accessToken && userId && userEmail && userName) {
+          // useAuth의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
+          login(
+            { 
+              id: parseInt(userId, 10), 
+              email: userEmail, 
+              name: userName 
+            },
+            { 
+              accessToken, 
+              refreshToken: refreshToken || accessToken 
+            }
+          );
+
+          console.log('OAuth2 로그인 성공, 홈페이지로 이동합니다.');
+          
+          // 홈페이지로 리다이렉트
+          router.push('/');
+        } else {
+          console.error('OAuth2 토큰 또는 사용자 정보 누락:', {
+            accessToken: !!accessToken,
+            userId: !!userId,
+            userEmail: !!userEmail,
+            userName: !!userName
+          });
+          
+          setError('로그인에 실패했습니다. 다시 시도해주세요.');
+          
+          // 3초 후 로그인 페이지로 리다이렉트
+          setTimeout(() => {
+            router.push('/login?error=oauth_failed');
+          }, 3000);
+        }
+      } catch (error) {
+        console.error('OAuth2 리다이렉트 처리 실패:', error);
+        setError('로그인 처리 중 오류가 발생했습니다.');
+        
+        // 3초 후 로그인 페이지로 리다이렉트
+        setTimeout(() => {
+          router.push('/login?error=oauth_failed');
+        }, 3000);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    handleOAuth2Redirect();
+  }, [searchParams, router, login]);
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-yellow-50">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-8 max-w-md mx-4">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">로그인 실패</h2>
           <p className="text-gray-600 mb-4">{error}</p>
-          <p className="text-sm text-gray-500">잠시 후 홈페이지로 이동합니다...</p>
+          <p className="text-sm text-gray-500">잠시 후 로그인 페이지로 이동합니다...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">로그인 처리 중...</p>
+  if (isProcessing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-yellow-50">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-8 max-w-md mx-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">로그인 처리 중</h2>
+          <p className="text-gray-600">잠시만 기다려주세요...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 }
 
 export default function OAuth2RedirectPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">로딩 중...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-yellow-50">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-8 max-w-md mx-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">로딩 중</h2>
+          <p className="text-gray-600">페이지를 불러오는 중...</p>
         </div>
       </div>
     }>
