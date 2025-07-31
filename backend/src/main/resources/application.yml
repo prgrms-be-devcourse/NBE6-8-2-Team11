@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: temp
+    active: dev
   application:
     name: springboot-jpa
   config:
