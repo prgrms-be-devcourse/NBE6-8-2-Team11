@@ -1,12 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
 import { User } from '../types';
 import { apiClient } from '../../../shared/services/apiClient';
 
 interface ProfileEditProps {
   user: User | null;
   setUser: (user: User | null) => void;
+}
+
+// 1. 백엔드 MemberResponseDto에 해당하는 타입 정의
+interface MemberData {
+  memberId: number;
+  email: string;
+  name: string;
+  phone: string;
+  address?: string;
+  bio?: string;
+}
+
+// 2. 백엔드 API 응답 전체에 대한 타입 정의
+interface UpdateProfileResponse {
+  success: boolean;
+  code: string;
+  message: string;
+  content: MemberData;
 }
 
 export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
@@ -19,9 +37,10 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -29,16 +48,15 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!user) return;
+
     setIsSubmitting(true);
-    setMessage('');
+    setError('');
+    setSuccess('');
 
     try {
-      if (!user) {
-        throw new Error('사용자 정보가 없습니다.');
-      }
-
       const userId = localStorage.getItem('userId');
       if (!userId) {
         throw new Error('사용자 ID를 찾을 수 없습니다.');
@@ -46,8 +64,8 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
 
       console.log('프로필 수정 요청:', { userId, formData });
 
-      // 백엔드 API 호출
-      const response = await apiClient.put(`/members/${userId}`, {
+      // 3. apiClient.put 호출 시 응답 타입을 <UpdateProfileResponse>로 명시
+      const response = await apiClient.put<UpdateProfileResponse>(`/members/${userId}`, {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -57,29 +75,29 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
 
       console.log('프로필 수정 응답:', response);
 
-      if (response.success) {
+      if (response.success && response.content) {
         // 성공 시 로컬 상태 업데이트
         const updatedUser: User = {
           ...user,
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          address: formData.address,
-          bio: formData.bio
+          name: response.content.name,
+          email: response.content.email,
+          phone: response.content.phone,
+          address: response.content.address || '',
+          bio: response.content.bio || ''
         };
         
         setUser(updatedUser);
-        setMessage('정보가 성공적으로 수정되었습니다!');
+        setSuccess('프로필이 성공적으로 수정되었습니다.');
         
         // localStorage의 사용자 정보도 업데이트
-        localStorage.setItem('userName', formData.name);
-        localStorage.setItem('userEmail', formData.email);
+        localStorage.setItem('userName', response.content.name);
+        localStorage.setItem('userEmail', response.content.email);
       } else {
-        throw new Error(response.message || '정보 수정에 실패했습니다.');
+        throw new Error(response.message || '프로필 수정에 실패했습니다.');
       }
-    } catch (error) {
-      console.error('프로필 수정 실패:', error);
-      setMessage(error instanceof Error ? error.message : '정보 수정에 실패했습니다. 다시 시도해주세요.');
+    } catch (err) {
+      console.error('프로필 수정 실패:', err);
+      setError((err as Error).message);
     } finally {
       setIsSubmitting(false);
     }
@@ -95,15 +113,8 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {message && (
-        <div className={`p-4 rounded-lg ${
-          message.includes('성공') 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-red-100 text-red-800'
-        }`}>
-          {message}
-        </div>
-      )}
+      {error && <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{error}</div>}
+      {success && <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">{success}</div>}
 
       {/* 기본 정보 */}
       <div className="space-y-4">
@@ -199,7 +210,8 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
               address: user.address,
               bio: user.bio || ''
             });
-            setMessage('');
+            setError('');
+            setSuccess('');
           }}
           className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
         >
