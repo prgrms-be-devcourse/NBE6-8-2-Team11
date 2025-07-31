@@ -42,13 +42,13 @@ export default function LoginPage() {
       // useAuth의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
       login(
         { 
-          id: parseInt(response.user.id.toString(), 10), 
-          email: response.user.email, 
-          name: response.user.nickname 
+          id: parseInt(response.userId.toString(), 10), 
+          email: response.userEmail, 
+          name: response.userName 
         },
         { 
-          accessToken: response.token, 
-          refreshToken: response.token // refreshToken이 별도로 제공되지 않는 경우
+          accessToken: response.accessToken, 
+          refreshToken: response.refreshToken 
         }
       );
       

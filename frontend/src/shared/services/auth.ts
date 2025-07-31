@@ -14,13 +14,12 @@ interface JoinRequest {
 }
 
 interface AuthResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    nickname: string;
-    [key: string]: any;
-  };
+  grantType: string;
+  accessToken: string;
+  refreshToken: string;
+  userId: number;
+  userEmail: string;
+  userName: string;
 }
 
 export const authService = {
@@ -50,11 +49,12 @@ export const authService = {
       const response = await apiClient.post<AuthResponse>('/api/auth/login', credentials);
       
       // 로그인 성공 시 토큰과 사용자 정보 저장
-      if (response.content.token) {
-        localStorage.setItem('accessToken', response.content.token);
-        localStorage.setItem('userId', response.content.user.id);
-        localStorage.setItem('userEmail', response.content.user.email);
-        localStorage.setItem('userName', response.content.user.nickname);
+      if (response.content.accessToken) {
+        localStorage.setItem('accessToken', response.content.accessToken);
+        localStorage.setItem('refreshToken', response.content.refreshToken);
+        localStorage.setItem('userId', response.content.userId.toString());
+        localStorage.setItem('userEmail', response.content.userEmail);
+        localStorage.setItem('userName', response.content.userName);
       }
       
       return response.content;
@@ -62,19 +62,20 @@ export const authService = {
       console.log('Backend 서버 오류로 인해 Mock 응답을 반환합니다:', error);
       // Backend 서버 문제가 해결될 때까지 Mock 응답
       const mockResponse: AuthResponse = {
-        token: 'mock-token-' + Date.now(),
-        user: {
-          id: '1',
-          email: credentials.email,
-          nickname: '테스트 사용자',
-        }
+        grantType: 'Bearer',
+        accessToken: 'mock-access-token-' + Date.now(),
+        refreshToken: 'mock-refresh-token-' + Date.now(),
+        userId: 1,
+        userEmail: credentials.email,
+        userName: '테스트 사용자',
       };
       
       // Mock 토큰과 사용자 정보 저장
-      localStorage.setItem('accessToken', mockResponse.token);
-      localStorage.setItem('userId', mockResponse.user.id);
-      localStorage.setItem('userEmail', mockResponse.user.email);
-      localStorage.setItem('userName', mockResponse.user.nickname);
+      localStorage.setItem('accessToken', mockResponse.accessToken);
+      localStorage.setItem('refreshToken', mockResponse.refreshToken);
+      localStorage.setItem('userId', mockResponse.userId.toString());
+      localStorage.setItem('userEmail', mockResponse.userEmail);
+      localStorage.setItem('userName', mockResponse.userName);
       
       return mockResponse;
     }
