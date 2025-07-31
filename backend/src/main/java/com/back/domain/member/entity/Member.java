@@ -50,6 +50,13 @@ public class Member implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @Column(name = "member_address")
+    private String address;
+
+    @Lob // 자기소개
+    @Column(name = "member_bio")
+    private String bio;
+
     @CreatedDate
     private LocalDateTime createdAt;
 
@@ -111,9 +118,11 @@ public class Member implements UserDetails {
     }
 
     //비지니스 로직
-    public void updateInfo(String name, String phone) {
+    public void updateInfo(String name, String phone,String address, String bio) {
         this.name = name;
         this.phone = phone;
+        this.address = address;
+        this.bio = bio;
     }
 
     public void updatePassword(String newPassword) {

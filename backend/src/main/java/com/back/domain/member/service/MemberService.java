@@ -35,7 +35,12 @@ public class MemberService {
             throw new MemberException(MemberErrorCode.FORBIDDEN_ACCESS);
         }
 
-        memberToUpdate.updateInfo(requestDto.name(), requestDto.phone());
+        memberToUpdate.updateInfo(
+                requestDto.name(),
+                requestDto.phone(),
+                requestDto.address(),
+                requestDto.bio()
+        );
 
         if (requestDto.newPassword() != null && !requestDto.newPassword().isBlank()) {
             if (!passwordEncoder.matches(requestDto.currentPassword(), memberToUpdate.getPassword())) {
