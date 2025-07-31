@@ -31,12 +31,12 @@ export const formatAnimalAge = (age: number): string => {
 };
 
 // 동물 성별 표시 함수
-export const formatAnimalGender = (gender: 'male' | 'female'): string => {
-  if (!gender || !['male', 'female'].includes(gender)) {
+export const formatAnimalGender = (gender: 'MALE' | 'FEMALE'): string => {
+  if (!gender || !['MALE', 'FEMALE'].includes(gender)) {
     console.warn('Invalid gender provided:', gender);
     return '성별 미상';
   }
-  return gender === 'male' ? '수컷' : '암컷';
+  return gender === 'MALE' ? '수컷' : '암컷';
 };
 
 // 동물 종류 표시 함수 (species 기반)
