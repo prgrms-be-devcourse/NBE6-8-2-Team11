@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Pet } from '@/shared/types';
-import { MOCK_PETS } from '@/shared/constants';
+import { petService } from '@/shared/services/petService';
 import Header from '@/shared/components/layout/Header';
 import Footer from '@/shared/components/layout/Footer';
 import AnimalGrid from '@/features/gallery/components/AnimalGrid';
@@ -23,15 +23,14 @@ export default function GalleryPage() {
   });
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Mock 데이터 로드 (API 서버 대신)
+  // API에서 동물 데이터 로드
   useEffect(() => {
     const loadPets = async () => {
       try {
         setLoading(true);
-        // API 호출 대신 Mock 데이터 사용
-        await new Promise(resolve => setTimeout(resolve, 500)); // 로딩 시뮬레이션
-        setPets(MOCK_PETS);
-        setFilteredPets(MOCK_PETS);
+        const petsData = await petService.getPets();
+        setPets(petsData);
+        setFilteredPets(petsData);
       } catch (err) {
         setError('동물 정보를 불러오는데 실패했습니다.');
         console.error('Failed to load pets:', err);
