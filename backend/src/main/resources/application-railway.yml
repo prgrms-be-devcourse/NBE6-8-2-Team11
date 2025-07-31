@@ -3,9 +3,11 @@ spring:
     activate:
       on-profile: railway
   
-  # Railway PostgreSQL 데이터베이스 설정
+  # Railway PostgreSQL 데이터베이스 설정 (자동 변수 사용)
   datasource:
-    url: ${DATABASE_URL}
+    url: jdbc:postgresql://${PGHOST:postgres.railway.internal}:${PGPORT:5432}/${PGDATABASE:railway}
+    username: ${PGUSER:postgres}
+    password: ${PGPASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       auto-commit: false
@@ -14,25 +16,24 @@ spring:
       max-lifetime: 1800000
       maximum-pool-size: 10
 
-  # JPA 설정 - 강제 테이블 생성
+  # JPA 설정
   jpa:
     hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    defer-datasource-initialization: false
+      ddl-auto: update
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        highlight_sql: true
-        use_sql_comments: true
+        format_sql: false
+        highlight_sql: false
+        use_sql_comments: false
 
   # SQL 초기화 비활성화 (Railway용)
   sql:
     init:
       mode: never
 
-  # 전체 Chat 패키지 스캔 제외 (Railway 전용)
+  # Redis 설정 비활성화 (Railway용)
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -71,16 +72,14 @@ cookie:
 server:
   port: ${PORT:8080}
 
-# 로깅 설정 - PostgreSQL 디버깅
+# 로깅 설정 (프로덕션)
 logging:
   level:
-    com.back: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: DEBUG
-    org.springframework.transaction.interceptor: DEBUG
-    org.springframework.security: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    com.back: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
+    org.springframework.transaction.interceptor: WARN
+    org.springframework.security: WARN
 
 # Actuator 설정
 management:
