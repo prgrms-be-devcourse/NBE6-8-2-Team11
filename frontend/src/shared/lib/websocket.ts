@@ -1,12 +1,33 @@
 import SockJS from 'sockjs-client';
-import { Client, Message, StompSubscription } from '@stomp/stompjs';
+import { Client, Message } from '@stomp/stompjs';
 import { ChatMessage, ChatMessageRequest } from '@/shared/types/chat';
+
+interface Notification {
+  id: number;
+  type: string;
+  message: string;
+  timestamp: string;
+}
+
+interface ChatRoom {
+  id: number;
+  name: string;
+  participants: number[];
+  lastMessage?: string;
+  lastMessageTime?: string;
+}
+
+interface StompFrame {
+  command: string;
+  headers: Record<string, string>;
+  body?: string;
+}
 
 class WebSocketClient {
   private client: Client | null = null;
   private messageHandlers: ((message: ChatMessage) => void)[] = [];
-  private notificationHandlers: ((notification: any) => void)[] = [];
-  private chatRoomUpdateHandlers: ((room: any) => void)[] = [];
+  private notificationHandlers: ((notification: Notification) => void)[] = [];
+  private chatRoomUpdateHandlers: ((room: ChatRoom) => void)[] = [];
   private isConnected = false;
   private currentUserId: number | null = null;
   private connectionStatusHandlers: ((connected: boolean) => void)[] = [];
@@ -30,7 +51,7 @@ class WebSocketClient {
       heartbeatOutgoing: 4000,
     });
 
-    this.client.onConnect = (frame: any) => {
+    this.client.onConnect = (_frame: StompFrame) => {
       console.log('WebSocket connected');
       const wasConnected = this.isConnected;
       this.isConnected = true;
@@ -62,7 +83,7 @@ class WebSocketClient {
       }
     };
 
-    this.client.onStompError = (frame: any) => {
+    this.client.onStompError = (frame: StompFrame) => {
       console.error('WebSocket error:', frame);
       this.isConnected = false;
       this.connectionStatusHandlers.forEach(handler => handler(false));
@@ -163,12 +184,12 @@ class WebSocketClient {
   }
 
   // 알림 핸들러 등록
-  onNotification(handler: (notification: any) => void) {
+  onNotification(handler: (notification: Notification) => void) {
     this.notificationHandlers.push(handler);
   }
 
   // 알림 핸들러 제거
-  offNotification(handler: (notification: any) => void) {
+  offNotification(handler: (notification: Notification) => void) {
     this.notificationHandlers = this.notificationHandlers.filter(h => h !== handler);
   }
 
@@ -257,12 +278,12 @@ class WebSocketClient {
   }
 
   // 채팅방 업데이트 핸들러 등록
-  onChatRoomUpdate(handler: (room: any) => void) {
+  onChatRoomUpdate(handler: (room: ChatRoom) => void) {
     this.chatRoomUpdateHandlers.push(handler);
   }
 
   // 채팅방 업데이트 핸들러 제거
-  offChatRoomUpdate(handler: (room: any) => void) {
+  offChatRoomUpdate(handler: (room: ChatRoom) => void) {
     this.chatRoomUpdateHandlers = this.chatRoomUpdateHandlers.filter(h => h !== handler);
   }
 
