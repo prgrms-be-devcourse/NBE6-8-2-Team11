@@ -1,8 +1,11 @@
-import { MOCK_PETS } from '../../../shared/constants';
 import { Pet } from '../../../shared/types';
 import { formatAnimalAge, formatAnimalGender } from '../../../shared/utils';
 
-export default function GalleryPreview() {
+interface GalleryPreviewProps {
+  pets: Pet[];
+}
+
+export default function GalleryPreview({ pets }: GalleryPreviewProps) {
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
@@ -16,7 +19,7 @@ export default function GalleryPreview() {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {MOCK_PETS.slice(0, 4).map((pet: Pet) => (
+          {pets.slice(0, 4).map((pet: Pet) => (
             <div key={pet.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
               <div className="h-48 bg-gradient-to-br from-orange-200 to-yellow-200 flex items-center justify-center">
                 <span className="text-6xl">🐕</span>
