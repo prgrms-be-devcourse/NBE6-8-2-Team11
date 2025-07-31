@@ -75,6 +75,9 @@ public class SecurityConfig {
                         // 동물(Pet) 관련 API는 GET(조회) 요청만 모두에게 허용
                         .requestMatchers(HttpMethod.GET, "/api/pets/**").permitAll()
 
+
+                        .requestMatchers("/api/members/**").authenticated()
+
                         // 관리자 전용 경로
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 

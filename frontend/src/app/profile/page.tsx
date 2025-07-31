@@ -9,44 +9,76 @@ import AdoptionHistory from '../../features/profile/components/AdoptionHistory';
 import LoadingSpinner from '../../shared/components/common/LoadingSpinner';
 import ErrorBoundary from '../../shared/components/common/ErrorBoundary';
 import { User } from '../../features/profile/types';
+import { apiClient } from '../../shared/services/apiClient';
+import { useRouter } from 'next/navigation';
+
+// 백엔드 MemberResponseDto에 해당하는 타입 정의
+interface MemberData {
+  memberId: number;
+  email: string;
+  name: string;
+  phone: string;
+}
+
+// 백엔드 실제 응답 전체에 대한 타입 정의
+interface MemberApiResponse {
+  success: boolean;
+  code: string;
+  message: string;
+  content: MemberData;
+}
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('info');
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    // 실제 API 호출 대신 모의 데이터 사용
     const loadUserData = async () => {
       setIsLoading(true);
       try {
-        // 모의 로딩 시간
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const userId = localStorage.getItem('userId');
+
+        if (!userId) {
+          alert('로그인이 필요한 서비스입니다.');
+          router.push('/login');
+          return;
+        }
+
+        // 이제 apiClient.get은 백엔드 응답을 그대로 반환합니다.
+        const response = await apiClient.get<MemberApiResponse>(`/members/${userId}`);
         
-        // 모의 사용자 데이터 (김동물로 설정)
-        const mockUser: User = {
-          id: 1,
-          name: '김동물',
-          email: 'kim@example.com',
-          phone: '010-1234-5678',
-          address: '서울시 강남구',
-          profileImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-          memberType: 'adopter', // adopter, shelter
-          createdAt: new Date('2024-01-15'),
-          bio: '동물을 사랑하는 사람입니다. 새로운 가족을 찾고 있어요!'
-        };
-        
-        setUser(mockUser);
+        if (response.success && response.content) {
+          const userData: User = {
+            id: response.content.memberId,
+            name: response.content.name,
+            email: response.content.email,
+            phone: response.content.phone,
+            address: '주소를 입력해주세요.',
+            profileImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face', 
+            memberType: 'adopter',
+            createdAt: new Date(),
+            bio: '소개글을 작성해주세요.'
+          };
+          setUser(userData);
+        } else {
+          throw new Error(response.message || '사용자 정보 로딩 실패');
+        }
+
       } catch (error) {
         console.error('사용자 정보 로딩 실패:', error);
+        alert('사용자 정보를 불러오는 데 실패했습니다. 다시 로그인해주세요.');
+        router.push('/login'); 
       } finally {
         setIsLoading(false);
       }
     };
 
     loadUserData();
-  }, []);
+  }, [router]);
 
+  // 이하 JSX 코드는 수정할 필요 없습니다.
   const tabs = [
     { id: 'info', label: '내 정보', icon: '👤' },
     { id: 'edit', label: '정보 수정', icon: '✏️' },
@@ -71,13 +103,10 @@ export default function ProfilePage() {
         <Header />
         
         <main className="max-w-6xl mx-auto px-4 py-8">
-          {/* 페이지 헤더 */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">내 프로필</h1>
             <p className="text-gray-600">내 정보와 입양 이력을 관리하세요</p>
           </div>
-
-          {/* 탭 네비게이션 */}
           <div className="bg-white rounded-lg shadow-sm mb-8">
             <div className="border-b border-gray-200">
               <nav className="flex space-x-8 px-6">
@@ -97,8 +126,6 @@ export default function ProfilePage() {
                 ))}
               </nav>
             </div>
-
-            {/* 탭 컨텐츠 */}
             <div className="p-6">
               {activeTab === 'info' && <ProfileInfo user={user} />}
               {activeTab === 'edit' && <ProfileEdit user={user} setUser={setUser} />}
@@ -106,9 +133,8 @@ export default function ProfilePage() {
             </div>
           </div>
         </main>
-
         <Footer />
       </div>
     </ErrorBoundary>
   );
-} 
+}

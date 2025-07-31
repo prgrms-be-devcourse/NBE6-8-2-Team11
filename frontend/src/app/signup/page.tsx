@@ -97,7 +97,7 @@ export default function SignupPage() {
       const response = await apiClient.post('/auth/join', {
         email: formData.email,
         password: formData.password,
-        name: formData.name,
+        name: formData.name, 
         phone: formData.phone,
       }) as unknown as {
         success: boolean;
@@ -112,7 +112,7 @@ export default function SignupPage() {
       };
       
       console.log('회원가입 응답:', response);
-      
+
       if (response.success) {
         console.log('회원가입 성공!');
         setSuccess('회원가입이 성공적으로 완료되었습니다! 2초 후 로그인 페이지로 이동합니다.');
@@ -154,7 +154,7 @@ export default function SignupPage() {
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                   이름 *
                 </label>
-                <input
+                    <input
                   id="name"
                   name="name"
                   type="text"

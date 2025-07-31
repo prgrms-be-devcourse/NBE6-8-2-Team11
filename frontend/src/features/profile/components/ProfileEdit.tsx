@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { User } from '../types';
+import { apiClient } from '../../../shared/services/apiClient';
 
 interface ProfileEditProps {
   user: User | null;
@@ -34,10 +35,30 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
     setMessage('');
 
     try {
-      // 모의 API 호출
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (user) {
+      if (!user) {
+        throw new Error('사용자 정보가 없습니다.');
+      }
+
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        throw new Error('사용자 ID를 찾을 수 없습니다.');
+      }
+
+      console.log('프로필 수정 요청:', { userId, formData });
+
+      // 백엔드 API 호출
+      const response = await apiClient.put(`/members/${userId}`, {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        bio: formData.bio
+      });
+
+      console.log('프로필 수정 응답:', response);
+
+      if (response.success) {
+        // 성공 시 로컬 상태 업데이트
         const updatedUser: User = {
           ...user,
           name: formData.name,
@@ -49,9 +70,16 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
         
         setUser(updatedUser);
         setMessage('정보가 성공적으로 수정되었습니다!');
+        
+        // localStorage의 사용자 정보도 업데이트
+        localStorage.setItem('userName', formData.name);
+        localStorage.setItem('userEmail', formData.email);
+      } else {
+        throw new Error(response.message || '정보 수정에 실패했습니다.');
       }
-    } catch {
-      setMessage('정보 수정에 실패했습니다. 다시 시도해주세요.');
+    } catch (error) {
+      console.error('프로필 수정 실패:', error);
+      setMessage(error instanceof Error ? error.message : '정보 수정에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
