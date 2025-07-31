@@ -18,8 +18,6 @@ import com.back.domain.notification.repository.NotificationRepository;
 import com.back.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -34,8 +32,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Profile("!railway") // Railway 환경에서는 채팅 서비스 비활성화
-@ConditionalOnProperty(name = "spring.data.redis.host")
 public class ChatService {
 
     private final ChatRoomRepository chatRoomRepository;
