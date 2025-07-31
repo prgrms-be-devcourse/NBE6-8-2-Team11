@@ -24,7 +24,7 @@ const createChatStore = () => {
   if (typeof window !== 'undefined') {
     return create<ChatState>()(
       persist(
-        (set, get) => ({
+        (set) => ({
           messages: {},
           chatRooms: [],
           currentRoom: null,
@@ -42,14 +42,12 @@ const createChatStore = () => {
           setChatRooms: (rooms) => set({ chatRooms: rooms }),
           setCurrentRoom: (room) => set({ currentRoom: room }),
           setLoading: (loading) => set({ isLoading: loading }),
-          clearMessages: (roomId) => set((state) => ({ 
-            messages: { ...state.messages, [roomId]: [] } 
+          clearMessages: (roomId) => set((_state) => ({ 
+            messages: { ..._state.messages, [roomId]: [] } 
           })),
           
           // 채팅방 메시지 로드 함수 추가
           loadRoomMessages: async (roomId: number) => {
-            const state = get();
-            
             console.log(`Loading messages for room ${roomId}...`);
             set({ isLoading: true });
             
@@ -84,7 +82,7 @@ const createChatStore = () => {
     );
   } else {
     // 서버 사이드에서는 persist 없이 생성
-    return create<ChatState>()((set, get) => ({
+    return create<ChatState>()((set) => ({
       messages: {},
       chatRooms: [],
       currentRoom: null,
@@ -102,13 +100,11 @@ const createChatStore = () => {
       setChatRooms: (rooms) => set({ chatRooms: rooms }),
       setCurrentRoom: (room) => set({ currentRoom: room }),
       setLoading: (loading) => set({ isLoading: loading }),
-      clearMessages: (roomId) => set((_state) => ({ 
-        messages: { ..._state.messages, [roomId]: [] } 
+      clearMessages: (roomId) => set((state) => ({ 
+        messages: { ...state.messages, [roomId]: [] } 
       })),
       
       loadRoomMessages: async (roomId: number) => {
-        const state = get();
-        
         console.log(`Loading messages for room ${roomId}...`);
         set({ isLoading: true });
         

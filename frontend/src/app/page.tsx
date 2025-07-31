@@ -13,7 +13,7 @@ import Footer from '../shared/components/layout/Footer';
 
 export default function Home() {
   const [pets, setPets] = useState<Pet[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const loadPets = async () => {

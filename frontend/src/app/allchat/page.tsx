@@ -19,7 +19,7 @@ export default function AllChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   
   const currentUserId = getCurrentUserIdSync();
-  const { addMessage, setMessages: _setStoreMessages, loadRoomMessages, messages: storeMessages } = useChatStore();
+  const { addMessage, loadRoomMessages, messages: storeMessages } = useChatStore();
 
   // 현재 선택된 채팅방의 메시지
   const messages = selectedChat ? (storeMessages[selectedChat] || []) : [];
@@ -221,7 +221,7 @@ export default function AllChatPage() {
       
       const result = format(date, 'yyyy-MM-dd');
       return result;
-    } catch (error) {
+    } catch {
       return '날짜 정보 없음';
     }
   };
