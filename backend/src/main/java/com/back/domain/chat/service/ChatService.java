@@ -188,7 +188,7 @@ public class ChatService {
                 .toList();
 
         // 사용자에게 최근 메시지 전송
-        messagingTemplate.convertAndSend("/queue/user/" + member.getId() + "/messages", messageResponses);
+        messagingTemplate.convertAndSend("/queue/user/" + roomId + "/messages", messageResponses);
 
         log.info("Sent {} recent messages to user {} for room {}", messageResponses.size(), member.getId(), roomId);
     }
