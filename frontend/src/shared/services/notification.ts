@@ -5,13 +5,13 @@ export const notificationService = {
   // 알림 목록 조회
   async getNotifications(): Promise<Notification[]> {
     const response = await apiClient.get<Notification[]>('/api/notifications');
-    return response.data;
+    return response.content;
   },
 
   // 알림 상세 조회
   async getNotification(notificationId: string): Promise<Notification> {
     const response = await apiClient.get<Notification>(`/api/notifications/${notificationId}`);
-    return response.data;
+    return response.content;
   },
 
   // 알림 삭제

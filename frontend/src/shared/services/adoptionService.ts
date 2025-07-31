@@ -48,26 +48,26 @@ export const adoptionService = {
   // 입양 신청
   async createAdoption(applicationData: CreateAdoptionRequest): Promise<AdoptionApplication> {
     const response = await apiClient.post<AdoptionApplication>('/api/applies/adoption', applicationData);
-    return response.data;
+    return response.content;
   },
 
   // 돌봄 신청 -> 해당 컨트롤러는 분리되어 있음
   // 기능 확장시 careService.ts 로 분리 예정
   async createCare(applicationData: CreateCareRequest): Promise<AdoptionApplication> {
     const response = await apiClient.post<AdoptionApplication>('/api/applies/care', applicationData);
-    return response.data;
+    return response.content;
   },
 
   // 회원 입양/돌봄 신청 목록 조회
   async getAdoptionApplications(): Promise<AdoptionApplication[]> {
     const response = await apiClient.get<AdoptionApplication[]>('/api/applies');
-    return response.data;
+    return response.content;
   },
 
   // 회원 입양/돌봄 신청 내역 상세 조회
   async getAdoptionApplicationDetail(applicationId: string): Promise<AdoptionApplicationDetail> {
     const response = await apiClient.get<AdoptionApplicationDetail>(`/api/applies/detail?id=${applicationId}`);
-    return response.data;
+    return response.content;
   },
 
   // 회원 입양/돌봄 신청 내역 단건 취소(삭제)
@@ -83,19 +83,19 @@ export const adoptionService = {
   // 보호자가 받은 입양/돌봄 신청 내역 리스트 조회
   async getReceivedApplications(): Promise<AdoptionApplication[]> {
     const response = await apiClient.get<AdoptionApplication[]>('/api/applies/received');
-    return response.data;
+    return response.content;
   },
 
   // 보호자가 받은 입양/돌봄 신청 내역 상세 조회
   async getReceivedApplicationDetail(applicationId: string): Promise<AdoptionApplicationDetail> {
     const response = await apiClient.get<AdoptionApplicationDetail>(`/api/applies/received/detail?id=${applicationId}`);
-    return response.data;
+    return response.content;
   },
 
   // 보호자가 받은 입양/돌봄 신청 내역 상태 변경 - 수락/거절
   async updateAdoptionStatus(applicationId: string, statusData: UpdateAdoptionStatusRequest): Promise<AdoptionApplication> {
     const response = await apiClient.put<AdoptionApplication>(`/api/applies/received?id=${applicationId}`, statusData);
-    return response.data;
+    return response.content;
   },
 
   // 보호자가 받은 입양/돌봄 등록 내역 단건 취소(삭제)
