@@ -14,12 +14,14 @@ function OAuth2RedirectContent() {
   useEffect(() => {
     const handleOAuth2Redirect = async () => {
       try {
-        // URL 파라미터에서 토큰 및 사용자 정보 추출
-        const accessToken = searchParams.get('accessToken');
-        const refreshToken = searchParams.get('refreshToken');
-        const userId = searchParams.get('userId');
-        const userEmail = searchParams.get('userEmail');
-        const userName = searchParams.get('userName');
+        // URL 파라미터에서 토큰 및 사용자 정보 추출 (다양한 변수명 시도)
+        const accessToken = searchParams.get('accessToken') || searchParams.get('access_token');
+        const refreshToken = searchParams.get('refreshToken') || searchParams.get('refresh_token');
+        
+        // 다양한 변수명으로 사용자 정보 시도
+        const userId = searchParams.get('userId') || searchParams.get('user_id') || searchParams.get('id');
+        const userEmail = searchParams.get('userEmail') || searchParams.get('user_email') || searchParams.get('email');
+        const userName = searchParams.get('userName') || searchParams.get('user_name') || searchParams.get('name') || searchParams.get('nickname');
 
         console.log('OAuth2 리다이렉트 파라미터:', {
           accessToken: accessToken ? '존재' : '없음',
@@ -28,6 +30,13 @@ function OAuth2RedirectContent() {
           userEmail,
           userName
         });
+
+        // 모든 URL 파라미터 확인 (디버깅용)
+        const allParams: Record<string, string | null> = {};
+        searchParams.forEach((value, key) => {
+          allParams[key] = value;
+        });
+        console.log('모든 URL 파라미터:', allParams);
 
         if (accessToken && userId && userEmail && userName) {
           // useAuth의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
