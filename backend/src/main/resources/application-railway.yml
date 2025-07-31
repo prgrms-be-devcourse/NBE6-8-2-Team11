@@ -1,5 +1,7 @@
 spring:
-  profiles: railway
+  config:
+    activate:
+      on-profile: railway
   
   # Railway PostgreSQL 데이터베이스 설정
   datasource:
