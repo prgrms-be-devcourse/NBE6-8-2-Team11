@@ -4,9 +4,10 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
-import { MOCK_PETS, MOCK_SHELTERS } from '../../shared/constants';
 import { Pet, Shelter } from '../../shared/types';
 import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../shared/utils';
+import { petService } from '../../shared/services/petService';
+import { adoptionService } from '../../shared/services/adoptionService';
 import Image from 'next/image';
 
 interface AdoptionFormData {
@@ -26,7 +27,6 @@ function ApplyPageContent() {
   const petIdFromUrl = searchParams.get('petId');
   
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
-  const [shelters, setShelters] = useState<Shelter[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
@@ -43,19 +43,25 @@ function ApplyPageContent() {
   });
 
   useEffect(() => {
-    // Mock 데이터 로드
-    setShelters(MOCK_SHELTERS);
-    
-    // URL에서 petId가 있으면 해당 동물 선택
-    if (petIdFromUrl) {
-      const pet = MOCK_PETS.find(p => p.id === Number(petIdFromUrl));
-      if (pet) {
-        setSelectedPet(pet);
-        setFormData(prev => ({ ...prev, petId: pet.id }));
+    const loadPetData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // URL에서 petId가 있으면 해당 동물 정보 로드
+        if (petIdFromUrl) {
+          const petData = await petService.getPet(petIdFromUrl);
+          setSelectedPet(petData);
+          setFormData(prev => ({ ...prev, petId: petData.id }));
+        }
+      } catch (error) {
+        console.error('Failed to load pet data:', error);
+        setSubmitMessage('동물 정보를 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
       }
-    }
-    
-    setIsLoading(false);
+    };
+
+    loadPetData();
   }, [petIdFromUrl]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -78,20 +84,12 @@ function ApplyPageContent() {
     setSubmitMessage('');
 
     try {
-      // Mock API 호출 시뮬레이션
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mock 데이터에 추가
-      const newAdoption = {
-        id: Math.floor(Math.random() * 1000) + 100,
-        memberId: 3, // Mock 사용자 ID
-        petId: selectedPet.id,
-        message: formData.reason, // 입양 신청 메시지는 입양 신청 이유로 사용
-        status: 'pending' as const,
-        createdAt: new Date(),
-      };
+      // 입양 신청 API 호출
+      await adoptionService.createAdoption({
+        petId: selectedPet.id.toString(),
+        message: formData.reason,
+      });
 
-      console.log('입양 신청 완료:', newAdoption);
       setSubmitMessage('입양 신청이 성공적으로 제출되었습니다!');
       
       // 3초 후 프로필 페이지로 이동
@@ -99,7 +97,8 @@ function ApplyPageContent() {
         router.push('/profile');
       }, 3000);
       
-    } catch {
+    } catch (error) {
+      console.error('Adoption application failed:', error);
       setSubmitMessage('입양 신청에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
@@ -133,8 +132,6 @@ function ApplyPageContent() {
     );
   }
 
-  const selectedShelter = shelters.find(s => s.id === selectedPet.shelterId);
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -165,9 +162,7 @@ function ApplyPageContent() {
                 <p className="text-sm text-gray-600 mb-2">
                   {formatAnimalSpecies(selectedPet.species)} • {formatAnimalAge(selectedPet.age)} • {formatAnimalGender(selectedPet.gender)}
                 </p>
-                {selectedShelter && (
-                  <p className="text-sm text-gray-500">보호소: {selectedShelter.name}</p>
-                )}
+                <p className="text-sm text-gray-500">보호소 ID: {selectedPet.shelterId}</p>
               </div>
             </div>
           </div>
