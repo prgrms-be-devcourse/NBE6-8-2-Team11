@@ -47,7 +47,7 @@ export default function OAuth2RedirectHandler() {
     }
 
     router.replace('/');
-  }, [searchParams, router, login]); // login 함수를 의존성 배열에 추가
+  }, []); // login 함수를 의존성 배열에 추가
 
   return null;
 }

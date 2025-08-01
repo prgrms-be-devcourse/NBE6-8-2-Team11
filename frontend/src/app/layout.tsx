@@ -29,7 +29,6 @@ export default function RootLayout({
     <html lang="ko">
       <body>
         <AuthProvider>
-          <Header /> {/* Header 컴포넌트가 AuthContext를 사용할 수 있도록 Provider 내부에 위치 */}
           <main>{children}</main>
         </AuthProvider>
       </body>
