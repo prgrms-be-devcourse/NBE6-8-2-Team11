@@ -15,7 +15,6 @@ export default function Header() {
   const pathname = usePathname();
   const { unreadCount, addNotification } = useNotificationStore();
   const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false);
-  const [wsConnected, setWsConnected] = useState(false);
 
   // 알림 버튼 클릭 핸들러
   const handleNotificationClick = () => {
@@ -35,8 +34,7 @@ export default function Header() {
   // 웹소켓 연결 상태 확인
   useEffect(() => {
     const checkConnection = () => {
-      const connected = wsClient.getConnectionStatus();
-      setWsConnected(connected);
+      wsClient.getConnectionStatus();
     };
 
     // 초기 상태 확인

@@ -38,7 +38,7 @@ class WebSocketClient {
   private subscribedRooms: Set<number> = new Set();
   private pendingSubscriptions: Array<{roomId: number, senderId: number}> = [];
 
-  connect(token: string, userId: number, userEmail: string) {
+  connect(token: string, userId: number) {
     
     this.currentUserId = userId;
     this.client = new Client({

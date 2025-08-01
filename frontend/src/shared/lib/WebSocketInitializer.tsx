@@ -33,6 +33,7 @@ export default function WebSocketInitializer() {
 
   // 실시간 알림 처리
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleNotification = (notification: any) => {
       console.log('Received notification:', notification);
       

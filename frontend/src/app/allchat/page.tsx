@@ -75,6 +75,7 @@ export default function AllChatPage() {
 
   // 실시간 채팅방 업데이트 처리
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleChatRoomUpdate = (newRoom: any) => {
       setChatRooms(prevRooms => {
         const existingRoom = prevRooms.find(room => room.id === newRoom.id);
