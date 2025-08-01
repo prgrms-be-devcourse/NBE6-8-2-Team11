@@ -1,5 +1,5 @@
 # Multi-stage build for optimized image size
-FROM openjdk:21-jdk-slim as builder
+FROM eclipse-temurin:21-jdk-alpine as builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY src ./src/
 RUN chmod +x gradlew && ./gradlew build -x test --no-daemon
 
 # Runtime stage
-FROM openjdk:21-jre-slim
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
@@ -26,6 +26,6 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 # Expose port
 EXPOSE 10000
 
-# Set production profile and run
-ENV SPRING_PROFILES_ACTIVE=prod
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Set render profile for Render deployment
+ENV SPRING_PROFILES_ACTIVE=render
+ENTRYPOINT ["java", "-Dserver.port=${PORT:-10000}", "-jar", "app.jar"]
