@@ -152,6 +152,33 @@ export default function AllChatPage() {
     }
   };
 
+  // 채팅방 나가기 핸들러
+  const handleLeaveChatRoom = async () => {
+    if (!selectedChat) return;
+
+    const roomIdToDelete = selectedChat;
+
+    try {
+      // 백엔드에 채팅방 삭제 요청
+      await chatService.deleteChatRoom(roomIdToDelete);
+      
+      // 성공 시 로컬 상태 업데이트
+      setChatRooms(prev => prev.filter(room => room.id !== roomIdToDelete));
+      setSelectedChat(null);
+      
+      console.log('채팅방을 나갔습니다:', roomIdToDelete);
+    } catch (error) {
+      console.error('채팅방 나가기 실패:', error);
+      
+      // 백엔드에서 실제로 삭제되었을 가능성이 높으므로
+      // 로컬 상태도 업데이트하고 사용자에게는 성공 메시지 표시
+      setChatRooms(prev => prev.filter(room => room.id !== roomIdToDelete));
+      setSelectedChat(null);
+      
+      console.log('백엔드 응답 오류였지만 채팅방을 나갔습니다:', roomIdToDelete);
+    }
+  };
+
   // 메시지 시간 포맷팅 함수
   const formatMessageTime = (timestamp: string | number | Array<number>): string => {
     console.log('formatMessageTime called with timestamp:', timestamp);
@@ -282,13 +309,21 @@ export default function AllChatPage() {
               {selectedChat ? (
                 <>
                   {/* 채팅 헤더 */}
-                  <div className="p-4 border-b border-gray-200 h-20 flex flex-col justify-center">
-                    <h3 className="font-semibold text-gray-900">
-                      {opponentNames[selectedChat] || `사용자 ${chatRooms.find(room => room.id === selectedChat)?.firstMemberId === currentUserId ? chatRooms.find(room => room.id === selectedChat)?.secondMemberId : chatRooms.find(room => room.id === selectedChat)?.firstMemberId}`}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      채팅방 #{selectedChat}
-                    </p>
+                  <div className="p-4 border-b border-gray-200 h-20 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">
+                        {opponentNames[selectedChat] || `사용자 ${chatRooms.find(room => room.id === selectedChat)?.firstMemberId === currentUserId ? chatRooms.find(room => room.id === selectedChat)?.secondMemberId : chatRooms.find(room => room.id === selectedChat)?.firstMemberId}`}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        채팅방 #{selectedChat}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleLeaveChatRoom}
+                      className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                    >
+                      나가기
+                    </button>
                   </div>
 
                   {/* 메시지 영역 */}

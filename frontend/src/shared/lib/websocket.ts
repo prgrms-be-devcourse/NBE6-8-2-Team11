@@ -5,7 +5,9 @@ import { ChatMessage, ChatMessageRequest } from '@/shared/types/chat';
 interface Notification {
   id: number;
   type: string;
+  title: string;
   message: string;
+  isRead: boolean;
   timestamp: string;
 }
 
@@ -253,7 +255,7 @@ class WebSocketClient {
     }
   }
 
-  // 개인 알림 구독 - /queue/notifications/{userId}
+  // 개인 알림 구독 - /queue/notifications
   subscribeToPersonalNotifications() {
     if (!this.client || !this.isConnected || !this.currentUserId) {
       console.warn('WebSocket not connected or user ID not set. Cannot subscribe to notifications.');

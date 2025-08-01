@@ -83,7 +83,7 @@ const createChatStore = () => {
     );
   } else {
     // 서버 사이드에서는 persist 없이 생성
-    return create<ChatState>()((set, get) => ({
+    return create<ChatState>()((set) => ({
       messages: {},
       chatRooms: [],
       currentRoom: null,
@@ -101,13 +101,11 @@ const createChatStore = () => {
       setChatRooms: (rooms) => set({ chatRooms: rooms }),
       setCurrentRoom: (room) => set({ currentRoom: room }),
       setLoading: (loading) => set({ isLoading: loading }),
-      clearMessages: (roomId) => set((state) => ({ 
-        messages: { ...state.messages, [roomId]: [] } 
+      clearMessages: (roomId) => set((_state) => ({ 
+        messages: { ..._state.messages, [roomId]: [] } 
       })),
       
       loadRoomMessages: async (roomId: number) => {
-        const state = get();
-        
         console.log(`Loading messages for room ${roomId}...`);
         set({ isLoading: true });
         

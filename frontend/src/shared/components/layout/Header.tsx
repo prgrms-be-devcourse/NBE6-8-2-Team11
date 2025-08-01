@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { NAV_ITEMS, BRAND_INFO } from '../../constants';
+import NotificationDropdown from '../common/notify/NotificationDropdown';
+import { useNotificationStore } from '../common/notify/NotificationStore';
 
 // 실제 토큰과 사용자 이름 기반 로그인 상태 관리
 const useAuth = () => {
@@ -43,11 +45,22 @@ const useAuth = () => {
 export default function Header() {
   const { user, isLoading, logout } = useAuth();
   const pathname = usePathname();
+  const { unreadCount, addNotification } = useNotificationStore();
+  const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false);
 
-  // 팀원이 추가한 알림 버튼 클릭 핸들러
+  // 알림 버튼 클릭 핸들러
   const handleNotificationClick = () => {
-    // 알림 기능은 추후 구현
-    console.log('알림 버튼 클릭됨');
+    setIsNotificationDropdownOpen(!isNotificationDropdownOpen);
+  };
+
+  // 테스트용 알림 추가 함수 (개발 중에만 사용)
+  const addTestNotification = () => {
+    addNotification({
+      title: '새 메시지',
+      message: '새로운 메시지가 도착했습니다.',
+      type: 'NEW_MESSAGE',
+      userId: 1,
+    });
   };
 
   return (
@@ -91,29 +104,51 @@ export default function Header() {
                       {user.name} 님
                     </span>
 
-                    {/* ▼▼▼▼▼ 팀원이 추가한 알림 버튼 ▼▼▼▼▼ */}
-                    <button
-                      onClick={handleNotificationClick}
-                      className="relative p-2 text-gray-600 hover:text-orange-500 transition-colors"
-                      title="알림"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
+                    {/* 알림 버튼 */}
+                    <div className="relative">
+                      <button
+                        onClick={handleNotificationClick}
+                        className="relative p-2 text-gray-600 hover:text-orange-500 transition-colors"
+                        title="알림"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"
-                        />
-                      </svg>
-                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full opacity-0">
-                      </span>
-                    </button>
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"
+                          />
+                        </svg>
+                        {unreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                            <span className="text-xs text-white font-medium">
+                              {unreadCount > 9 ? '9+' : unreadCount}
+                            </span>
+                          </span>
+                        )}
+                      </button>
+
+                      {/* 개발용 테스트 버튼 (나중에 제거) */}
+                      <button
+                        onClick={addTestNotification}
+                        className="text-xs text-gray-400 hover:text-gray-600"
+                        title="테스트 알림 추가"
+                      >
+                        테스트
+                      </button>
+                      
+                      {/* 알림 드롭다운 */}
+                      <NotificationDropdown
+                        isOpen={isNotificationDropdownOpen}
+                        onClose={() => setIsNotificationDropdownOpen(false)}
+                      />
+                    </div>
 
                     {/* 채팅 버튼 */}
                     <Link
@@ -176,7 +211,7 @@ export default function Header() {
             )}
           </div>
         </div>
-      </div>
-    </header>
+              </div>
+      </header>
   );
 }
