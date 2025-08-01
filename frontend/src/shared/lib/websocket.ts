@@ -5,7 +5,9 @@ import { ChatMessage, ChatMessageRequest } from '@/shared/types/chat';
 interface Notification {
   id: number;
   type: string;
+  title: string;
   message: string;
+  isRead: boolean;
   timestamp: string;
 }
 
@@ -36,7 +38,8 @@ class WebSocketClient {
   private subscribedRooms: Set<number> = new Set();
   private pendingSubscriptions: Array<{roomId: number, senderId: number}> = [];
 
-  connect(token: string, userId: number) {
+  connect(token: string, userId: number, userEmail: string) {
+    
     this.currentUserId = userId;
     this.client = new Client({
       webSocketFactory: () => new SockJS('http://localhost:8080/ws-chat'),
@@ -184,6 +187,7 @@ class WebSocketClient {
   }
 
   // 알림 핸들러 등록
+
   onNotification(handler: (notification: Notification) => void) {
     this.notificationHandlers.push(handler);
   }
@@ -260,8 +264,8 @@ class WebSocketClient {
     }
 
     try {
-      // 개인 알림 구독만 유지 
-      this.client.subscribe(`/queue/notifications`, (message: Message) => {
+      // 사용자별 알림 큐 구독
+      this.client.subscribe(`/queue/notifications/${this.currentUserId}`, (message: Message) => {
         try {
           const notification = JSON.parse(message.body);
           console.log('Received personal notification:', notification);
@@ -271,7 +275,18 @@ class WebSocketClient {
         }
       });
 
-      console.log('Subscribed to personal notifications for user:', this.currentUserId);
+      // 채팅방 업데이트 알림 구독 - /queue/chat-rooms/{userId}
+      this.client.subscribe(`/queue/chat-rooms/${this.currentUserId}`, (message: Message) => {
+        try {
+          const chatRoom = JSON.parse(message.body);
+          console.log('Received chat room update:', chatRoom);
+          this.chatRoomUpdateHandlers.forEach(handler => handler(chatRoom));
+        } catch (error) {
+          console.error('Failed to parse chat room update:', error);
+        }
+      });
+
+      console.log('Subscribed to personal notifications and chat room updates for user:', this.currentUserId);
     } catch (error) {
       console.error('Failed to subscribe to personal notifications:', error);
     }

@@ -178,7 +178,10 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
           </div>
         ) : (
           <div className="space-y-1">
-            {notifications.slice(0, 10).map((notification) => (
+            {notifications
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .slice(0, 10)
+              .map((notification) => (
               <div
                 key={notification.id}
                 className={`p-3 border-l-4 ${
