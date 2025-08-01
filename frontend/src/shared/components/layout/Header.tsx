@@ -15,7 +15,7 @@ export default function Header() {
 
   const handleLogout = () => {
     logout(); // AuthContext의 logout 함수 호출
-    router.push('/login'); // 로그아웃 후 로그인 페이지로 리다이렉트
+    router.push('/'); // 로그아웃 후 메인 페이지로 리다이렉트
   };
 
   // 알림 버튼 클릭 핸들러 (기존 코드에 있었으나 정의되지 않음, 임시 추가)
