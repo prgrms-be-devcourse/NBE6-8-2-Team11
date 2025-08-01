@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+
 import RealTimeNotificationManager from "../shared/components/common/notify/RealTimeNotificationManager";
 import WebSocketInitializer from "../shared/lib/WebSocketInitializer";
+import { AuthProvider } from '../context/AuthContext';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,9 +16,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body className="antialiased" suppressHydrationWarning={true}>
-        {children}
+        <AuthProvider>
+          <main>{children}</main>
+        </AuthProvider>
         <RealTimeNotificationManager />
         <WebSocketInitializer />
       </body>

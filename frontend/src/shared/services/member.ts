@@ -51,7 +51,6 @@ export const memberService = {
         console.log('Current user from localStorage:', user);
         return user;
       }
-      
       // localStorage에 없으면 API에서 가져오기 (fallback)
       const response = await apiClient.get<User>('/members/1');
       return response.content;

@@ -5,23 +5,14 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
-import { apiClient } from '../../shared/services/apiClient';
+import { memberService } from '../../shared/services/member';
 import { useAuth } from '../../shared/hooks/useAuth';
-
-interface LoginResponse {
-  grantType: string;
-  accessToken: string;
-  refreshToken: string;
-  userId: number;
-  userEmail: string;
-  userName: string;
-}
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -41,54 +32,48 @@ export default function LoginPage() {
     setIsLoading(true);
   
     try {
-      const response = await apiClient.post<LoginResponse>('/auth/login', {
-        email: formData.username,
+      const response = await memberService.login({
+        email: formData.email,
         password: formData.password,
-      }) as unknown as {
-        success: boolean;
-        code: string;
-        message: string;
-        content: LoginResponse;
-      };
+      });
       
-      if (response.success && response.content) {
-        console.log('로그인 성공:', response.content);
-        
-        // useAuth의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
-        login(
-          { 
-            id: response.content.userId, 
-            email: response.content.userEmail, 
-            name: response.content.userName 
-          },
-          { 
-            accessToken: response.content.accessToken, 
-            refreshToken: response.content.refreshToken 
-          }
-        );
-        
-        console.log('로그인 상태 업데이트 완료, 홈페이지로 이동합니다.');
-        
-        // 로그인 성공 시 즉시 홈페이지로 이동
-        router.push('/');
-        
-        // router.push가 작동하지 않을 경우를 대비해 강제 이동
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 100);
-      } else {
-        console.log('로그인 실패:', response);
-        console.log('응답 구조:', {
-          success: response.success,
-          message: response.message,
-          content: response.content,
-          전체응답: response
-        });
-        setError(response.message || '아이디 또는 비밀번호가 일치하지 않습니다.');
-      }
-    } catch (error) {
+      console.log('로그인 성공:', response);
+      
+      // useAuth의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
+      login(
+        { 
+          id: parseInt(response.userId.toString(), 10), 
+          email: response.userEmail, 
+          name: response.userName 
+        },
+        { 
+          accessToken: response.accessToken, 
+          refreshToken: response.refreshToken 
+        }
+      );
+      
+      console.log('로그인 상태 업데이트 완료, 홈페이지로 이동합니다.');
+      
+      // 로그인 성공 시 즉시 홈페이지로 이동
+      router.push('/');
+      
+    } catch (error: unknown) {
       console.log('로그인 에러:', error);
-      setError('로그인에 실패했습니다. 다시 시도해주세요.');
+      
+      // 에러 메시지 처리
+      let errorMessage = '로그인에 실패했습니다. 다시 시도해주세요.';
+      
+      if (error && typeof error === 'object' && 'response' in error) {
+        const errorResponse = error as { response?: { data?: { message?: string } } };
+        if (errorResponse.response?.data?.message) {
+          errorMessage = errorResponse.response.data.message;
+        }
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        const errorObj = error as { message: string };
+        errorMessage = errorObj.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -116,20 +101,20 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* 아이디(이메일) 입력 */}
+              {/* 이메일 입력 */}
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                  아이디
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  이메일
                 </label>
                 <input
-                  id="username"
-                  name="username"
-                  type="text"
+                  id="email"
+                  name="email"
+                  type="email"
                   required
-                  value={formData.username}
+                  value={formData.email}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                  placeholder="아이디(이메일)를/을 입력하세요"
+                  placeholder="이메일을 입력하세요"
                 />
               </div>
 
@@ -152,7 +137,7 @@ export default function LoginPage() {
 
               {/* 에러 메시지 */}
               {error && (
-                <div className="text-red-600 text-sm text-center">
+                <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">
                   {error}
                 </div>
               )}

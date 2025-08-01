@@ -53,7 +53,7 @@
    - props로 받은 데이터 사용하도록 변경
 ```
 
-#### **3-2. 입양 신청 페이지**
+#### **3-2. 입양 신청 페이지** [0731] 완료 
 ```
 1. src/app/apply/page.tsx
    - MOCK_PETS, MOCK_SHELTERS import 삭제
@@ -62,7 +62,7 @@
    - adoptionService.createAdoption() 호출로 교체
 ```
 
-#### **3-3. 프로필 페이지**
+#### **3-3. 프로필 페이지** [0731] 동하님 작업중...
 ```
 1. src/app/profile/page.tsx
    - mockUser 하드코딩 데이터 삭제
@@ -73,7 +73,11 @@
    - adoptionService.getUserAdoptions() 호출로 교체
 ```
 
-#### **3-4. 채팅 페이지**
+#### **3-4. 로그인,회원가입 페이지** [0731] 완료
+```
+```
+
+#### **3-5. 채팅 페이지**
 ```
 1. src/app/allchat/page.tsx
    - messages, chatRooms 하드코딩 데이터 삭제
