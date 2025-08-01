@@ -31,7 +31,7 @@ export interface Member {
   email: string;
   password: string;
   name: string;
-  role: 'user' | 'admin' | 'shelter_manager';
+  role: 'USER' | 'ADMIN';
   phone?: string;
   createdAt: Date;
 }

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
-import { apiClient } from '../../shared/services/apiClient';
+import { memberService } from '../../shared/services/member';
 
 interface SignupFormData {
   email: string;
@@ -94,39 +94,54 @@ export default function SignupPage() {
     try {
       console.log('회원가입 시도:', formData);
       
-      const response = await apiClient.post('/auth/join', {
+      const response = await memberService.signup({
         email: formData.email,
         password: formData.password,
         name: formData.name,
         phone: formData.phone,
-      }) as unknown as {
-        success: boolean;
-        code: string;
-        message: string;
-        content?: {
-          id: number;
-          email: string;
-          name: string;
-          phone: string;
-        };
-      };
+      });
       
-      console.log('회원가입 응답:', response);
+      console.log('회원가입 성공:', response);
+      setSuccess('회원가입이 성공적으로 완료되었습니다! 2초 후 로그인 페이지로 이동합니다.');
       
-      if (response.success) {
-        console.log('회원가입 성공!');
-        setSuccess('회원가입이 성공적으로 완료되었습니다! 2초 후 로그인 페이지로 이동합니다.');
-        
-        setTimeout(() => {
-          router.push('/login');
-        }, 2000);
-      } else {
-        console.log('회원가입 실패:', response);
-        setError(response.message || '회원가입에 실패했습니다.');
-      }
-    } catch (error) {
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+      
+    } catch (error: unknown) {
       console.log('회원가입 에러:', error);
-      setError('회원가입 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+      console.log('에러 상세 정보:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        response: error && typeof error === 'object' && 'response' in error ? (error as { response?: unknown }).response : undefined,
+        status: error && typeof error === 'object' && 'response' in error ? (error as { response?: { status?: number } }).response?.status : undefined,
+        data: error && typeof error === 'object' && 'response' in error ? (error as { response?: { data?: unknown } }).response?.data : undefined
+      });
+      
+      // 에러 메시지 처리
+      let errorMessage = '회원가입 처리 중 오류가 발생했습니다. 다시 시도해주세요.';
+      
+      if (error && typeof error === 'object' && 'response' in error) {
+        const errorResponse = error as { response?: { data?: { message?: string; error?: string }; status?: number } };
+        if (errorResponse.response?.data?.message) {
+          errorMessage = errorResponse.response.data.message;
+        } else if (errorResponse.response?.data?.error) {
+          errorMessage = errorResponse.response.data.error;
+        }
+        
+        // HTTP 상태 코드별 메시지
+        if (errorResponse.response?.status === 400) {
+          errorMessage = '입력 정보를 확인해주세요.';
+        } else if (errorResponse.response?.status === 409) {
+          errorMessage = '이미 존재하는 이메일입니다.';
+        } else if (errorResponse.response?.status === 500) {
+          errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        }
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        const errorObj = error as { message: string };
+        errorMessage = errorObj.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
