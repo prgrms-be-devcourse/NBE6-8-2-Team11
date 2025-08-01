@@ -5,8 +5,9 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { NAV_ITEMS, BRAND_INFO } from '../../constants';
-import NotificationDropdown from '../common/notify/NotificationDropdown';
 import { useNotificationStore } from '../common/notify/NotificationStore';
+import NotificationDropdown from '../common/notify/NotificationDropdown';
+import { wsClient } from '../../lib/websocket';
 
 // 실제 토큰과 사용자 이름 기반 로그인 상태 관리
 const useAuth = () => {
@@ -47,6 +48,7 @@ export default function Header() {
   const pathname = usePathname();
   const { unreadCount, addNotification } = useNotificationStore();
   const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false);
+  const [wsConnected, setWsConnected] = useState(false);
 
   // 알림 버튼 클릭 핸들러
   const handleNotificationClick = () => {
@@ -62,6 +64,22 @@ export default function Header() {
       userId: 1,
     });
   };
+
+  // 웹소켓 연결 상태 확인
+  useEffect(() => {
+    const checkConnection = () => {
+      const connected = wsClient.getConnectionStatus();
+      setWsConnected(connected);
+    };
+
+    // 초기 상태 확인
+    checkConnection();
+
+    // 1초마다 연결 상태 확인
+    const interval = setInterval(checkConnection, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50">
@@ -211,7 +229,7 @@ export default function Header() {
             )}
           </div>
         </div>
-              </div>
-      </header>
+      </div>
+    </header>
   );
 }
