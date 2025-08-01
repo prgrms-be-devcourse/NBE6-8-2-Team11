@@ -54,18 +54,20 @@ export default function Header() {
     <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center">
-              <Image
-                src="/DolBomZ4.jpg"
-                alt="DolBömZ 로고"
-                width={32}
-                height={32}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <span className="text-xl font-bold text-gray-800">{BRAND_INFO.name}</span>
-          </div>
+         <Link href="/">
+           <div className="flex items-center space-x-2">
+             <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center">
+               <Image
+                   src="/DolBomZ4.jpg"
+                   alt="DolBömZ 로고"
+                   width={32}
+                   height={32}
+                   className="w-full h-full object-cover"
+               />
+             </div>
+             <span className="text-xl font-bold text-gray-800">{BRAND_INFO.name}</span>
+           </div>
+         </Link>
           
           {/* 가운데: 네비게이션 (항상 중앙 고정) */}
           <nav className="hidden md:flex space-x-8 absolute left-1/2 transform -translate-x-1/2">
