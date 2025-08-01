@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter, usePathname } from 'next/navigation'; // useRouter 추가
+import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { NAV_ITEMS, BRAND_INFO } from '../../constants';
 import { useNotificationStore } from '../common/notify/NotificationStore';
 import NotificationDropdown from '../common/notify/NotificationDropdown';
 import { wsClient } from '../../lib/websocket';
-import { useAuth } from '../../hooks/useAuth';
 import { useAuth } from '../../../context/AuthContext'; // 전역 AuthContext의 useAuth 훅 임포트
 
 export default function Header() {
@@ -15,8 +15,7 @@ export default function Header() {
   // 전역 AuthContext에서 제공하는 상태와 함수를 사용합니다.
   const { isLoggedIn, userInfo, logout } = useAuth();
   const router = useRouter(); // useRouter 훅 초기화
-  const pathname = usePathname(); // usePathname 훅 초기화 (기존에 있었음)
-  const pathname = usePathname();
+  const pathname = usePathname(); // usePathname 훅 초기화
   const { unreadCount, addNotification } = useNotificationStore();
   const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false);
 
