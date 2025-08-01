@@ -57,7 +57,15 @@ public class CareService {
                 .build();
         careRepository.save(care);
 
-       notificationService.sendCareRequestNotification(pet.getMember().getUsername(), "동물 돌봄 신청이 도착하였습니다", member.getName());
+        notificationService.sendCareRequestNotification(member.getId(), "동물 돌봄 신청이 접수되었습니다", pet.getName());
+
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        notificationService.sendCareRequestNotification(pet.getMember().getId(), "동물 돌봄 신청이 도착하였습니다", member.getName());
 
         return CareResponseDto.from(care);
     }

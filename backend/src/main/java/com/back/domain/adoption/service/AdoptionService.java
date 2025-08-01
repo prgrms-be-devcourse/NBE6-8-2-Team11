@@ -61,7 +61,15 @@ public class AdoptionService {
                 .status(RequestStatus.PENDING)
                 .build();
         adoptionRepository.save(adoption);
-        notificationService.sendAdoptionRequestNotification(pet.getMember().getUsername(), "입양 신청이 도착하였습니다.", member.getName());
+        notificationService.sendAdoptionRequestNotification(member.getId(), "입양을 신청하였습니다.", pet.getName());
+
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        notificationService.sendAdoptionRequestNotification(pet.getMember().getId(), "입양 신청이 도착하였습니다.", member.getName());
 
         return AdoptionResponseDto.from(adoption);
     }
@@ -172,7 +180,7 @@ public class AdoptionService {
         if (newStatus == RequestStatus.REJECTED) {
             updateApplicationStatus(entity, newStatus);
             notificationService.sendResponseNotification(
-                    member.getUsername(),
+                    member.getId(),
                     "신청이 거절되었습니다.",
                     requestDto.type(),
                     false
@@ -182,7 +190,7 @@ public class AdoptionService {
 
         // ACCEPTED인 경우 PetStatus도 함께 업데이트
         updateApplicationStatusWithPetStatus(entity, newStatus);
-        notificationService.sendResponseNotification(member.getUsername(),
+        notificationService.sendResponseNotification(member.getId(),
                 requestDto.type(), "신청이 승인되었습니다.", true);
     }
 
