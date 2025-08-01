@@ -8,40 +8,7 @@ import { NAV_ITEMS, BRAND_INFO } from '../../constants';
 import { useNotificationStore } from '../common/notify/NotificationStore';
 import NotificationDropdown from '../common/notify/NotificationDropdown';
 import { wsClient } from '../../lib/websocket';
-
-// 실제 토큰과 사용자 이름 기반 로그인 상태 관리
-const useAuth = () => {
-  const [user, setUser] = useState<{ name: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // localStorage에서 토큰과 사용자 이름 확인
-    const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
-    const userName = localStorage.getItem('userName');
-    
-    if (accessToken && refreshToken && userName) {
-      // 실제 사용자 이름으로 상태 설정
-      setUser({ name: userName });
-    } else {
-      setUser(null);
-    }
-    
-    setIsLoading(false);
-  }, []);
-
-  const logout = () => {
-    // 로그아웃 시 모든 관련 정보 삭제
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('userEmail');
-    setUser(null);
-  };
-
-  return { user, isLoading, logout };
-};
+import { useAuth } from '../../hooks/useAuth';
 
 export default function Header() {
   const { user, isLoading, logout } = useAuth();

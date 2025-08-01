@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNotificationStore } from './NotificationStore';
 import RealTimeNotification from './RealTimeNotification';
 import { Notification } from '../../../types/notification';
@@ -8,17 +8,26 @@ import { Notification } from '../../../types/notification';
 export default function RealTimeNotificationManager() {
   const { notifications } = useNotificationStore();
   const [realTimeNotifications, setRealTimeNotifications] = useState<Notification[]>([]);
+  const mountTime = useRef(Date.now());
+  const lastNotificationCount = useRef(notifications.length);
 
-  // 새로운 알림이 추가될 때 실시간 알림 표시
   useEffect(() => {
-    if (notifications.length > 0) {
-      const latestNotification = notifications[0];
-      const isNewNotification = Date.now() - new Date(latestNotification.createdAt).getTime() < 1000; // 1초 이내 생성된 알림
-
-      if (isNewNotification) {
-        setRealTimeNotifications(prev => [latestNotification, ...prev]);
+    // 컴포넌트 마운트 시점 이후에 추가된 알림만 실시간 알림으로 표시
+    if (notifications.length > lastNotificationCount.current) {
+      const newNotifications = notifications.slice(0, notifications.length - lastNotificationCount.current);
+      
+      // 마운트 시점 이후에 생성된 알림만 필터링
+      const recentNotifications = newNotifications.filter(notification => {
+        const notificationTime = new Date(notification.createdAt).getTime();
+        return notificationTime > mountTime.current;
+      });
+      
+      if (recentNotifications.length > 0) {
+        setRealTimeNotifications(prev => [...recentNotifications, ...prev]);
       }
     }
+    
+    lastNotificationCount.current = notifications.length;
   }, [notifications]);
 
   const handleCloseRealTimeNotification = (notificationId: number) => {
@@ -27,7 +36,6 @@ export default function RealTimeNotificationManager() {
 
   return (
     <>
-      {/* 실시간 알림 토스트들 */}
       {realTimeNotifications.map((notification, index) => (
         <div
           key={`${notification.id}-${index}`}

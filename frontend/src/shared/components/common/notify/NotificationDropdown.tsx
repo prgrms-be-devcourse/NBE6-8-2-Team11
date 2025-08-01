@@ -99,7 +99,7 @@ const getNotificationColor = (type: Notification['type']) => {
 };
 
 export default function NotificationDropdown({ isOpen, onClose }: NotificationDropdownProps) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification } = useNotificationStore();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll } = useNotificationStore();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 드롭다운 외부 클릭 시 닫기
@@ -134,6 +134,10 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
     markAllAsRead();
   };
 
+  const handleClearAll = () => {
+    clearAll();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -143,14 +147,24 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
           <h3 className="text-sm font-medium text-gray-900">
             알림 ({unreadCount}개 읽지 않음)
           </h3>
-          {unreadCount > 0 && (
-            <button
-              onClick={handleMarkAllAsRead}
-              className="text-xs text-orange-500 hover:text-orange-700"
-            >
-              모두 읽음 처리
-            </button>
-          )}
+          <div className="flex items-center space-x-2">
+            {unreadCount > 0 && (
+              <button
+                onClick={handleMarkAllAsRead}
+                className="text-xs text-orange-500 hover:text-orange-700"
+              >
+                모두 읽음 처리
+              </button>
+            )}
+            {notifications.length > 0 && (
+              <button
+                onClick={handleClearAll}
+                className="text-xs text-orange-500 hover:text-orange-700"
+              >
+                모두 삭제
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

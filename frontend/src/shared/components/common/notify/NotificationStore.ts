@@ -14,10 +14,14 @@ const createNotificationStore = () => {
           isLoading: false,
 
           addNotification: (notification) => {
+            // 클라이언트에서만 실행되도록 보장
+            const timestamp = typeof window !== 'undefined' ? Date.now() : 0;
+            const now = typeof window !== 'undefined' ? new Date().toISOString() : '';
+            
             const newNotification: Notification = {
               ...notification,
-              id: Date.now(),
-              createdAt: new Date().toISOString(),
+              id: timestamp,
+              createdAt: now,
               isRead: false,
             };
 
@@ -96,10 +100,11 @@ const createNotificationStore = () => {
       isLoading: false,
 
       addNotification: (notification) => {
+        // 서버에서는 기본값 사용
         const newNotification: Notification = {
           ...notification,
-          id: Date.now(),
-          createdAt: new Date().toISOString(),
+          id: 0,
+          createdAt: '',
           isRead: false,
         };
 
