@@ -1,8 +1,12 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function UserInfoDecoder() {
+// 동적 렌더링 강제
+export const dynamic = 'force-dynamic';
+
+function UserInfoDecoder() {
   const searchParams = useSearchParams();
   const accessToken = searchParams.get('accessToken');
 
@@ -44,5 +48,20 @@ export default function UserInfoDecoder() {
         <p>액세스 토큰이 없습니다.</p>
       )}
     </div>
+  );
+}
+
+export default function OAuthRedirectPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">토큰 정보를 로딩 중...</p>
+        </div>
+      </div>
+    }>
+      <UserInfoDecoder />
+    </Suspense>
   );
 }
