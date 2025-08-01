@@ -1,19 +1,30 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuth } from '../../../context/AuthContext'; // AuthContext 경로에 맞게 수정
+import { useAuth } from '../../../context/AuthContext';
 
-export default function OAuth2RedirectHandler() {
+// 동적 렌더링 강제
+export const dynamic = 'force-dynamic';
+
+function OAuth2RedirectHandler() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { login } = useAuth(); // AuthContext의 login 함수 가져오기
+  const { login } = useAuth();
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    // 이미 처리되었으면 다시 실행하지 않음
+    if (hasProcessed.current) {
+      return;
+    }
+
     const accessToken = searchParams.get('accessToken');
     const refreshToken = searchParams.get('refreshToken');
 
     if (accessToken) {
       try {
+        hasProcessed.current = true; // 처리 시작을 표시
+
         const base64Url = accessToken.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const binaryString = atob(base64);
@@ -37,17 +48,42 @@ export default function OAuth2RedirectHandler() {
 
         console.log('OAuth 로그인 및 정보 저장 완료:', userInfo);
 
+        // 성공적으로 처리된 후 홈으로 리다이렉트
+        router.replace('/');
+
       } catch (error) {
         console.error("토큰 디코딩 또는 저장 중 오류 발생:", error);
-        // 오류 발생 시에도 메인 페이지로 리다이렉트하거나, 오류 페이지로 리다이렉트할 수 있습니다.
+        hasProcessed.current = true; // 오류가 발생해도 처리 완료로 표시
+        router.replace('/');
       }
     } else {
       console.warn("URL에 accessToken이 없습니다.");
-      // accessToken이 없는 경우 처리 로직 (예: 로그인 페이지로 리다이렉트)
+      hasProcessed.current = true; // 토큰이 없어도 처리 완료로 표시
+      router.replace('/');
     }
+  }, []); // 빈 의존성 배열로 한 번만 실행
 
-    router.replace('/');
-  }, []); // login 함수를 의존성 배열에 추가
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+        <p className="text-gray-600">로그인 처리 중...</p>
+      </div>
+    </div>
+  );
+}
 
-  return null;
+export default function OAuth2RedirectPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">토큰 정보를 로딩 중...</p>
+        </div>
+      </div>
+    }>
+      <OAuth2RedirectHandler />
+    </Suspense>
+  );
 }
