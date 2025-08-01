@@ -1,8 +1,8 @@
 spring:
-  application:
-    name: springboot-jpa
   profiles:
     active: dev
+  application:
+    name: springboot-jpa
   config:
     import: optional:file:.env
   jpa:
@@ -58,7 +58,7 @@ logging:
 
 jwt:
   secret: ${JWT_SECRET:3f1e2a0e-8e8f-4c0a-9d3f-b3fae09e6d5a}
-  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:PT15M}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:PT45M}
   refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:PT168H}
 
 cookie:

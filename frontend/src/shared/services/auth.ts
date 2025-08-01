@@ -5,7 +5,6 @@ export async function getCurrentUser(): Promise<User | null> {
     const userId = localStorage.getItem('userId');
     const userEmail = localStorage.getItem('userEmail');
     const userName = localStorage.getItem('userName');
-
     if (userId && userEmail && userName) {
       try {
         return {
@@ -20,7 +19,6 @@ export async function getCurrentUser(): Promise<User | null> {
       }
     }
   }
-
   // 사용자 정보가 없으면 API에서 가져오기
   try {
     const user = await memberService.getCurrentUser();

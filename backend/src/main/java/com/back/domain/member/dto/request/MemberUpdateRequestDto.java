@@ -4,5 +4,8 @@ public record MemberUpdateRequestDto(
         String name,
         String phone,
         String currentPassword,
-        String newPassword
+        String newPassword,
+        String address,
+        String bio
+
 ) {}

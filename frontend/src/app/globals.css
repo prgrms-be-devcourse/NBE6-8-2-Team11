@@ -11,13 +11,13 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
-
+/* 홈페이지 자체가 css 다크모드 지원 안하기 때문에 해당 코드가 있으면 흰 바탕 입력 창에서 글씨가 흰색으로 보임
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   background: var(--background);
