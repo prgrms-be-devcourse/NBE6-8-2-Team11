@@ -1,10 +1,10 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { useNotificationStore } from './NotificationStore';
 import { Notification } from '../../../types/notification';
+import { format, parseISO } from 'date-fns';
 
 interface NotificationDropdownProps {
   isOpen: boolean;
@@ -138,6 +138,46 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
     clearAll();
   };
 
+  // 메시지 시간 포맷팅 함수
+  const formatAlertTime = (timestamp: string | number | Array<number>): string => {
+    console.log('formatMessageTime called with timestamp:', timestamp);
+    
+    try {
+      let date: Date;
+      
+      if (Array.isArray(timestamp)) {
+        // 배열 형태의 날짜 처리 [year, month, day, hour, minute, second, nano]
+        const [year, month, day, hour, minute, second] = timestamp;
+        date = new Date(year, month - 1, day, hour, minute, second);
+      } else if (typeof timestamp === 'string') {
+        // ISO 문자열인 경우 parseISO 사용
+        if (timestamp.includes('T')) {
+          date = parseISO(timestamp);
+        } else {
+          // 일반 문자열인 경우 new Date 사용
+          date = new Date(timestamp);
+        }
+      } else if (typeof timestamp === 'number') {
+        date = new Date(timestamp);
+      } else {
+        return '알 수 없는 시간';
+      }
+      
+      if (isNaN(date.getTime())) {
+        return '알 수 없는 시간';
+      }
+      
+      // 서버와 클라이언트에서 동일한 형식 사용
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const result = format(date, 'yyyy-MM-dd') + ' ' + `${hours}:${minutes}`;
+      return result;
+    } catch (_error) {
+      console.error('Date parsing error:', _error, 'for date:', timestamp);
+      return '알 수 없는 시간';
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -212,7 +252,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
                       {notification.message}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {format(new Date(notification.createdAt), 'MM월 dd일 HH:mm', { locale: ko })}
+                      {formatAlertTime(notification.createdAt)}
                     </p>
                   </div>
                   <button

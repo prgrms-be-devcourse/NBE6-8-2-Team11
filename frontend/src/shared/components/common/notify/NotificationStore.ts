@@ -25,10 +25,28 @@ const createNotificationStore = () => {
               isRead: false,
             };
 
-            set((state) => ({
-              notifications: [newNotification, ...state.notifications],
-              unreadCount: state.unreadCount + 1,
-            }));
+            set((state) => {
+              // 중복 알림 체크 (같은 제목과 메시지를 가진 알림이 최근 5초 내에 있으면 무시)
+              const recentNotifications = state.notifications.filter(n => 
+                Date.now() - new Date(n.createdAt).getTime() < 5000
+              );
+              
+              const isDuplicate = recentNotifications.some(n => 
+                n.title === notification.title && 
+                n.message === notification.message &&
+                n.type === notification.type
+              );
+              
+              if (isDuplicate) {
+                console.log('Duplicate notification ignored:', notification);
+                return state; // 중복이면 상태 변경하지 않음
+              }
+
+              return {
+                notifications: [newNotification, ...state.notifications],
+                unreadCount: state.unreadCount + 1,
+              };
+            });
           },
 
           markAsRead: (id) => {

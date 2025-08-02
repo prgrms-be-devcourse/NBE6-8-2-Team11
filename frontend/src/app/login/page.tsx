@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
 import { memberService } from '../../shared/services/member';
-import { useAuth } from '../../shared/hooks/useAuth';
+import { useAuth } from '../../context/AuthContext'; // AuthContext의 useAuth 사용
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,16 +39,16 @@ export default function LoginPage() {
       
       console.log('로그인 성공:', response);
       
-      // useAuth의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
+      // AuthContext의 login 함수 사용
       login(
-        { 
-          id: parseInt(response.userId.toString(), 10), 
-          email: response.userEmail, 
-          name: response.userName 
-        },
-        { 
-          accessToken: response.accessToken, 
-          refreshToken: response.refreshToken 
+        response.accessToken,
+        response.refreshToken,
+        {
+          sub: response.userId.toString(),
+          auth: 'USER',
+          exp: Date.now() + 3600000, // 1시간 후 만료
+          nickname: response.userName,
+          email: response.userEmail,
         }
       );
       

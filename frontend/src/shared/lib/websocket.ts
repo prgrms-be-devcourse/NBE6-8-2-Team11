@@ -260,12 +260,19 @@ class WebSocketClient {
   subscribeToPersonalNotifications() {
     if (!this.client || !this.isConnected || !this.currentUserId) {
       console.warn('WebSocket not connected or user ID not set. Cannot subscribe to notifications.');
+      console.warn('Client:', !!this.client, 'Connected:', this.isConnected, 'UserId:', this.currentUserId);
       return;
     }
 
     try {
+      const notificationDestination = `/queue/notifications/${this.currentUserId}`;
+      const chatRoomDestination = `/queue/chat-rooms/${this.currentUserId}`;
+      
+      console.log('Subscribing to notifications at:', notificationDestination);
+      console.log('Subscribing to chat room updates at:', chatRoomDestination);
+      
       // 사용자별 알림 큐 구독
-      this.client.subscribe(`/queue/notifications/${this.currentUserId}`, (message: Message) => {
+      this.client.subscribe(notificationDestination, (message: Message) => {
         try {
           const notification = JSON.parse(message.body);
           console.log('Received personal notification:', notification);
@@ -276,7 +283,7 @@ class WebSocketClient {
       });
 
       // 채팅방 업데이트 알림 구독 - /queue/chat-rooms/{userId}
-      this.client.subscribe(`/queue/chat-rooms/${this.currentUserId}`, (message: Message) => {
+      this.client.subscribe(chatRoomDestination, (message: Message) => {
         try {
           const chatRoom = JSON.parse(message.body);
           console.log('Received chat room update:', chatRoom);
