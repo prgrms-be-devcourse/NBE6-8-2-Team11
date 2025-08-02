@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { ko } from 'date-fns/locale';
 import { useNotificationStore } from './NotificationStore';
 import { Notification } from '../../../types/notification';
 import { format, parseISO } from 'date-fns';
