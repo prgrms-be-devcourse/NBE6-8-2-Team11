@@ -52,17 +52,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-
-  // Experimental features for Tailwind CSS 4
-  experimental: {
-    turbo: {
-      rules: {
-        '*.css': {
-          loaders: ['@tailwindcss/postcss'],
-        },
-      },
-    },
-  },
 };
 
 export default nextConfig;
