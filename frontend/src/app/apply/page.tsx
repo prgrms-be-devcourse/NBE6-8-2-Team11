@@ -269,7 +269,7 @@ const CareDateFields = ({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          돌봄 시작일
+          돌봄 시작일 *
         </label>
         <input
           type="date"
@@ -283,7 +283,7 @@ const CareDateFields = ({
       
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          돌봄 종료일
+          돌봄 종료일 *
         </label>
         <input
           type="date"
@@ -418,14 +418,51 @@ function ApplyPageContent() {
       return;
     }
 
+    // 필수 필드 검증
+    if (!formData.contactName || !formData.contactEmail || !formData.contactPhone || !formData.address || !formData.reason) {
+      setSubmitMessage('필수 항목을 모두 입력해주세요.');
+      return;
+    }
+
+    // 돌봄 신청 시 날짜 필드 검증
+    if (formData.applicationType === 'care' && (!formData.careStartDate || !formData.careEndDate)) {
+      setSubmitMessage('돌봄 시작일과 종료일을 모두 입력해주세요.');
+      return;
+    }
+
+    // 돌봄 종료일이 시작일보다 이전인지 검증
+    if (formData.applicationType === 'care' && formData.careStartDate && formData.careEndDate) {
+      if (formData.careEndDate < formData.careStartDate) {
+        setSubmitMessage('돌봄 종료일은 시작일보다 늦어야 합니다.');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setSubmitMessage('');
 
     try {
-      await adoptionService.createAdoption({
-        petId: selectedPet.id.toString(),
-        message: formData.reason,
-      });
+      if (formData.applicationType === 'adoption') {
+        // 입양 신청
+        await adoptionService.createAdoption({
+          petId: selectedPet.id.toString(),
+          title: `${selectedPet.name} 입양 신청`,
+          message: formData.reason,
+          anotherPets: formData.otherPets,
+          experience: formData.experience,
+        });
+      } else {
+        // 돌봄 신청
+        await adoptionService.createCare({
+          petId: selectedPet.id.toString(),
+          title: `${selectedPet.name} 돌봄 신청`,
+          message: formData.reason,
+          desiredStartDate: new Date(formData.careStartDate || ''),
+          desiredEndDate: new Date(formData.careEndDate || ''),
+          anotherPets: formData.otherPets,
+          experience: formData.experience,
+        });
+      }
 
       setSubmitMessage('입양/돌봄 신청이 성공적으로 제출되었습니다!');
       

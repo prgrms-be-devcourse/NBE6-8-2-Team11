@@ -30,14 +30,20 @@ export interface AdoptionApplicationDetail extends AdoptionApplication {
 
 export interface CreateAdoptionRequest {
   petId: string;
+  title: string;
   message: string;
+  anotherPets: string;
+  experience: string;
 }
 
 export interface CreateCareRequest {
   petId: string;
+  title: string;
   message: string;
   desiredStartDate: Date;
   desiredEndDate: Date;
+  anotherPets: string;
+  experience: string;
 }
 
 export interface UpdateAdoptionStatusRequest {
