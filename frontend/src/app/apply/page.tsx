@@ -189,12 +189,16 @@ const ApplicationTypeRadio = ({
   onTypeChange: (type: 'adoption' | 'care') => void; 
 }) => {
   // 상태에 따른 라디오 버튼 활성화 여부 결정
-  const canAdopt = petStatuses?.some(status => 
+  const canAdopt = petStatuses?.some((status: PetStatusType) => 
     status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
   );
-  const canCare = petStatuses?.some(status => 
+  const canCare = petStatuses?.some((status: PetStatusType) => 
     status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
   );
+
+  // 기본적으로 두 옵션 모두 활성화 (petStatuses가 없거나 빈 배열인 경우)
+  const isAdoptEnabled = canAdopt !== false;
+  const isCareEnabled = canCare !== false;
 
   return (
     <div className="mb-6">
@@ -206,18 +210,18 @@ const ApplicationTypeRadio = ({
           selectedType === 'adoption' 
             ? 'border-orange-500 bg-orange-50' 
             : 'border-gray-200 hover:border-gray-300'
-        } ${!canAdopt ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+        } ${!isAdoptEnabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
           <input
             type="radio"
             name="applicationType"
             value="adoption"
             checked={selectedType === 'adoption'}
-            onChange={() => canAdopt && onTypeChange('adoption')}
-            disabled={!canAdopt}
+            onChange={() => isAdoptEnabled && onTypeChange('adoption')}
+            disabled={!isAdoptEnabled}
             className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
           />
           <span className="text-sm font-medium text-gray-900">입양 신청</span>
-          {!canAdopt && (
+          {!isAdoptEnabled && (
             <span className="text-xs text-gray-500 ml-2">(현재 입양 불가)</span>
           )}
         </label>
@@ -226,18 +230,18 @@ const ApplicationTypeRadio = ({
           selectedType === 'care' 
             ? 'border-orange-500 bg-orange-50' 
             : 'border-gray-200 hover:border-gray-300'
-        } ${!canCare ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+        } ${!isCareEnabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
           <input
             type="radio"
             name="applicationType"
             value="care"
             checked={selectedType === 'care'}
-            onChange={() => canCare && onTypeChange('care')}
-            disabled={!canCare}
+            onChange={() => isCareEnabled && onTypeChange('care')}
+            disabled={!isCareEnabled}
             className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
           />
           <span className="text-sm font-medium text-gray-900">돌봄 신청</span>
-          {!canCare && (
+          {!isCareEnabled && (
             <span className="text-xs text-gray-500 ml-2">(현재 돌봄 불가)</span>
           )}
         </label>
@@ -330,11 +334,11 @@ function ApplyPageContent() {
           // petStatuses에 따라 기본 선택값 설정
           let defaultApplicationType: 'adoption' | 'care' = 'adoption';
           
-          if (petData.petStatuses) {
-            const canAdopt = petData.petStatuses.some(status => 
+          if (petData.petStatuses && petData.petStatuses.length > 0) {
+            const canAdopt = petData.petStatuses.some((status: PetStatusType) => 
               status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
             );
-            const canCare = petData.petStatuses.some(status => 
+            const canCare = petData.petStatuses.some((status: PetStatusType) => 
               status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
             );
             
