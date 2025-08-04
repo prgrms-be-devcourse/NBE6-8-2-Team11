@@ -63,8 +63,7 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/api/auth/**", // 회원가입, 로그인 등
-                                "/ws-chat/**",
-                                "/ws-notification",// WebSocket 엔드포인트
+                                "/ws-chat/**",// WebSocket 엔드포인트
                                 "/login/oauth2/code/**",
                                 "/oauth2/**",
                                 "/actuator/health", // Docker 헬스체크

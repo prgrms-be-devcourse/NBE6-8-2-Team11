@@ -2,8 +2,12 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter, usePathname } from 'next/navigation'; // useRouter 추가
+import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { NAV_ITEMS, BRAND_INFO } from '../../constants';
+import { useNotificationStore } from '../common/notify/NotificationStore';
+import NotificationDropdown from '../common/notify/NotificationDropdown';
+import { wsClient } from '../../lib/websocket';
 import { useAuth } from '../../../context/AuthContext'; // 전역 AuthContext의 useAuth 훅 임포트
 
 export default function Header() {
@@ -11,19 +15,44 @@ export default function Header() {
   // 전역 AuthContext에서 제공하는 상태와 함수를 사용합니다.
   const { isLoggedIn, userInfo, logout } = useAuth();
   const router = useRouter(); // useRouter 훅 초기화
-  const pathname = usePathname(); // usePathname 훅 초기화 (기존에 있었음)
+  const pathname = usePathname(); // usePathname 훅 초기화
+  const { unreadCount, addNotification } = useNotificationStore();
+  const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     logout(); // AuthContext의 logout 함수 호출
     router.push('/'); // 로그아웃 후 메인 페이지로 리다이렉트
   };
-
-  // 알림 버튼 클릭 핸들러 (기존 코드에 있었으나 정의되지 않음, 임시 추가)
+   
+  // 알림 버튼 클릭 핸들러
   const handleNotificationClick = () => {
-    alert('알림 기능은 아직 구현되지 않았습니다.');
-    // 실제 알림 페이지나 모달을 열도록 로직 추가
+    setIsNotificationDropdownOpen(!isNotificationDropdownOpen);
   };
 
+  // 테스트용 알림 추가 함수 (개발 중에만 사용)
+  const addTestNotification = () => {
+    addNotification({
+      title: '새 메시지',
+      message: '새로운 메시지가 도착했습니다.',
+      type: 'NEW_MESSAGE',
+      userId: 1,
+    });
+  };
+
+  // 웹소켓 연결 상태 확인
+  useEffect(() => {
+    const checkConnection = () => {
+      wsClient.getConnectionStatus();
+    };
+
+    // 초기 상태 확인
+    checkConnection();
+
+    // 1초마다 연결 상태 확인
+    const interval = setInterval(checkConnection, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50">
@@ -66,11 +95,11 @@ export default function Header() {
                 // 로그인된 상태: 실제 사용자 이름, 알림 버튼, 채팅 버튼, 내 프로필, 로그아웃 버튼
                 <div className="flex items-center space-x-3">
                   <span className="text-sm text-gray-700 font-medium">
-                    {/* userInfo가 있을 때 nickname 또는 email, 없으면 '사용자'로 표시 */}
                     {userInfo?.nickname || userInfo?.email || '사용자'} 님
                   </span>
 
-                  {/* ▼▼▼▼▼ 팀원이 추가한 알림 버튼 ▼▼▼▼▼ */}
+                {/* 알림 버튼 */}
+                <div className="relative">
                   <button
                     onClick={handleNotificationClick}
                     className="relative p-2 text-gray-600 hover:text-orange-500 transition-colors"
@@ -90,9 +119,23 @@ export default function Header() {
                         d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"
                       />
                     </svg>
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full opacity-0">
-                    </span>
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
+                        <span className="text-xs text-white font-medium">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      </span>
+                    )}
                   </button>
+
+                  
+                  {/* 알림 드롭다운 */}
+                  <NotificationDropdown
+                    isOpen={isNotificationDropdownOpen}
+                    onClose={() => setIsNotificationDropdownOpen(false)}
+                  />
+                </div>
+
 
                   {/* 채팅 버튼 */}
                   <Link
@@ -115,11 +158,11 @@ export default function Header() {
                       />
                     </svg>
 
-                    {/* 새 메시지 표시 배지 (새 메시지가 있을 때만 표시) */}
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full opacity-0">
-                      {/* 추후 새 메시지 개수에 따라 표시 */}
-                    </span>
-                  </Link>
+                  {/* 새 메시지 표시 배지 (새 메시지가 있을 때만 표시) */}
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full opacity-0">
+                    {/* 추후 새 메시지 개수에 따라 표시 */}
+                  </span>
+                </Link>
 
                   <Link
                     href="/profile"

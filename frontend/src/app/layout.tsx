@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import RealTimeNotificationManager from "../shared/components/common/notify/RealTimeNotificationManager";
+import WebSocketInitializer from "../shared/lib/WebSocketInitializer";
 import { AuthProvider } from '../context/AuthContext';
 
 export const metadata: Metadata = {
@@ -15,9 +17,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body>
+      <body className="antialiased" suppressHydrationWarning={true}>
         <AuthProvider>
           <main>{children}</main>
+          <RealTimeNotificationManager />
+          <WebSocketInitializer />
         </AuthProvider>
       </body>
     </html>

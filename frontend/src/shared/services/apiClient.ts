@@ -27,7 +27,7 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    // API 엔드포인트가 /api로 시작하지 않으면 추가
+    // 엔드포인트가 이미 /api로 시작하는지 확인
     const normalizedEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
     const url = `${this.baseURL}${normalizedEndpoint}`;
     
@@ -62,7 +62,23 @@ class ApiClient {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
+      // 응답이 비어있는지 확인
+      const responseText = await response.text();
+      console.log('Response text:', responseText);
+      
+      // 응답이 비어있으면 빈 객체 반환
+      if (!responseText.trim()) {
+        return {
+          content: undefined as T,
+          message: 'Success',
+          success: true,
+          code: '200'
+        };
+      }
+      
+      // JSON 파싱
+      const data = JSON.parse(responseText);
+      console.log('Response data:', data);
       return data;
     } catch (error) {
       console.error('API request failed:', error);
