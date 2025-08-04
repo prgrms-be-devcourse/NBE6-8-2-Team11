@@ -23,22 +23,11 @@ public class NotificationController {
 
     @GetMapping
     @Operation(summary = "알림 목록 조회", description = "사용자의 모든 알림을 조회합니다.")
-    public ResponseEntity<ApiResponse<List<NotificationSimpleResponseDto>>> getNotificationsList(
+    public ResponseEntity<ApiResponse<List<NotificationResponseDto>>> getNotificationsList(
             @AuthenticationPrincipal UserDetails userDetails) {
-        List<NotificationSimpleResponseDto> notifications = notificationService.getNotificationsList(userDetails.getUsername());
+        List<NotificationResponseDto> notifications = notificationService.getNotificationsList(userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(
                 ApiResponse.success(notifications));
-    }
-
-    @GetMapping("/{notificationId}")
-    @Operation(summary = "알림 상세 조회", description = "특정 알림의 상세 정보를 조회합니다.")
-    public ResponseEntity<ApiResponse<NotificationResponseDto>> getNotificationDetail(
-            @PathVariable Long notificationId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        NotificationResponseDto notification = notificationService.getNotificationDetail(userDetails.getUsername(), notificationId);
-        return ResponseEntity.status(HttpStatus.OK).body(
-                ApiResponse.success(notification)
-        );
     }
 
     @DeleteMapping("/{notificationId}")

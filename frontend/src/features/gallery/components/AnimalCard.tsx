@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Pet } from '@/shared/types';
-import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '@/shared/utils';
+import { Pet } from '../../../shared/types';
+import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../../shared/utils';
 
 interface AnimalCardProps {
   pet: Pet;

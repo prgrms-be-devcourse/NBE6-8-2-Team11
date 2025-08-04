@@ -28,5 +28,15 @@ export const chatService = {
   async getChatMessages(roomId: number): Promise<ChatMessage[]> {
     const response = await apiClient.get<ChatMessage[]>(`/chat/${roomId}`);
     return response.content;
+  },
+
+  // 채팅방 삭제
+  async deleteChatRoom(roomId: number): Promise<void> {
+    try {
+      await apiClient.delete(`/chat/${roomId}`);
+    } catch (error) {
+      console.error('채팅방 삭제 API 호출 실패:', error);
+      throw error;
+    }
   }
 }; 

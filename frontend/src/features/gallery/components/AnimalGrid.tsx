@@ -1,4 +1,4 @@
-import { Pet } from '@/shared/types';
+import { Pet } from '../../../shared/types';
 import AnimalCard from './AnimalCard';
 
 interface AnimalGridProps {

@@ -72,13 +72,29 @@ public class ChatService {
             Member opponent = memberRepository.findById(opponentId)
                     .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-            notificationService.sendChatNotification(opponent.getUsername(), myMember.getName(),
-                    "새 채팅방이 생성되었습니다", chatRoom.getId());
+            notificationService.sendChatNotification(opponent.getId(), myMember.getName(),
+                    "새 채팅방이 생성되었습니다");
 
             log.info("New chat room {} created, notified opponent {}", chatRoom.getId(), opponentId);
+            notifyChatRoomCreated(chatRoom);
         }
 
         return ChatRoomResponseDto.from(chatRoom);
+    }
+
+    private void notifyChatRoomCreated(ChatRoom chatRoom) {
+        // 두 사용자 모두에게 알림 전송
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(chatRoom.getFirstMember().getId()),
+                "/queue/chat-rooms",
+                ChatRoomResponseDto.from(chatRoom)
+        );
+
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(chatRoom.getSecondMember().getId()),
+                "/queue/chat-rooms",
+                ChatRoomResponseDto.from(chatRoom)
+        );
     }
 
     public void enterChatRoom(Long roomId, Long userId) {
@@ -204,9 +220,21 @@ public class ChatService {
         // DB에서 채팅방 삭제 (Cascade로 메시지도 자동 삭제)
         chatRoomRepository.delete(chatRoom);
 
-        // 양쪽 사용자에게 채팅방 삭제 알림 전송
-        notificationService.sendChatDeleteNotification(chatRoom.getFirstMember().getUsername(), "채팅방이 삭제되었습니다", roomId);
-        notificationService.sendChatDeleteNotification(chatRoom.getSecondMember().getUsername(), "채팅방이 삭제되었습니다", roomId);
+        // 양쪽 사용자에게 채팅방 삭제 알림 전송 (순차적으로)
+        Long firstMemberId = chatRoom.getFirstMember().getId();
+        Long secondMemberId = chatRoom.getSecondMember().getId();
+        
+        // 첫 번째 멤버에게 알림
+        notificationService.sendChatDeleteNotification(firstMemberId, "채팅방이 삭제되었습니다");
+        
+        // 잠시 대기 후 두 번째 멤버에게 알림
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        notificationService.sendChatDeleteNotification(secondMemberId, "채팅방이 삭제되었습니다");
         log.info("Chat room {} deleted, cleaned Redis data and notified users", roomId);
     }
 }

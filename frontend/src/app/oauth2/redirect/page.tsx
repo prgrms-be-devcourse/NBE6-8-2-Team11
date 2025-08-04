@@ -1,52 +1,72 @@
 'use client';
+import { useEffect, useRef, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useAuth } from '../../../context/AuthContext';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+// 동적 렌더링 강제
+export const dynamic = 'force-dynamic';
 
-function OAuth2RedirectContent() {
-  const router = useRouter();
+function OAuth2RedirectHandler() {
   const searchParams = useSearchParams();
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { login } = useAuth();
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    // 이미 처리되었으면 다시 실행하지 않음
+    if (hasProcessed.current) {
+      return;
+    }
+
     const accessToken = searchParams.get('accessToken');
     const refreshToken = searchParams.get('refreshToken');
 
-    if (accessToken && refreshToken) {
-      // 토큰을 로컬 스토리지에 저장
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+    if (accessToken) {
+      try {
+        hasProcessed.current = true; // 처리 시작을 표시
 
-      // 메인 페이지로 리다이렉트
-      router.push('/');
+        const base64Url = accessToken.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const decodedString = new TextDecoder('utf-8').decode(bytes);
+        const decodedPayload = JSON.parse(decodedString);
+
+        const userInfo = {
+          sub: decodedPayload.sub,
+          auth: decodedPayload.auth,
+          exp: decodedPayload.exp,
+          nickname: decodedPayload.nickname || null,
+          email: decodedPayload.email || null,
+        };
+
+        // localStorage에 저장하고 전역 상태도 업데이트
+        login(accessToken, refreshToken || '', userInfo);
+
+        console.log('OAuth 로그인 및 정보 저장 완료:', userInfo);
+
+        // 성공적으로 처리된 후 홈으로 리다이렉트
+        router.replace('/');
+
+      } catch (error) {
+        console.error("토큰 디코딩 또는 저장 중 오류 발생:", error);
+        hasProcessed.current = true; // 오류가 발생해도 처리 완료로 표시
+        router.replace('/');
+      }
     } else {
-      // 토큰이 없으면 에러 상태로 설정하고 3초 후 홈으로 리다이렉트
-      setError('로그인에 실패했습니다. 다시 시도해주세요.');
-      
-      // 3초 후 홈으로 리다이렉트
-      setTimeout(() => {
-        router.push('/');
-      }, 3000);
+      console.warn("URL에 accessToken이 없습니다.");
+      hasProcessed.current = true; // 토큰이 없어도 처리 완료로 표시
+      router.replace('/');
     }
-  }, [searchParams, router]);
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">로그인 실패</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <p className="text-sm text-gray-500">잠시 후 홈페이지로 이동합니다...</p>
-        </div>
-      </div>
-    );
-  }
+  }, []); 
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
         <p className="text-gray-600">로그인 처리 중...</p>
       </div>
     </div>
@@ -56,14 +76,14 @@ function OAuth2RedirectContent() {
 export default function OAuth2RedirectPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">로딩 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">토큰 정보를 로딩 중...</p>
         </div>
       </div>
     }>
-      <OAuth2RedirectContent />
+      <OAuth2RedirectHandler />
     </Suspense>
   );
-} 
+}

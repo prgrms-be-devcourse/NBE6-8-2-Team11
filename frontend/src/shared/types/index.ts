@@ -4,7 +4,7 @@ export interface Pet {
   name: string;
   species: string; // dog, cat, rabbit, bird, other
   age: number;
-  gender: 'MALE' | 'FEMALE';
+  gender: 'MALE' | 'FEMALE' | 'UNKNOWN' | 'NEUTERED_MALE' | 'NEUTERED_FEMALE' ;
   description: string;
   imageUrl?: string;
   shelterName?: string; // Backend DTO에서 제공하는 보호소 이름
@@ -31,7 +31,7 @@ export interface Member {
   email: string;
   password: string;
   name: string;
-  role: 'user' | 'admin' | 'shelter_manager';
+  role: 'USER' | 'ADMIN';
   phone?: string;
   createdAt: Date;
 }
