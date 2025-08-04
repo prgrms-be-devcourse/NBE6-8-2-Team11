@@ -256,7 +256,7 @@ class WebSocketClient {
     }
   }
 
-  // 개인 알림 구독 - /queue/notifications
+  // 개인 알림 구독 - /queue/notifications/{userId}
   subscribeToPersonalNotifications() {
     if (!this.client || !this.isConnected || !this.currentUserId) {
       console.warn('WebSocket not connected or user ID not set. Cannot subscribe to notifications.');

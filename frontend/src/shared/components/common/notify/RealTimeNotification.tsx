@@ -1,10 +1,6 @@
 'use client';
 
-<<<<<<< HEAD
-import { useEffect, useState } from 'react';
-=======
 import { useEffect } from 'react';
->>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
 import { Notification } from '../../../types/notification';
 
 interface RealTimeNotificationProps {
@@ -60,21 +56,6 @@ const getNotificationColor = (type: Notification['type']) => {
   switch (type) {
     case 'ADOPTION_ACCEPTED':
     case 'CARE_ACCEPTED':
-<<<<<<< HEAD
-      return 'bg-green-50 border-green-200 text-green-800';
-    case 'ADOPTION_REJECTED':
-    case 'CARE_REJECTED':
-      return 'bg-red-50 border-red-200 text-red-800';
-    case 'ADOPTION_REQUESTED':
-    case 'CARE_REQUESTED':
-      return 'bg-yellow-50 border-yellow-200 text-yellow-800';
-    case 'NEW_MESSAGE':
-      return 'bg-orange-50 border-orange-200 text-orange-800';
-    case 'CHAT_ROOM_DELETED':
-      return 'bg-gray-50 border-gray-200 text-gray-800';
-    default:
-      return 'bg-blue-50 border-blue-200 text-blue-800';
-=======
       return 'bg-green-50 border-l-green-500';
     case 'ADOPTION_REJECTED':
     case 'CARE_REJECTED':
@@ -88,65 +69,10 @@ const getNotificationColor = (type: Notification['type']) => {
       return 'bg-gray-50 border-l-gray-500';
     default:
       return 'bg-blue-50 border-l-blue-500';
->>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
   }
 };
 
 export default function RealTimeNotification({ notification, onClose }: RealTimeNotificationProps) {
-<<<<<<< HEAD
-  const [isVisible, setIsVisible] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
-
-  useEffect(() => {
-    // 알림이 나타나는 애니메이션
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    
-    // 5초 후 자동으로 사라짐
-    const autoCloseTimer = setTimeout(() => {
-      setIsClosing(true);
-      setTimeout(onClose, 300);
-    }, 5000);
-
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(autoCloseTimer);
-    };
-  }, [onClose]);
-
-  const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(onClose, 300);
-  };
-
-  return (
-    <div
-      className={`fixed top-4 right-4 z-50 max-w-sm w-full transform transition-all duration-300 ${
-        isVisible && !isClosing ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
-      }`}
-    >
-      <div className={`rounded-lg border shadow-lg p-4 ${getNotificationColor(notification.type)}`}>
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0">
-            {getNotificationIcon(notification.type)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">
-              {notification.title}
-            </p>
-            <p className="text-sm mt-1 opacity-90">
-              {notification.message}
-            </p>
-          </div>
-          <button
-            onClick={handleClose}
-            className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-=======
   // 5초 후 자동으로 닫기
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -178,7 +104,6 @@ export default function RealTimeNotification({ notification, onClose }: RealTime
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
->>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
       </div>
     </div>
   );

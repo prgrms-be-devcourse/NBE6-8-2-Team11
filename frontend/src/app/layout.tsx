@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import RealTimeNotificationManager from "../shared/components/common/notify/RealTimeNotificationManager";
-import WebSocketProvider from "../shared/lib/WebSocketProvider";
-
-import RealTimeNotificationManager from "../shared/components/common/notify/RealTimeNotificationManager";
 import WebSocketInitializer from "../shared/lib/WebSocketInitializer";
 import { AuthProvider } from '../context/AuthContext';
 

@@ -14,19 +14,6 @@ const createNotificationStore = () => {
           isLoading: false,
 
           addNotification: (notification) => {
-<<<<<<< HEAD
-            const newNotification: Notification = {
-              ...notification,
-              id: Date.now(),
-              createdAt: new Date().toISOString(),
-              isRead: false,
-            };
-
-            set((state) => ({
-              notifications: [newNotification, ...state.notifications],
-              unreadCount: state.unreadCount + 1,
-            }));
-=======
             // 클라이언트에서만 실행되도록 보장
             const timestamp = typeof window !== 'undefined' ? Date.now() : 0;
             const now = typeof window !== 'undefined' ? new Date().toISOString() : '';
@@ -63,7 +50,6 @@ const createNotificationStore = () => {
                 unreadCount: state.unreadCount + 1,
               };
             });
->>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
           },
 
           markAsRead: (id) => {
@@ -135,18 +121,11 @@ const createNotificationStore = () => {
       isLoading: false,
 
       addNotification: (notification) => {
-<<<<<<< HEAD
-        const newNotification: Notification = {
-          ...notification,
-          id: Date.now(),
-          createdAt: new Date().toISOString(),
-=======
         // 서버에서는 기본값 사용
         const newNotification: Notification = {
           ...notification,
           id: 0,
           createdAt: '',
->>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
           isRead: false,
         };
 
