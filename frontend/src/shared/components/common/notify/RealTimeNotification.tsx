@@ -1,6 +1,10 @@
 'use client';
 
+<<<<<<< HEAD
 import { useEffect, useState } from 'react';
+=======
+import { useEffect } from 'react';
+>>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
 import { Notification } from '../../../types/notification';
 
 interface RealTimeNotificationProps {
@@ -56,6 +60,7 @@ const getNotificationColor = (type: Notification['type']) => {
   switch (type) {
     case 'ADOPTION_ACCEPTED':
     case 'CARE_ACCEPTED':
+<<<<<<< HEAD
       return 'bg-green-50 border-green-200 text-green-800';
     case 'ADOPTION_REJECTED':
     case 'CARE_REJECTED':
@@ -69,10 +74,26 @@ const getNotificationColor = (type: Notification['type']) => {
       return 'bg-gray-50 border-gray-200 text-gray-800';
     default:
       return 'bg-blue-50 border-blue-200 text-blue-800';
+=======
+      return 'bg-green-50 border-l-green-500';
+    case 'ADOPTION_REJECTED':
+    case 'CARE_REJECTED':
+      return 'bg-red-50 border-l-red-500';
+    case 'ADOPTION_REQUESTED':
+    case 'CARE_REQUESTED':
+      return 'bg-yellow-50 border-l-yellow-500';
+    case 'NEW_MESSAGE':
+      return 'bg-orange-50 border-l-orange-500';
+    case 'CHAT_ROOM_DELETED':
+      return 'bg-gray-50 border-l-gray-500';
+    default:
+      return 'bg-blue-50 border-l-blue-500';
+>>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
   }
 };
 
 export default function RealTimeNotification({ notification, onClose }: RealTimeNotificationProps) {
+<<<<<<< HEAD
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -125,6 +146,39 @@ export default function RealTimeNotification({ notification, onClose }: RealTime
             </svg>
           </button>
         </div>
+=======
+  // 5초 후 자동으로 닫기
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className={`w-80 p-4 rounded-lg shadow-lg border-l-4 ${getNotificationColor(notification.type)} animate-slide-in`}>
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0">
+          {getNotificationIcon(notification.type)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-900">
+            {notification.title}
+          </p>
+          <p className="text-sm text-gray-600 mt-1">
+            {notification.message}
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+>>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
       </div>
     </div>
   );

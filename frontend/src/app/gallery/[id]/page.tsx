@@ -77,11 +77,8 @@ export default function AnimalDetailPage() {
               <h1 className="text-3xl font-bold text-gray-900">{pet.name}</h1>
             </div>
             
-            {/* 우측: 날짜 + 상태 */}
+            {/* 우측: 상태 */}
             <div className="text-right">
-              <div className="text-sm text-gray-500 mb-1">
-                {pet.createdAt instanceof Date ? pet.createdAt.toLocaleDateString() : String(pet.createdAt)}
-              </div>
               <div className="flex items-center justify-end">
                 <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
                   입양 가능

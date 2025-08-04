@@ -1,6 +1,6 @@
 import SockJS from 'sockjs-client';
 import { Client, Message } from '@stomp/stompjs';
-import { ChatMessage, ChatMessageRequest } from '@/shared/types/chat';
+import { ChatMessage, ChatMessageRequest } from '../types/chat';
 
 interface Notification {
   id: number;
@@ -39,6 +39,7 @@ class WebSocketClient {
   private pendingSubscriptions: Array<{roomId: number, senderId: number}> = [];
 
   connect(token: string, userId: number) {
+    
     this.currentUserId = userId;
     this.client = new Client({
       webSocketFactory: () => new SockJS('http://localhost:8080/ws-chat'),
@@ -259,12 +260,19 @@ class WebSocketClient {
   subscribeToPersonalNotifications() {
     if (!this.client || !this.isConnected || !this.currentUserId) {
       console.warn('WebSocket not connected or user ID not set. Cannot subscribe to notifications.');
+      console.warn('Client:', !!this.client, 'Connected:', this.isConnected, 'UserId:', this.currentUserId);
       return;
     }
 
     try {
-      // 개인 알림 구독만 유지 
-      this.client.subscribe(`/queue/notifications`, (message: Message) => {
+      const notificationDestination = `/queue/notifications/${this.currentUserId}`;
+      const chatRoomDestination = `/queue/chat-rooms/${this.currentUserId}`;
+      
+      console.log('Subscribing to notifications at:', notificationDestination);
+      console.log('Subscribing to chat room updates at:', chatRoomDestination);
+      
+      // 사용자별 알림 큐 구독
+      this.client.subscribe(notificationDestination, (message: Message) => {
         try {
           const notification = JSON.parse(message.body);
           console.log('Received personal notification:', notification);
@@ -274,7 +282,18 @@ class WebSocketClient {
         }
       });
 
-      console.log('Subscribed to personal notifications for user:', this.currentUserId);
+      // 채팅방 업데이트 알림 구독 - /queue/chat-rooms/{userId}
+      this.client.subscribe(chatRoomDestination, (message: Message) => {
+        try {
+          const chatRoom = JSON.parse(message.body);
+          console.log('Received chat room update:', chatRoom);
+          this.chatRoomUpdateHandlers.forEach(handler => handler(chatRoom));
+        } catch (error) {
+          console.error('Failed to parse chat room update:', error);
+        }
+      });
+
+      console.log('Subscribed to personal notifications and chat room updates for user:', this.currentUserId);
     } catch (error) {
       console.error('Failed to subscribe to personal notifications:', error);
     }

@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
-import { ChatRoom, ChatMessage } from '@/shared/types/chat';
-import { chatService } from '@/shared/services/chat';
-import { memberService } from '@/shared/services/member';
-import { wsClient } from '@/shared/lib/websocket';
-import { useChatStore } from '@/shared/components/common/chat/chatStore';
-import { getCurrentUserIdSync } from '@/shared/services/auth';
+import { ChatRoom, ChatMessage } from '../../shared/types/chat';
+import { chatService } from '../../shared/services/chat';
+import { memberService } from '../../shared/services/member';
+import { wsClient } from '../../shared/lib/websocket';
+import { useChatStore } from '../../shared/components/common/chat/chatStore';
+import { getCurrentUserIdSync } from '../../shared/services/auth';
 import { format, parseISO } from 'date-fns';
 
 export default function AllChatPage() {
@@ -73,18 +73,27 @@ export default function AllChatPage() {
     }
   }, [currentUserId]);
 
-  // WebSocket 연결 초기화
+  // 실시간 채팅방 업데이트 처리
   useEffect(() => {
-    const initializeWebSocket = async () => {
-      const token = localStorage.getItem('accessToken');
-      if (token && currentUserId) {
-        console.log('Initializing WebSocket connection...');
-        wsClient.connect(token, currentUserId);
-        // 개인 메시지 구독 제거 - 채팅방 선택 시에만 구독
-      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleChatRoomUpdate = (newRoom: any) => {
+      setChatRooms(prevRooms => {
+        const existingRoom = prevRooms.find(room => room.id === newRoom.id);
+        if (existingRoom) return prevRooms;
+        
+        const chatRoom: ChatRoom = {
+          id: newRoom.id,
+          createdAt: newRoom.createdAt || new Date().toISOString(),
+          firstMemberId: newRoom.firstMemberId || newRoom.firstMember?.id,
+          secondMemberId: newRoom.secondMemberId || newRoom.secondMember?.id
+        };
+        
+        return [...prevRooms, chatRoom];
+      });
     };
 
-    initializeWebSocket();
+    wsClient.onChatRoomUpdate(handleChatRoomUpdate);
+    return () => wsClient.offChatRoomUpdate(handleChatRoomUpdate);
   }, [currentUserId]);
 
   // 메시지 수신 처리
@@ -101,7 +110,11 @@ export default function AllChatPage() {
       addMessage(receivedMessage.roomId, receivedMessage);
     };
 
-    wsClient.onMessage(handleMessage);
+    // 웹소켓이 연결된 상태에서만 메시지 핸들러 등록
+    if (wsClient.getConnectionStatus()) {
+      wsClient.onMessage(handleMessage);
+    }
+
     return () => {
       wsClient.offMessage(handleMessage);
     };
@@ -109,10 +122,28 @@ export default function AllChatPage() {
 
   // 채팅방 선택 시 메시지 로드
   useEffect(() => {
-    if (selectedChat) {
+    if (selectedChat && wsClient.getConnectionStatus()) {
       const loadMessages = async () => {
         try {
           console.log(`Loading messages for room ${selectedChat}`);
+          
+          // WebSocket 연결 상태 확인
+          if (!wsClient.getConnectionStatus()) {
+            console.log('WebSocket not connected, waiting for connection...');
+            // 연결 대기 (최대 3초)
+            let attempts = 0;
+            const maxAttempts = 30; // 3초 (100ms * 30)
+            
+            while (!wsClient.getConnectionStatus() && attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 100));
+              attempts++;
+            }
+            
+            if (!wsClient.getConnectionStatus()) {
+              console.error('WebSocket connection timeout');
+              return;
+            }
+          }
           
           // 이전 채팅방 구독 해제 (필요한 경우)
           // wsClient.unsubscribeFromRoom(previousRoom);

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { ChatMessage, ChatRoom } from '@/shared/types/chat';
-import { chatService } from '@/shared/services/chat';
+import { ChatMessage, ChatRoom } from '../../../types/chat';
+import { chatService } from '../../../services/chat';
 
 interface ChatState {
   messages: Record<number, ChatMessage[]>;

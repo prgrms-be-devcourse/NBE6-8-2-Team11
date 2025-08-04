@@ -46,6 +46,24 @@ public class JwtProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
+        String email = null;
+        String nickname = null;
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomOAuth2User) {
+            CustomOAuth2User customOAuth2User = (CustomOAuth2User) principal;
+            email = customOAuth2User.getEmail(); // CustomOAuth2User에 getEmail() 메서드가 있으므로 사용
+            // CustomOAuth2User의 member 필드에서 name (닉네임)을 가져옵니다.
+            // Member 엔티티에 getName() 메서드가 닉네임을 반환한다고 가정합니다.
+            // 만약 Member 엔티티의 name 필드가 닉네임이 아니라면, 해당 필드명으로 수정해야 합니다.
+            nickname = customOAuth2User.getNickname(); // Member 엔티티의 name 필드가 닉네임이라고 가정
+        } else if (principal instanceof UserDetails) {
+            // 자체 로그인 등의 경우 UserDetails에서 정보를 가져올 수 있습니다.
+            // 여기서는 OAuth2User 케이스에 집중합니다.
+            email = ((UserDetails) principal).getUsername(); // UserDetails의 username은 보통 이메일입니다.
+            // 닉네임은 UserDetails에 직접 포함되지 않을 수 있으므로, 별도 처리가 필요합니다.
+        }
+
         long now = (new Date()).getTime();
 
         // Access Token 생성
@@ -53,6 +71,8 @@ public class JwtProvider {
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
+                .claim("email", email)
+                .claim("nickname", nickname)
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();

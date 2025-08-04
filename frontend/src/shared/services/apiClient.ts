@@ -64,8 +64,14 @@ class ApiClient {
       
       // 응답이 비어있는지 확인
       const responseText = await response.text();
+<<<<<<< HEAD
       
       // 응답이 비어있으면 빈 객체 반환 (삭제 API 등에서 발생)
+=======
+      console.log('Response text:', responseText);
+      
+      // 응답이 비어있으면 빈 객체 반환
+>>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
       if (!responseText.trim()) {
         return {
           content: undefined as T,
@@ -77,6 +83,10 @@ class ApiClient {
       
       // JSON 파싱
       const data = JSON.parse(responseText);
+<<<<<<< HEAD
+=======
+      console.log('Response data:', data);
+>>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
       return data;
     } catch (error) {
       console.error('API request failed:', error);

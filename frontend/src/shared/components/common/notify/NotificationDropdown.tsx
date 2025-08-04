@@ -1,10 +1,10 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { format } from 'date-fns';
-import { ko } from 'date-fns/locale';
 import { useNotificationStore } from './NotificationStore';
 import { Notification } from '../../../types/notification';
+import { format, parseISO } from 'date-fns';
+import { notificationService } from '../../../services/notification';
 
 interface NotificationDropdownProps {
   isOpen: boolean;
@@ -99,8 +99,35 @@ const getNotificationColor = (type: Notification['type']) => {
 };
 
 export default function NotificationDropdown({ isOpen, onClose }: NotificationDropdownProps) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification } = useNotificationStore();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll, setNotifications } = useNotificationStore();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 서버에서 알림 목록 로드
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        console.log('Loading notifications from server...');
+        const serverNotifications = await notificationService.getNotifications();
+        console.log('Loaded notifications from server:', serverNotifications);
+        
+        // 서버 알림과 로컬 알림을 합치기 (중복 제거)
+        const existingIds = new Set(notifications.map(n => n.id));
+        const newServerNotifications = serverNotifications.filter(n => !existingIds.has(n.id));
+        
+        if (newServerNotifications.length > 0) {
+          console.log('Adding new server notifications:', newServerNotifications);
+          setNotifications([...newServerNotifications, ...notifications]);
+        }
+      } catch (error) {
+        console.error('Failed to load notifications from server:', error);
+      }
+    };
+
+    // 드롭다운이 열릴 때마다 서버에서 알림 로드
+    if (isOpen) {
+      loadNotifications();
+    }
+  }, [isOpen, notifications, setNotifications]);
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -134,6 +161,50 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
     markAllAsRead();
   };
 
+  const handleClearAll = () => {
+    clearAll();
+  };
+
+  // 메시지 시간 포맷팅 함수
+  const formatAlertTime = (timestamp: string | number | Array<number>): string => {
+    console.log('formatMessageTime called with timestamp:', timestamp);
+    
+    try {
+      let date: Date;
+      
+      if (Array.isArray(timestamp)) {
+        // 배열 형태의 날짜 처리 [year, month, day, hour, minute, second, nano]
+        const [year, month, day, hour, minute, second] = timestamp;
+        date = new Date(year, month - 1, day, hour, minute, second);
+      } else if (typeof timestamp === 'string') {
+        // ISO 문자열인 경우 parseISO 사용
+        if (timestamp.includes('T')) {
+          date = parseISO(timestamp);
+        } else {
+          // 일반 문자열인 경우 new Date 사용
+          date = new Date(timestamp);
+        }
+      } else if (typeof timestamp === 'number') {
+        date = new Date(timestamp);
+      } else {
+        return '알 수 없는 시간';
+      }
+      
+      if (isNaN(date.getTime())) {
+        return '알 수 없는 시간';
+      }
+      
+      // 서버와 클라이언트에서 동일한 형식 사용
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const result = format(date, 'yyyy-MM-dd') + ' ' + `${hours}:${minutes}`;
+      return result;
+    } catch (_error) {
+      console.error('Date parsing error:', _error, 'for date:', timestamp);
+      return '알 수 없는 시간';
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -143,14 +214,24 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
           <h3 className="text-sm font-medium text-gray-900">
             알림 ({unreadCount}개 읽지 않음)
           </h3>
-          {unreadCount > 0 && (
-            <button
-              onClick={handleMarkAllAsRead}
-              className="text-xs text-orange-500 hover:text-orange-700"
-            >
-              모두 읽음 처리
-            </button>
-          )}
+          <div className="flex items-center space-x-2">
+            {unreadCount > 0 && (
+              <button
+                onClick={handleMarkAllAsRead}
+                className="text-xs text-orange-500 hover:text-orange-700"
+              >
+                모두 읽음 처리
+              </button>
+            )}
+            {notifications.length > 0 && (
+              <button
+                onClick={handleClearAll}
+                className="text-xs text-orange-500 hover:text-orange-700"
+              >
+                모두 삭제
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -164,7 +245,10 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
           </div>
         ) : (
           <div className="space-y-1">
-            {notifications.slice(0, 10).map((notification) => (
+            {notifications
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .slice(0, 10)
+              .map((notification) => (
               <div
                 key={notification.id}
                 className={`p-3 border-l-4 ${
@@ -195,7 +279,7 @@ export default function NotificationDropdown({ isOpen, onClose }: NotificationDr
                       {notification.message}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {format(new Date(notification.createdAt), 'MM월 dd일 HH:mm', { locale: ko })}
+                      {formatAlertTime(notification.createdAt)}
                     </p>
                   </div>
                   <button

@@ -14,6 +14,7 @@ const createNotificationStore = () => {
           isLoading: false,
 
           addNotification: (notification) => {
+<<<<<<< HEAD
             const newNotification: Notification = {
               ...notification,
               id: Date.now(),
@@ -25,6 +26,44 @@ const createNotificationStore = () => {
               notifications: [newNotification, ...state.notifications],
               unreadCount: state.unreadCount + 1,
             }));
+=======
+            // 클라이언트에서만 실행되도록 보장
+            const timestamp = typeof window !== 'undefined' ? Date.now() : 0;
+            const now = typeof window !== 'undefined' ? new Date().toISOString() : '';
+            
+            const newNotification: Notification = {
+              ...notification,
+              id: timestamp,
+              createdAt: now,
+              isRead: false,
+            };
+
+            set((state) => {
+              // 중복 알림 체크 (같은 제목, 메시지, 타입을 가진 알림이 최근 10초 내에 있으면 무시)
+              const recentNotifications = state.notifications.filter(n => 
+                Date.now() - new Date(n.createdAt).getTime() < 10000
+              );
+              
+              const isDuplicate = recentNotifications.some(n => 
+                n.title === notification.title && 
+                n.message === notification.message &&
+                n.type === notification.type
+              );
+              
+              if (isDuplicate) {
+                console.log('Duplicate notification ignored:', notification);
+                return state; // 중복이면 상태 변경하지 않음
+              }
+
+              // 최대 50개의 알림만 유지
+              const updatedNotifications = [newNotification, ...state.notifications].slice(0, 50);
+
+              return {
+                notifications: updatedNotifications,
+                unreadCount: state.unreadCount + 1,
+              };
+            });
+>>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
           },
 
           markAsRead: (id) => {
@@ -96,10 +135,18 @@ const createNotificationStore = () => {
       isLoading: false,
 
       addNotification: (notification) => {
+<<<<<<< HEAD
         const newNotification: Notification = {
           ...notification,
           id: Date.now(),
           createdAt: new Date().toISOString(),
+=======
+        // 서버에서는 기본값 사용
+        const newNotification: Notification = {
+          ...notification,
+          id: 0,
+          createdAt: '',
+>>>>>>> 429aa072f86945f94da7672eb5bceec7bf216277
           isRead: false,
         };
 
