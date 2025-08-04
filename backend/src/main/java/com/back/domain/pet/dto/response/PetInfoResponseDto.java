@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 @Builder
 public record PetInfoResponseDto(
         Long id,
+        Long petOwnerId,
         String name,
         String species,
         int age,
@@ -21,6 +22,7 @@ public record PetInfoResponseDto(
     public static PetInfoResponseDto from(Pet pet) {
         return PetInfoResponseDto.builder()
                 .id(pet.getId())
+                .petOwnerId(pet.getMember().getId())
                 .name(pet.getName())
                 .species(pet.getSpecies())
                 .age(pet.getAge())
