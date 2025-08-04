@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react';
 import { useNotificationStore } from './NotificationStore';
 import { Notification } from '../../../types/notification';
 import { format, parseISO } from 'date-fns';
+import { notificationService } from '../../../services/notification';
 
 interface NotificationDropdownProps {
   isOpen: boolean;
@@ -98,8 +99,35 @@ const getNotificationColor = (type: Notification['type']) => {
 };
 
 export default function NotificationDropdown({ isOpen, onClose }: NotificationDropdownProps) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll } = useNotificationStore();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification, clearAll, setNotifications } = useNotificationStore();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // 서버에서 알림 목록 로드
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        console.log('Loading notifications from server...');
+        const serverNotifications = await notificationService.getNotifications();
+        console.log('Loaded notifications from server:', serverNotifications);
+        
+        // 서버 알림과 로컬 알림을 합치기 (중복 제거)
+        const existingIds = new Set(notifications.map(n => n.id));
+        const newServerNotifications = serverNotifications.filter(n => !existingIds.has(n.id));
+        
+        if (newServerNotifications.length > 0) {
+          console.log('Adding new server notifications:', newServerNotifications);
+          setNotifications([...newServerNotifications, ...notifications]);
+        }
+      } catch (error) {
+        console.error('Failed to load notifications from server:', error);
+      }
+    };
+
+    // 드롭다운이 열릴 때마다 서버에서 알림 로드
+    if (isOpen) {
+      loadNotifications();
+    }
+  }, [isOpen, notifications, setNotifications]);
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {

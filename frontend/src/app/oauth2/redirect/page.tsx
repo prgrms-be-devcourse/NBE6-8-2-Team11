@@ -61,7 +61,7 @@ function OAuth2RedirectHandler() {
       hasProcessed.current = true; // 토큰이 없어도 처리 완료로 표시
       router.replace('/');
     }
-  }, [login, router, searchParams]); // 의존성 배열에 누락된 의존성들 추가
+  }, []); 
 
   return (
     <div className="flex items-center justify-center min-h-screen">

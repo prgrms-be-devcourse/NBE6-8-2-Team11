@@ -20,9 +20,9 @@ export default function RootLayout({
       <body className="antialiased" suppressHydrationWarning={true}>
         <AuthProvider>
           <main>{children}</main>
+          <RealTimeNotificationManager />
+          <WebSocketInitializer />
         </AuthProvider>
-        <RealTimeNotificationManager />
-        <WebSocketInitializer />
       </body>
     </html>
   );
