@@ -57,6 +57,8 @@ public class AdoptionService {
                 .member(member)
                 .pet(pet)
                 .title(adoptionRequestDto.title())
+                .anotherPets(adoptionRequestDto.anotherPets())
+                .experience(adoptionRequestDto.experience())
                 .message(adoptionRequestDto.message())
                 .status(RequestStatus.PENDING)
                 .build();

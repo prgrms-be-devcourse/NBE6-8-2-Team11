@@ -44,6 +44,13 @@ public class Care {
     @Column(name = "care_title", nullable = false)
     private String title;
 
+    @Column(name = "care_another_pets")
+    private String anotherPets;
+
+    @Lob
+    @Column(name = "care_experience")
+    private String experience;
+
     @Lob
     @Column(name = "care_message", nullable = false)
     private String message;
@@ -73,7 +80,7 @@ public class Care {
     private List<Notification> notifications = new ArrayList<>();
 
     @Builder
-    public Care(String title, String message, LocalDateTime desiredStartDate,
+    public Care(String title, String message, LocalDateTime desiredStartDate, String anotherPets, String experience,
                 LocalDateTime desiredEndDate, RequestStatus status, Member member, Pet pet) {
         this.title = title;
         this.message = message;
@@ -82,6 +89,8 @@ public class Care {
         this.status = status;
         this.member = member;
         this.pet = pet;
+        this.anotherPets = anotherPets;
+        this.experience = experience;
     }
 
     public void updateStatus(RequestStatus status) {
