@@ -37,13 +37,13 @@ export default function WebSocketInitializer() {
     const handleNotification = (notification: any) => {
       console.log('Received notification:', notification);
       
-      // RealTimeNotificationManager에서 처리하므로 여기서는 NotificationStore에 추가하지 않음
-      // addNotification({
-      //   title: notification.title || '새 알림',
-      //   message: notification.message || notification.content || '새로운 알림이 도착했습니다.',
-      //   type: notification.type || 'NEW_MESSAGE',
-      //   userId: userInfo ? parseInt(userInfo.sub, 10) : 0,
-      // });
+      // NotificationStore에 알림 추가
+      addNotification({
+        title: notification.title || '새 알림',
+        message: notification.message || notification.content || '새로운 알림이 도착했습니다.',
+        type: notification.type || 'NEW_MESSAGE',
+        userId: parseInt(localStorage.getItem('userId') || '0', 10),
+      });
     };
 
     // WebSocket 알림 핸들러 등록
