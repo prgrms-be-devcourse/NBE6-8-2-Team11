@@ -21,12 +21,9 @@ import com.back.domain.pet.enums.PetStatusType;
 import com.back.domain.pet.exception.PetErrorCode;
 import com.back.domain.pet.exception.PetException;
 import com.back.domain.pet.repository.PetRepository;
-import com.back.global.security.CustomOAuth2User;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,19 +41,7 @@ public class AdoptionService {
     private final NotificationService notificationService;
 
     public AdoptionResponseDto applyAdoption(AdoptionRequestDto adoptionRequestDto, String memberEmail) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof CustomOAuth2User)) {
-            throw new MemberException(MemberErrorCode.FORBIDDEN_ACCESS); // 인증된 회원 찾을 수 없음
-        }
-        CustomOAuth2User userDetails = (CustomOAuth2User) authentication.getPrincipal();
-        String userEmail = userDetails.getEmail(); // 이메일 반환
-
-        Member member = memberRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND)); // (이메일)회원 찾을 수 없음
-
-        // 자체 로그인 뿐만 아니라 Oauth 인증에서 memberEmail을 사용하기 위해 주석처리
-        // Member member = getMemberByEmail(memberEmail);
+        Member member = getMemberByEmail(memberEmail);
 
         Pet pet = petRepository.findById(adoptionRequestDto.petId())
                 .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
