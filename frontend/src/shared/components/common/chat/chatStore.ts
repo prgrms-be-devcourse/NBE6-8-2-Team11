@@ -42,8 +42,8 @@ const createChatStore = () => {
           setChatRooms: (rooms) => set({ chatRooms: rooms }),
           setCurrentRoom: (room) => set({ currentRoom: room }),
           setLoading: (loading) => set({ isLoading: loading }),
-          clearMessages: (roomId) => set((state) => ({ 
-            messages: { ...state.messages, [roomId]: [] } 
+          clearMessages: (roomId) => set((_state) => ({ 
+            messages: { ..._state.messages, [roomId]: [] } 
           })),
           
           // 채팅방 메시지 로드 함수 추가
