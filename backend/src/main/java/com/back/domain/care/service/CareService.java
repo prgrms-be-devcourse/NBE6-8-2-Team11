@@ -50,6 +50,8 @@ public class CareService {
                 .member(member)
                 .pet(pet)
                 .title(careRequestDto.title())
+                .anotherPets(careRequestDto.anotherPets())
+                .experience(careRequestDto.experience())
                 .message(careRequestDto.message())
                 .desiredStartDate(careRequestDto.desiredStartDate())
                 .desiredEndDate(careRequestDto.desiredEndDate())

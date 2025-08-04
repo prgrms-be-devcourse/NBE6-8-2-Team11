@@ -12,6 +12,8 @@ public record ApplicationResponseDto(
     Long id,
     String title,
     String type, // "ADOPTION" 또는 "CARE"
+    String anotherPets,
+    String experience,
     String message,
     RequestStatus status,
     LocalDateTime createdAt,
@@ -25,6 +27,8 @@ public record ApplicationResponseDto(
                 .id(adoption.getId())
                 .title(adoption.getTitle())
                 .type("ADOPTION")
+                .anotherPets(adoption.getAnotherPets())
+                .experience(adoption.getExperience())
                 .message(adoption.getMessage())
                 .status(adoption.getStatus())
                 .createdAt(adoption.getCreatedAt())
@@ -37,6 +41,8 @@ public record ApplicationResponseDto(
                 .id(care.getId())
                 .title(care.getTitle())
                 .type("CARE")
+                .anotherPets(care.getAnotherPets())
+                .experience(care.getExperience())
                 .message(care.getMessage())
                 .status(care.getStatus())
                 .createdAt(care.getCreatedAt())
