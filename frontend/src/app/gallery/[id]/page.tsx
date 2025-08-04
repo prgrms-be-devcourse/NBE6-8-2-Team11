@@ -9,12 +9,15 @@ import { chatService } from '../../../shared/services/chat';
 import { Pet } from '../../../shared/types';
 import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../../shared/utils';
 import { useAuth } from '../../../context/AuthContext';
+import { wsClient } from '../../../shared/lib/websocket';
+import { useNotificationStore } from '../../../shared/components/common/notify/NotificationStore';
 import Image from 'next/image';
 
 export default function AnimalDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { userInfo } = useAuth();
+  const { addNotification } = useNotificationStore();
   const [pet, setPet] = useState<Pet | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +42,45 @@ export default function AnimalDetailPage() {
     loadPetData();
   }, [params?.id]);
 
+  // WebSocket 연결 및 알림 처리
+  useEffect(() => {
+    if (!userInfo) return;
+
+    const token = localStorage.getItem('accessToken');
+    if (token && userInfo) {
+      const userId = parseInt(userInfo.sub, 10);
+      console.log('Gallery page - Connecting WebSocket with userId:', userId);
+      
+      // WebSocket 연결
+      wsClient.connect(token, userId);
+      
+      // 알림 구독
+      setTimeout(() => {
+        if (wsClient.getConnectionStatus()) {
+          wsClient.subscribeToPersonalNotifications();
+        }
+      }, 1000);
+
+      // 알림 핸들러 등록
+      const handleNotification = (notification: any) => {
+        console.log('Gallery page - Received notification:', notification);
+        addNotification({
+          title: notification.title || '새 알림',
+          message: notification.message || notification.content || '새로운 알림이 도착했습니다.',
+          type: notification.type || 'NEW_MESSAGE',
+          userId: userId,
+        });
+      };
+
+      wsClient.onNotification(handleNotification);
+
+      // 컴포넌트 언마운트 시 정리
+      return () => {
+        wsClient.offNotification(handleNotification);
+      };
+    }
+  }, [userInfo, addNotification]);
+
   const handleInquiryClick = async () => {
     if (!userInfo || !pet) {
       alert('로그인이 필요합니다.');
@@ -55,6 +97,9 @@ export default function AnimalDetailPage() {
         firstMemberId: currentUserId,
         secondMemberId: pet.petOwnerId,
       });
+
+      // 알림을 받을 시간을 위해 약간의 지연 추가
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // 채팅 페이지로 이동
       router.push(`/allchat?roomId=${chatRoom.id}&petName=${encodeURIComponent(pet.name)}`);

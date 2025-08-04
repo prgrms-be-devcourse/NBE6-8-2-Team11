@@ -12,13 +12,17 @@ import Image from 'next/image';
 
 interface AdoptionFormData {
   petId: number;
+  title: string;
   contactPhone: string;
   contactEmail: string;
   address: string;
   experience: string;
   familyMembers: string;
-  otherPets: string;
-  reason: string;
+  anotherPets: string;
+  message: string;
+  type: 'AVAILABLE_FOR_ADOPTION' | 'AVAILABLE_FOR_CARE';
+  careStartDate?: string;
+  careEndDate?: string;
 }
 
 function ApplyPageContent() {
@@ -33,13 +37,17 @@ function ApplyPageContent() {
 
   const [formData, setFormData] = useState<AdoptionFormData>({
     petId: 0,
+    title: '',
     contactPhone: '',
     contactEmail: '',
     address: '',
     experience: '',
     familyMembers: '',
-    otherPets: '',
-    reason: '',
+    anotherPets: '',
+    message: '',
+    type: 'AVAILABLE_FOR_ADOPTION',
+    careStartDate: '',
+    careEndDate: '',
   });
 
   useEffect(() => {
@@ -72,7 +80,7 @@ function ApplyPageContent() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAdoptionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!selectedPet) {
@@ -84,13 +92,29 @@ function ApplyPageContent() {
     setSubmitMessage('');
 
     try {
-      // 입양 신청 API 호출
-      await adoptionService.createAdoption({
-        petId: selectedPet.id.toString(),
-        message: formData.reason,
-      });
-
-      setSubmitMessage('입양 신청이 성공적으로 제출되었습니다!');
+      if (formData.type === 'AVAILABLE_FOR_ADOPTION') {
+        // 입양 신청 API 호출
+        await adoptionService.createAdoption({
+          petId: selectedPet.id.toString(),
+          title: formData.title,
+          message: formData.message,
+          anotherPets: formData.anotherPets,
+          experience: formData.experience
+        });
+        setSubmitMessage('입양 신청이 성공적으로 제출되었습니다!');
+      } else if (formData.type === 'AVAILABLE_FOR_CARE') {
+        // 돌봄 신청 API 호출
+        await adoptionService.createCare({
+          petId: selectedPet.id.toString(),
+          message: formData.message,
+          title: formData.title,
+          desiredStartDate: new Date(formData.careStartDate!),
+          desiredEndDate: new Date(formData.careEndDate!),
+          anotherPets: formData.anotherPets,
+          experience: formData.experience
+        });
+        setSubmitMessage('돌봄 신청이 성공적으로 제출되었습니다!');
+      }
       
       // 3초 후 프로필 페이지로 이동
       setTimeout(() => {
@@ -98,8 +122,8 @@ function ApplyPageContent() {
       }, 3000);
       
     } catch (error) {
-      console.error('Adoption application failed:', error);
-      setSubmitMessage('입양 신청에 실패했습니다. 다시 시도해주세요.');
+      console.error('Application failed:', error);
+      setSubmitMessage('신청에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
@@ -145,7 +169,7 @@ function ApplyPageContent() {
         <div className="bg-white rounded-lg shadow-lg p-8">
           {/* 선택된 동물 정보 */}
           <div className="mb-8 pb-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">입양 신청 동물</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">입양/돌봄 신청 동물</h2>
             <div className="flex items-center space-x-4">
               {selectedPet.imageUrl && (
                 <div className="w-24 h-24 relative rounded-lg overflow-hidden">
@@ -172,8 +196,71 @@ function ApplyPageContent() {
           </div>
 
           {/* 입양 신청서 폼 */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleAdoptionSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* 입양/돌봄 선택 */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  신청 유형
+                </label>
+                <div className="flex space-x-6">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="type"
+                      value="AVAILABLE_FOR_ADOPTION"
+                      checked={formData.type === 'AVAILABLE_FOR_ADOPTION'}
+                      onChange={(e) => setFormData({...formData, type: e.target.value as 'AVAILABLE_FOR_ADOPTION' | 'AVAILABLE_FOR_CARE'})}
+                      className="mr-2"
+                    />
+                    <span>입양</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="type"
+                      value="AVAILABLE_FOR_CARE"
+                      checked={formData.type === 'AVAILABLE_FOR_CARE'}
+                      onChange={(e) => setFormData({...formData, type: e.target.value as 'AVAILABLE_FOR_ADOPTION' | 'AVAILABLE_FOR_CARE'})}
+                      className="mr-2"
+                    />
+                    <span>돌봄</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* 돌봄 기간 선택 (돌봄 선택 시에만 표시) */}
+              {formData.type === 'AVAILABLE_FOR_CARE' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      돌봄 시작일
+                    </label>
+                    <input
+                      type="date"
+                      name="careStartDate"
+                      value={formData.careStartDate}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      required={formData.type === 'AVAILABLE_FOR_CARE'}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      돌봄 종료일
+                    </label>
+                    <input
+                      type="date"
+                      name="careEndDate"
+                      value={formData.careEndDate}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      required={formData.type === 'AVAILABLE_FOR_CARE'}
+                    />
+                  </div>
+                </>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   연락처 (전화번호)
@@ -221,20 +308,6 @@ function ApplyPageContent() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  가족 구성원
-                </label>
-                <input
-                  type="text"
-                  name="familyMembers"
-                  value={formData.familyMembers}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="성인 2명, 아이 1명"
-                  required
-                />
-              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -242,8 +315,8 @@ function ApplyPageContent() {
                 </label>
                 <input
                   type="text"
-                  name="otherPets"
-                  value={formData.otherPets}
+                  name="anotherPets"
+                  value={formData.anotherPets}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="없음 또는 현재 키우고 있는 동물"
@@ -270,8 +343,8 @@ function ApplyPageContent() {
                 입양하고 싶은 이유
               </label>
               <textarea
-                name="reason"
-                value={formData.reason}
+                name="message"
+                value={formData.message}
                 onChange={handleInputChange}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
@@ -291,13 +364,6 @@ function ApplyPageContent() {
             )}
 
             <div className="pt-6 border-t border-gray-200 space-y-4">
-              <button
-                type="button"
-                onClick={() => router.push(`/chat?petId=${selectedPet.id}`)}
-                className="w-full py-3 px-6 rounded-lg font-semibold text-lg border-2 border-orange-500 text-orange-500 hover:bg-orange-50 transition-colors"
-              >
-                상담하기
-              </button>
               
               <button
                 type="submit"

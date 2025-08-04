@@ -12,7 +12,7 @@ export const notificationService = {
       type: notification.type,
       isRead: notification.isRead,
       createdAt: notification.createdAt,
-      userId: 0,
+      memberId: notification.memberId || 0,
     }));
   },
 
