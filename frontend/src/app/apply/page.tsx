@@ -84,13 +84,13 @@ function ApplyPageContent() {
     setSubmitMessage('');
 
     try {
-      // 입양 신청 API 호출
+      // 입양/돌봄 신청 API 호출
       await adoptionService.createAdoption({
         petId: selectedPet.id.toString(),
         message: formData.reason,
       });
 
-      setSubmitMessage('입양 신청이 성공적으로 제출되었습니다!');
+      setSubmitMessage('입양/돌봄 신청이 성공적으로 제출되었습니다!');
       
       // 3초 후 프로필 페이지로 이동
       setTimeout(() => {
@@ -99,7 +99,7 @@ function ApplyPageContent() {
       
     } catch (error) {
       console.error('Adoption application failed:', error);
-      setSubmitMessage('입양 신청에 실패했습니다. 다시 시도해주세요.');
+      setSubmitMessage('입양/돌봄 신청에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
@@ -137,15 +137,15 @@ function ApplyPageContent() {
       <Header />
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">입양 신청</h1>
-          <p className="text-gray-600">입양 신청서를 작성해주세요.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">입양/돌봄 신청</h1>
+          <p className="text-gray-600">입양/돌봄 신청서를 작성해주세요.</p>
         </div>
 
-        {/* 통합된 입양 신청서 */}
+        {/* 통합된 입양/돌봄 신청서 */}
         <div className="bg-white rounded-lg shadow-lg p-8">
           {/* 선택된 동물 정보 */}
           <div className="mb-8 pb-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">입양 신청 동물</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">입양/돌봄 신청 동물</h2>
             <div className="flex items-center space-x-4">
               {selectedPet.imageUrl && (
                 <div className="w-24 h-24 relative rounded-lg overflow-hidden">
@@ -171,7 +171,7 @@ function ApplyPageContent() {
             </div>
           </div>
 
-          {/* 입양 신청서 폼 */}
+          {/* 입양/돌봄 신청서 폼 */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -267,7 +267,7 @@ function ApplyPageContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                입양하고 싶은 이유
+                입양/돌봄하고 싶은 이유
               </label>
               <textarea
                 name="reason"
@@ -275,7 +275,7 @@ function ApplyPageContent() {
                 onChange={handleInputChange}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="이 동물을 입양하고 싶은 이유를 설명해주세요."
+                placeholder="이 동물을 입양/돌봄하고 싶은 이유를 설명해주세요."
                 required
               />
             </div>
@@ -308,7 +308,7 @@ function ApplyPageContent() {
                     : 'bg-orange-500 text-white hover:bg-orange-600'
                 }`}
               >
-                {isSubmitting ? '제출 중...' : '입양 신청하기'}
+                {isSubmitting ? '제출 중...' : '입양/돌봄 신청하기'}
               </button>
             </div>
           </form>
