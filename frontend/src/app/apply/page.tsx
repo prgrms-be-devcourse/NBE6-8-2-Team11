@@ -176,15 +176,14 @@ function ApplyPageContent() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  연락처 (전화번호)
+                  신청자 성함
                 </label>
                 <input
-                  type="tel"
-                  name="contactPhone"
-                  value={formData.contactPhone}
+                  type="text"
+                  name="familyMembers"
+                  value={formData.familyMembers}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="010-1234-5678"
                   required
                 />
               </div>
@@ -207,6 +206,21 @@ function ApplyPageContent() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
+                연락처 (전화번호)
+              </label>
+              <input
+                type="tel"
+                name="contactPhone"
+                value={formData.contactPhone}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="010-1234-5678"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 주소
               </label>
               <input
@@ -220,35 +234,18 @@ function ApplyPageContent() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  가족 구성원
-                </label>
-                <input
-                  type="text"
-                  name="familyMembers"
-                  value={formData.familyMembers}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="성인 2명, 아이 1명"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  현재 키우고 있는 다른 반려동물
-                </label>
-                <input
-                  type="text"
-                  name="otherPets"
-                  value={formData.otherPets}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="없음 또는 현재 키우고 있는 동물"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                현재 키우고 있는 다른 반려동물
+              </label>
+              <input
+                type="text"
+                name="otherPets"
+                value={formData.otherPets}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                placeholder="없음 또는 현재 키우고 있는 동물"
+              />
             </div>
 
             <div>
