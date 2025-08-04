@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
-import { Pet } from '../../shared/types';
+import { Pet, PetStatusType } from '../../shared/types';
 import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../shared/utils';
 import { petService } from '../../shared/services/petService';
 import { adoptionService } from '../../shared/services/adoptionService';
@@ -19,6 +19,7 @@ interface AdoptionFormData {
   experience: string;
   otherPets: string;
   reason: string;
+  applicationType: 'adoption' | 'care';
 }
 
 // 로딩 컴포넌트
@@ -175,6 +176,74 @@ const ActionButtons = ({
   </div>
 );
 
+// 라디오 버튼 컴포넌트
+const ApplicationTypeRadio = ({ 
+  petStatuses, 
+  selectedType, 
+  onTypeChange 
+}: { 
+  petStatuses?: PetStatusType[]; 
+  selectedType: 'adoption' | 'care'; 
+  onTypeChange: (type: 'adoption' | 'care') => void; 
+}) => {
+  // 상태에 따른 라디오 버튼 활성화 여부 결정
+  const canAdopt = petStatuses?.some(status => 
+    status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
+  );
+  const canCare = petStatuses?.some(status => 
+    status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
+  );
+
+  return (
+    <div className="mb-6">
+      <label className="block text-sm font-medium text-gray-700 mb-3">
+        신청 유형
+      </label>
+      <div className="space-y-3">
+        <label className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-colors ${
+          selectedType === 'adoption' 
+            ? 'border-orange-500 bg-orange-50' 
+            : 'border-gray-200 hover:border-gray-300'
+        } ${!canAdopt ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+          <input
+            type="radio"
+            name="applicationType"
+            value="adoption"
+            checked={selectedType === 'adoption'}
+            onChange={() => canAdopt && onTypeChange('adoption')}
+            disabled={!canAdopt}
+            className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
+          />
+          <span className="text-sm font-medium text-gray-900">입양 신청</span>
+          {!canAdopt && (
+            <span className="text-xs text-gray-500 ml-2">(현재 입양 불가)</span>
+          )}
+        </label>
+
+        <label className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-colors ${
+          selectedType === 'care' 
+            ? 'border-orange-500 bg-orange-50' 
+            : 'border-gray-200 hover:border-gray-300'
+        } ${!canCare ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+          <input
+            type="radio"
+            name="applicationType"
+            value="care"
+            checked={selectedType === 'care'}
+            onChange={() => canCare && onTypeChange('care')}
+            disabled={!canCare}
+            className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
+          />
+          <span className="text-sm font-medium text-gray-900">돌봄 신청</span>
+          {!canCare && (
+            <span className="text-xs text-gray-500 ml-2">(현재 돌봄 불가)</span>
+          )}
+        </label>
+      </div>
+    </div>
+  );
+};
+
 function ApplyPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -194,6 +263,7 @@ function ApplyPageContent() {
     experience: '',
     otherPets: '',
     reason: '',
+    applicationType: 'adoption',
   });
 
   useEffect(() => {
@@ -204,7 +274,33 @@ function ApplyPageContent() {
         if (petIdFromUrl) {
           const petData = await petService.getPet(petIdFromUrl);
           setSelectedPet(petData);
-          setFormData(prev => ({ ...prev, petId: petData.id }));
+          
+          // petStatuses에 따라 기본 선택값 설정
+          let defaultApplicationType: 'adoption' | 'care' = 'adoption';
+          
+          if (petData.petStatuses) {
+            const canAdopt = petData.petStatuses.some(status => 
+              status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
+            );
+            const canCare = petData.petStatuses.some(status => 
+              status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
+            );
+            
+            // 입양 및 돌봄 모두 가능하면 입양을 기본값으로 설정
+            if (canAdopt && canCare) {
+              defaultApplicationType = 'adoption';
+            } else if (canAdopt) {
+              defaultApplicationType = 'adoption';
+            } else if (canCare) {
+              defaultApplicationType = 'care';
+            }
+          }
+          
+          setFormData(prev => ({ 
+            ...prev, 
+            petId: petData.id,
+            applicationType: defaultApplicationType
+          }));
         }
       } catch (error) {
         console.error('Failed to load pet data:', error);
@@ -222,6 +318,13 @@ function ApplyPageContent() {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handleApplicationTypeChange = (type: 'adoption' | 'care') => {
+    setFormData(prev => ({
+      ...prev,
+      applicationType: type
     }));
   };
 
@@ -281,6 +384,12 @@ function ApplyPageContent() {
           <SelectedPetInfo pet={selectedPet} />
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            <ApplicationTypeRadio 
+              petStatuses={selectedPet?.petStatuses}
+              selectedType={formData.applicationType}
+              onTypeChange={handleApplicationTypeChange}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 label="신청자 성함"
