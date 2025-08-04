@@ -128,14 +128,6 @@ export default function Header() {
                     )}
                   </button>
 
-                  {/* 개발용 테스트 버튼 (나중에 제거) */}
-                  <button
-                    onClick={addTestNotification}
-                    className="text-xs text-gray-400 hover:text-gray-600"
-                    title="테스트 알림 추가"
-                  >
-                    테스트
-                  </button>
                   
                   {/* 알림 드롭다운 */}
                   <NotificationDropdown
