@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
-import { ChatRoom, ChatMessage } from '@/shared/types/chat';
-import { chatService } from '@/shared/services/chat';
-import { memberService } from '@/shared/services/member';
-import { wsClient } from '@/shared/lib/websocket';
-import { useChatStore } from '@/shared/components/common/chat/chatStore';
-import { getCurrentUserIdSync } from '@/shared/services/auth';
+import { ChatRoom, ChatMessage } from '../../shared/types/chat';
+import { chatService } from '../../shared/services/chat';
+import { memberService } from '../../shared/services/member';
+import { wsClient } from '../../shared/lib/websocket';
+import { useChatStore } from '../../shared/components/common/chat/chatStore';
+import { getCurrentUserIdSync } from '../../shared/services/auth';
 import { format, parseISO } from 'date-fns';
 
 export default function AllChatPage() {

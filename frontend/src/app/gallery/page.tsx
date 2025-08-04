@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Pet } from '@/shared/types';
-import { petService } from '@/shared/services/petService';
-import Header from '@/shared/components/layout/Header';
-import Footer from '@/shared/components/layout/Footer';
-import AnimalGrid from '@/features/gallery/components/AnimalGrid';
-import AnimalFilter from '@/features/gallery/components/AnimalFilter';
-import AnimalSearch from '@/features/gallery/components/AnimalSearch';
-import LoadingSpinner from '@/shared/components/common/LoadingSpinner';
-import ErrorBoundary from '@/shared/components/common/ErrorBoundary';
+import { Pet } from '../../shared/types';
+import { petService } from '../../shared/services/petService';
+import Header from '../../shared/components/layout/Header';
+import Footer from '../../shared/components/layout/Footer';
+import AnimalGrid from '../../features/gallery/components/AnimalGrid';
+import AnimalFilter from '../../features/gallery/components/AnimalFilter';
+import AnimalSearch from '../../features/gallery/components/AnimalSearch';
+import LoadingSpinner from '../../shared/components/common/LoadingSpinner';
+import ErrorBoundary from '../../shared/components/common/ErrorBoundary';
 
 export default function GalleryPage() {
   const [pets, setPets] = useState<Pet[]>([]);

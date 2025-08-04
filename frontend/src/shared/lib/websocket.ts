@@ -1,6 +1,6 @@
 import SockJS from 'sockjs-client';
 import { Client, Message } from '@stomp/stompjs';
-import { ChatMessage, ChatMessageRequest } from '@/shared/types/chat';
+import { ChatMessage, ChatMessageRequest } from '../types/chat';
 
 interface Notification {
   id: number;
