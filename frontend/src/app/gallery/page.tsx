@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Pet } from '../../shared/types';
+import { Pet, PetStatusType } from '../../shared/types';
 import { petService } from '../../shared/services/petService';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
@@ -76,7 +76,7 @@ export default function GalleryPage() {
     // 상태 필터 추가
     if (filters.status) {
       filtered = filtered.filter(pet => 
-        pet.petStatuses && pet.petStatuses.includes(filters.status as any)
+        pet.petStatuses && pet.petStatuses.includes(filters.status as PetStatusType)
       );
     }
 

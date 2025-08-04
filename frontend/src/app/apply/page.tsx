@@ -452,13 +452,16 @@ function ApplyPageContent() {
           experience: formData.experience,
         });
       } else {
-        // 돌봄 신청
+        // 돌봄 신청 - 날짜 필드가 이미 검증되었으므로 안전하게 변환
+        const startDate = new Date(formData.careStartDate!);
+        const endDate = new Date(formData.careEndDate!);
+        
         await adoptionService.createCare({
           petId: selectedPet.id.toString(),
           title: `${selectedPet.name} 돌봄 신청`,
           message: formData.reason,
-          desiredStartDate: new Date(formData.careStartDate || ''),
-          desiredEndDate: new Date(formData.careEndDate || ''),
+          desiredStartDate: startDate,
+          desiredEndDate: endDate,
           anotherPets: formData.otherPets,
           experience: formData.experience,
         });
