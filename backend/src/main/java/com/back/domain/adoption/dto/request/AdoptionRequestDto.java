@@ -11,7 +11,10 @@ public record AdoptionRequestDto(
         @NotNull
         String title,
 
-        @NotBlank(message = "메세지는 비어있을 수 없습니다.")
+        String anotherPets,
+
+        String experience,
+        
         String message
 ) {
 

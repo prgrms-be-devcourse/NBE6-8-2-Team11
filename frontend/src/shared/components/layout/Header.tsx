@@ -95,6 +95,7 @@ export default function Header() {
                 // 로그인된 상태: 실제 사용자 이름, 알림 버튼, 채팅 버튼, 내 프로필, 로그아웃 버튼
                 <div className="flex items-center space-x-3">
                   <span className="text-sm text-gray-700 font-medium">
+                    {/* userInfo가 있을 때 nickname 또는 email, 없으면 '사용자'로 표시 */}
                     {userInfo?.nickname || userInfo?.email || '사용자'} 님
                   </span>
 

@@ -159,6 +159,8 @@ class AdoptionControllerIntegrationTest {
         AdoptionRequestDto requestDto = new AdoptionRequestDto(
                 testPet.getId(),
                 "입양 신청합니다",
+                "강아지 1마리",
+                "돌봄 경험이 있습니다.",
                 "정성스럽게 키우겠습니다."
         );
 
@@ -180,6 +182,8 @@ class AdoptionControllerIntegrationTest {
         AdoptionRequestDto requestDto = new AdoptionRequestDto(
                 999L,
                 "입양 신청합니다",
+                "강아지 1마리",
+                "돌봄 경험이 있습니다.",
                 "정성스럽게 키우겠습니다."
         );
 
@@ -206,6 +210,8 @@ class AdoptionControllerIntegrationTest {
         AdoptionRequestDto requestDto = new AdoptionRequestDto(
                 testPet.getId(),
                 "입양 신청합니다",
+                "강아지 1마리",
+                "돌봄 경험이 있습니다.",
                 "정성스럽게 키우겠습니다."
         );
 
@@ -354,6 +360,8 @@ class AdoptionControllerIntegrationTest {
         AdoptionRequestDto requestDto = new AdoptionRequestDto(
                 testPet.getId(),
                 "입양 신청합니다",
+                "강아지 1마리",
+                "돌봄 경험이 있습니다.",
                 "정성스럽게 키우겠습니다."
         );
 

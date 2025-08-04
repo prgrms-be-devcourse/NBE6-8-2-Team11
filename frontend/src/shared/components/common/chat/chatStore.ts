@@ -48,6 +48,7 @@ const createChatStore = () => {
           
           // 채팅방 메시지 로드 함수 추가
           loadRoomMessages: async (roomId: number) => {
+            
             console.log(`Loading messages for room ${roomId}...`);
             set({ isLoading: true });
             
@@ -100,8 +101,8 @@ const createChatStore = () => {
       setChatRooms: (rooms) => set({ chatRooms: rooms }),
       setCurrentRoom: (room) => set({ currentRoom: room }),
       setLoading: (loading) => set({ isLoading: loading }),
-      clearMessages: (roomId) => set((state) => ({ 
-        messages: { ...state.messages, [roomId]: [] } 
+      clearMessages: (roomId) => set((_state) => ({ 
+        messages: { ..._state.messages, [roomId]: [] } 
       })),
       
       loadRoomMessages: async (roomId: number) => {
