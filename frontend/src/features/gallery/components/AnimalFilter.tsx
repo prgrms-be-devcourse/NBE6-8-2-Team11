@@ -51,8 +51,6 @@ export default function AnimalFilter({ filters, onChange }: AnimalFilterProps) {
           <option value="">전체</option>
           <option value="MALE">수컷</option>
           <option value="FEMALE">암컷</option>
-          <option value="NEUTERED_MALE">중성화된 수컷</option>
-          <option value="NEUTERED_FEMALE">중성화된 암컷</option>
         </select>
       </div>
 

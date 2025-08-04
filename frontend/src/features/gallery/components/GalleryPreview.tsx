@@ -24,7 +24,15 @@ export default function GalleryPreview({ pets = [] }: GalleryPreviewProps) {
           {pets.slice(0, 4).map((pet: Pet) => (
             <div key={pet.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
               <div className="h-48 bg-gradient-to-br from-orange-200 to-yellow-200 flex items-center justify-center">
-                <span className="text-6xl">🐕</span>
+                {pet.imageUrl ? (
+                  <img 
+                    src={pet.imageUrl} 
+                    alt={pet.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-6xl">🐕</span>
+                )}
               </div>
               <div className="p-6">
                 <h3 className="font-semibold text-gray-800 mb-2">{pet.name}</h3>
