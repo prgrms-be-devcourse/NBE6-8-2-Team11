@@ -20,6 +20,8 @@ interface AdoptionFormData {
   otherPets: string;
   reason: string;
   applicationType: 'adoption' | 'care';
+  careStartDate?: string;
+  careEndDate?: string;
 }
 
 // 로딩 컴포넌트
@@ -244,6 +246,54 @@ const ApplicationTypeRadio = ({
   );
 };
 
+// 돌봄 날짜 입력 컴포넌트
+const CareDateFields = ({ 
+  startDate, 
+  endDate, 
+  onStartDateChange, 
+  onEndDateChange 
+}: { 
+  startDate: string; 
+  endDate: string; 
+  onStartDateChange: (date: string) => void; 
+  onEndDateChange: (date: string) => void; 
+}) => {
+  // 최소 날짜를 오늘로 설정
+  const today = new Date().toISOString().split('T')[0];
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          돌봄 시작일
+        </label>
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => onStartDateChange(e.target.value)}
+          min={today}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          required
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          돌봄 종료일
+        </label>
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => onEndDateChange(e.target.value)}
+          min={startDate || today}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          required
+        />
+      </div>
+    </div>
+  );
+};
+
 function ApplyPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -264,6 +314,8 @@ function ApplyPageContent() {
     otherPets: '',
     reason: '',
     applicationType: 'adoption',
+    careStartDate: '',
+    careEndDate: '',
   });
 
   useEffect(() => {
@@ -324,7 +376,33 @@ function ApplyPageContent() {
   const handleApplicationTypeChange = (type: 'adoption' | 'care') => {
     setFormData(prev => ({
       ...prev,
-      applicationType: type
+      applicationType: type,
+      // 돌봄 신청으로 변경 시 기본 날짜 설정 (시작일: 오늘, 종료일: 1주일 후)
+      ...(type === 'care' && {
+        careStartDate: new Date().toISOString().split('T')[0],
+        careEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      }),
+      // 입양 신청으로 변경 시 날짜 필드 초기화
+      ...(type === 'adoption' && {
+        careStartDate: '',
+        careEndDate: '',
+      }),
+    }));
+  };
+
+  const handleCareStartDateChange = (date: string) => {
+    setFormData(prev => ({
+      ...prev,
+      careStartDate: date,
+      // 시작일이 종료일보다 늦으면 종료일을 시작일로 설정
+      ...(date > (prev.careEndDate || '') && { careEndDate: date }),
+    }));
+  };
+
+  const handleCareEndDateChange = (date: string) => {
+    setFormData(prev => ({
+      ...prev,
+      careEndDate: date,
     }));
   };
 
@@ -389,6 +467,16 @@ function ApplyPageContent() {
               selectedType={formData.applicationType}
               onTypeChange={handleApplicationTypeChange}
             />
+
+            {/* 돌봄 신청 선택 시 날짜 입력란 표시 */}
+            {formData.applicationType === 'care' && (
+              <CareDateFields
+                startDate={formData.careStartDate || ''}
+                endDate={formData.careEndDate || ''}
+                onStartDateChange={handleCareStartDateChange}
+                onEndDateChange={handleCareEndDateChange}
+              />
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
