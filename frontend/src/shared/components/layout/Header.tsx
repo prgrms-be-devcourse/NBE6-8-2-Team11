@@ -54,6 +54,9 @@ export default function Header() {
     return () => clearInterval(interval);
   }, []);
 
+  // userInfo.auth 문자열에 'ADMIN'이 포함되어 있는지 확인
+  const isAdmin = userInfo?.auth?.includes('ADMIN');
+
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,6 +87,18 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+            
+            {/* ▼▼▼▼▼ 변경된 부분 ▼▼▼▼▼ */}
+            {/* 로그인 상태(isLoggedIn)가 true일 때만 '펫 등록하기' 링크가 보이도록 한다. */}
+            {isLoggedIn && (
+              <Link
+                href="/pets/register"
+                className="font-semibold text-orange-600 hover:text-orange-500 transition-colors"
+              >
+                펫 등록하기
+              </Link>
+            )}
+            {/* ▲▲▲▲▲ 여기까지 변경 ▲▲▲▲▲ */}
           </nav>
 
           {/* 오른쪽: 사용자 메뉴 */}
@@ -164,6 +179,20 @@ export default function Header() {
                     {/* 추후 새 메시지 개수에 따라 표시 */}
                   </span>
                 </Link>
+                
+                  {/* 관리자일 경우 관리자 페이지 링크 표시 */}
+                {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className={`text-sm font-medium transition-colors ${
+                        pathname === '/admin'
+                          ? 'text-red-600'
+                          : 'text-gray-700 hover:text-red-500'
+                      }`}
+                    >
+                      관리자
+                    </Link>
+                  )}
 
                   <Link
                     href="/profile"

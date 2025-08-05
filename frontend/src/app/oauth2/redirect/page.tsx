@@ -36,6 +36,7 @@ function OAuth2RedirectHandler() {
         const decodedPayload = JSON.parse(decodedString);
 
         const userInfo = {
+          id:decodedPayload.id,
           sub: decodedPayload.sub,
           auth: decodedPayload.auth,
           exp: decodedPayload.exp,

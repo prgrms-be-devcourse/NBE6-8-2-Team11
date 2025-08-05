@@ -5,7 +5,7 @@ export interface Pet {
   name: string;
   species: string; // dog, cat, rabbit, bird, other
   age: number;
-  gender: 'MALE' | 'FEMALE' | 'UNKNOWN' | 'NEUTERED_MALE' | 'NEUTERED_FEMALE';
+  gender: 'MALE' | 'FEMALE';
   description: string;
   imageUrl?: string;
   createdAt: Date;
@@ -135,3 +135,15 @@ export interface CTAButton {
   onClick?: () => void;
   variant: 'primary' | 'secondary';
 } 
+
+export interface PetCreateRequestDto {
+  name: string;
+  species: string;
+  age: number;
+  // 'gender' 필드의 타입을 기존 Pet 인터페이스의 타입과 일치시킨다.
+  gender: 'MALE' | 'FEMALE' | 'UNKNOWN' | 'NEUTERED_MALE' | 'NEUTERED_FEMALE';
+  description: string;
+  imageUrl: string;
+  shelterName?: string; // 일반 사용자는 이 필드를 보내지 않으므로 optional 처리.
+  statuses: string[];
+}

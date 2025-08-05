@@ -3,14 +3,14 @@
 -- Member 테이블 더미 데이터
 -- password는 BCryptPasswordEncoder로 인코딩된 값이어야 합니다. (예: 'password123' -> '$2a$10$...')
 INSERT INTO member (member_email, member_password, member_name, member_phone, member_role, created_at)
-VALUES ('user1@example.com', '$2a$10$LgL4qLhG2M.B3Z4mP3qX.e.O3B.Q.C.C.N.U.R.A.Q.I.E.F.E.I.D.M.A.C.M.O.K.0', '김철수', '010-1111-2222', 'USER', NOW());
-
+VALUES ('user1@example.com', '$2a$12$..bFUk2xL6M8yKo4ZOu0uu.Znfa5oWqVyhDUAuh.wO3v.umTxI0P2', '김철수', '010-1111-2222', 'USER', NOW());
+-- USER1 비밀번호: asd123
 INSERT INTO member (member_email, member_password, member_name, member_phone, member_role, created_at)
 VALUES ('shelter@example.com', '$2a$10$LgL4qLhG2M.B3Z4mP3qX.e.O3B.Q.C.C.N.U.R.A.Q.I.E.F.E.I.D.M.A.C.M.O.K.0', '행복보호소관리자', '010-3333-4444', 'USER', NOW());
 
 INSERT INTO member (member_email, member_password, member_name, member_phone, member_role, created_at)
-VALUES ('ex@mail.com', 'asd123', '홍길동', '010-9999-9999', 'USER', NOW());
-
+VALUES ('ex@mail.com', '$2a$12$XVz8l7vdHSpiXahf3q3OXup9X35AKjY1veDLd7M6EsHnixm2dAWlC', '홍길동', '010-9999-9999', 'ADMIN', NOW());
+--관리자 비밀번호 password
 INSERT INTO shelter (shelter_id, shelter_name, shelter_address, shelter_city, shelter_state, shelter_zip_code, shelter_phone, created_at) VALUES
 (1, '사랑의 동물보호소', '서울시 강남구 테헤란로 123', '서울', '강남구', '06123', '02-1234-5678', '2024-01-01T00:00:00'),
 (2, '희망의 동물보호소', '서울시 서초구 서초대로 456', '서울', '서초구', '06678', '02-2345-6789', '2024-01-02T00:00:00'),

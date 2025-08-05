@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
 import { memberService } from '../../shared/services/member';
-import { useAuth } from '../../shared/hooks/useAuth';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,6 +26,21 @@ export default function LoginPage() {
     }));
   };
 
+  // JWT 토큰 디코딩 함수 추가
+  const decodeToken = (token: string) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error("Invalid token:", error);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -38,19 +53,22 @@ export default function LoginPage() {
       });
       
       console.log('로그인 성공:', response);
+
+      const decodedToken = decodeToken(response.accessToken);
+      if (!decodedToken) {
+        throw new Error('Invalid token');
+      }
+    
+      // context/AuthContext의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
+      const userInfo = {
+        sub: response.userId.toString(),
+        auth: decodedToken.auth,
+        exp: decodedToken.exp,
+        nickname: response.userName,
+        email: response.userEmail,
+      };
       
-      // useAuth의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
-      login(
-        { 
-          id: parseInt(response.userId.toString(), 10), 
-          email: response.userEmail, 
-          name: response.userName 
-        },
-        { 
-          accessToken: response.accessToken, 
-          refreshToken: response.refreshToken 
-        }
-      );
+      login(response.accessToken, response.refreshToken, userInfo);
       
       console.log('로그인 상태 업데이트 완료, 홈페이지로 이동합니다.');
       
