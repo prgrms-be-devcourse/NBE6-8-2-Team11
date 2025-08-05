@@ -6,10 +6,8 @@ import Header from '../../../shared/components/layout/Header';
 import Footer from '../../../shared/components/layout/Footer';
 import { petService } from '../../../shared/services/petService';
 import { useAuth } from '../../../context/AuthContext';
-// ▼▼▼ 1. 오류의 원인이었던 import 경로를 올바르게 수정했다. ▼▼▼
-// 이제 모든 타입은 frontend/src/shared/types/index.ts 에서 가져온다.
+// 1. 올바른 경로의 중앙 타입 정의 파일을 사용한다.
 import { PetCreateRequestDto } from '../../../shared/types';
-// ▲▲▲▲▲ 여기까지 수정 ▲▲▲▲▲
 
 /**
  * 사용자가 새로운 펫을 등록하는 페이지 컴포넌트이다.
@@ -19,7 +17,7 @@ export default function PetRegistrationPage() {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
   
-  // 폼 데이터를 관리하는 상태. PetCreateRequestDto 타입을 사용한다.
+  // 2. 폼 데이터 타입을 PetCreateRequestDto로 명확히 지정한다.
   const [formData, setFormData] = useState<PetCreateRequestDto>({
     name: '',
     species: '',
@@ -43,9 +41,10 @@ export default function PetRegistrationPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    // 'prev' 파라미터에 타입을 명시해 'any' 타입 오류를 해결한다.
+    // 3. 'prev' 파라미터에 타입을 명시하여 'any' 타입 오류를 해결한다.
     setFormData((prev: PetCreateRequestDto) => ({ 
         ...prev, 
+        // age 필드는 숫자로 변환한다.
         [name]: name === 'age' ? parseInt(value, 10) || 0 : value 
     }));
   };
@@ -60,18 +59,23 @@ export default function PetRegistrationPage() {
     setError('');
 
     try {
-      // ▼▼▼ 2. 500 에러의 원인이었던 payload 생성 로직을 수정했다. ▼▼▼
-      // 이제 formData 자체가 백엔드의 PetCreateRequestDto와 형식이 완전히 일치하므로
-      // 불필요한 필드를 추가하거나 변환할 필요 없이 그대로 전송한다.
-      // apiClient가 자동으로 인증 토큰을 헤더에 넣어주므로 완벽하게 작동한다.
+      // 4. formData 자체가 백엔드 DTO와 형식이 일치하므로 그대로 전송한다.
+      //    (500 에러 및 타입 불일치 오류 해결)
       await petService.createPet(formData);
-      // ▲▲▲▲▲ 여기까지 수정 ▲▲▲▲▲
       
       alert('펫 등록이 성공적으로 완료되었습니다! 갤러리 페이지로 이동합니다.');
       router.push('/gallery');
 
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || '펫 등록에 실패했습니다. 잠시 후 다시 시도해주세요.';
+    } catch (err: unknown) { // 5. ESLint 에러 해결을 위해 'any' 대신 'unknown' 타입을 사용한다.
+      let errorMessage = '펫 등록에 실패했습니다. 잠시 후 다시 시도해주세요.';
+      
+      // 'unknown' 타입의 에러를 안전하게 처리한다.
+      if (err && typeof err === 'object' && 'response' in err) {
+        const responseError = err as { response?: { data?: { message?: string } } };
+        if (responseError.response?.data?.message) {
+          errorMessage = responseError.response.data.message;
+        }
+      }
       setError(errorMessage);
       console.error(err);
     } finally {
@@ -83,6 +87,7 @@ export default function PetRegistrationPage() {
     return null;
   }
 
+  // JSX 렌더링 부분은 수정할 필요가 없으므로 그대로 사용한다.
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
