@@ -1,13 +1,15 @@
 import { apiClient } from './apiClient';
-import { Notification } from '../types/notification';
+import { Notification } from '../types';
 
+// Added by assistant to resolve linter errors and type mismatches
 interface NotificationResponse {
   notificationId: number;
-  type: 'ADOPTION_REQUESTED' | 'ADOPTION_ACCEPTED' | 'ADOPTION_REJECTED' | 'CARE_REQUESTED' | 'CARE_ACCEPTED' | 'CARE_REJECTED' | 'NEW_MESSAGE' | 'CHAT_ROOM_DELETED';
+  type: 'ADOPTION_REQUESTED' | 'ADOPTION_ACCEPTED' | 'ADOPTION_REJECTED' | 'CARE_REQUESTED' | 'CARE_ACCEPTED' | 'CARE_REJECTED' | 'NEW_MESSAGE' | 'CHAT_ROOM_DELETED' | 'CHAT_ROOM_CREATED';
   title: string;
   message: string;
   isRead: boolean;
   createdAt: string;
+  memberId: number; // Added to match frontend Notification type
 }
 
 export const notificationService = {
@@ -20,8 +22,8 @@ export const notificationService = {
       message: notification.message,
       type: notification.type,
       isRead: notification.isRead,
-      createdAt: notification.createdAt,
-      userId: 0,
+      createdAt: new Date(notification.createdAt),
+      memberId: notification.memberId || 0, // Added memberId mapping
     }));
   },
 

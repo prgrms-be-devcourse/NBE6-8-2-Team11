@@ -9,6 +9,10 @@ public record AdoptionResponseDto(
         Long adoptionId,
         Long petId,
         Long memberId,
+        String memberName,
+        String memberPhone,
+        String memberEmail,
+        String memberAddress,
         String anotherPets,
         String experience,
         String title,
@@ -22,6 +26,10 @@ public record AdoptionResponseDto(
                 .adoptionId(adoption.getId())
                 .petId(adoption.getPet().getId())
                 .memberId(adoption.getMember().getId())
+                .memberName(adoption.getMember().getName())
+                .memberPhone(adoption.getMember().getPhone())
+                .memberEmail(adoption.getMember().getEmail())
+                .memberAddress(adoption.getMember().getAddress())
                 .title(adoption.getTitle())
                 .anotherPets(adoption.getAnotherPets())
                 .experience(adoption.getExperience())

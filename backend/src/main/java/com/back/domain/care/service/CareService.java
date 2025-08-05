@@ -40,7 +40,8 @@ public class CareService {
                 .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
 
         boolean isAvailableForCare = pet.getPetStatuses().stream()
-                .anyMatch(status -> status.getStatus().equals(PetStatusType.AVAILABLE_FOR_CARE));
+                .anyMatch(status -> status.getStatus().equals(PetStatusType.AVAILABLE_FOR_CARE) ||
+                        status.getStatus().equals(PetStatusType.AVAILABLE_BOTH));
 
         if (!isAvailableForCare) {
             throw new PetException(PetErrorCode.PET_NOT_AVAILABLE_FOR_CARE);

@@ -12,11 +12,19 @@ export interface User {
 
 export interface AdoptionRecord {
   id: number;
-  petId: number;
-  petName: string;
-  petImage?: string;
-  shelterName: string;
-  status: 'pending' | 'approved' | 'rejected' | 'completed';
-  appliedAt: Date;
-  updatedAt?: Date;
+  title: string;
+  type: 'ADOPTION' | 'CARE';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  createdAt: string;
+  petInfo?: {
+    id: number;
+    name: string;
+    species: string;
+    age: number;
+    gender: string;
+    imageUrl: string;
+    shelterName?: string;
+  };
+  desiredStartDate?: string; // Care인 경우에만
+  desiredEndDate?: string;   // Care인 경우에만
 } 

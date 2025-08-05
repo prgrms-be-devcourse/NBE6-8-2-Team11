@@ -13,7 +13,7 @@ public record ApplicationSimpleListResponseDto(
     String title,
     String type, // "ADOPTION" 또는 "CARE"
     RequestStatus status,
-    LocalDateTime createdAt// Care인 경우에만 사용
+    LocalDateTime createdAt
 ) {
     
     public static ApplicationSimpleListResponseDto fromAdoption(Adoption adoption) {

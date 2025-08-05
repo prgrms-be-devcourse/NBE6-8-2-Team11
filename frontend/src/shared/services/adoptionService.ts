@@ -3,47 +3,49 @@ import { apiClient } from './apiClient';
 // 타입 정의
 export interface AdoptionApplication {
   id: string;
-  memberId: string;
-  petId: string;
-  message: string;
+  title: string;
+  type: 'ADOPTION' | 'CARE';
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
 }
 
 export interface AdoptionApplicationDetail extends AdoptionApplication {
-  pet: {
+  memberName: string;
+  memberPhone: string;
+  memberEmail: string;
+  memberAddress: string;
+  anotherPets: string;
+  experience: string;
+  message: string;
+  petInfo: {
     id: string;
     name: string;
     species: string;
     age: number;
     gender: string;
     imageUrl: string;
+    shelterName?: string;
   };
-  member: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-  };
+  desiredStartDate?: string; // Care인 경우에만
+  desiredEndDate?: string;   // Care인 경우에만
 }
 
 export interface CreateAdoptionRequest {
   petId: string;
   title: string;
-  message: string;
   anotherPets: string;
   experience: string;
+  message: string;
 }
 
 export interface CreateCareRequest {
   petId: string;
   title: string;
   message: string;
-  desiredStartDate: Date;
-  desiredEndDate: Date;
   anotherPets: string;
   experience: string;
+  desiredStartDate: Date;
+  desiredEndDate: Date;
 }
 
 export interface UpdateAdoptionStatusRequest {
@@ -71,14 +73,14 @@ export const adoptionService = {
   },
 
   // 회원 입양/돌봄 신청 내역 상세 조회
-  async getAdoptionApplicationDetail(applicationId: string): Promise<AdoptionApplicationDetail> {
-    const response = await apiClient.get<AdoptionApplicationDetail>(`/api/applies/detail?id=${applicationId}`);
+  async getAdoptionApplicationDetail(typeId: string, type: string): Promise<AdoptionApplicationDetail> {
+    const response = await apiClient.get<AdoptionApplicationDetail>(`/api/applies/detail?typeId=${typeId}&type=${type}`);
     return response.content;
   },
 
   // 회원 입양/돌봄 신청 내역 단건 취소(삭제)
-  async deleteAdoptionApplication(applicationId: string): Promise<void> {
-    await apiClient.delete(`/api/applies?id=${applicationId}`);
+  async deleteAdoptionApplication(typeId: string, type: string): Promise<void> {
+    await apiClient.delete(`/api/applies?typeId=${typeId}&type=${type}`);
   },
 
   // 회원 입양/돌봄 신청 내역 전체 취소(삭제)
@@ -93,14 +95,19 @@ export const adoptionService = {
   },
 
   // 보호자가 받은 입양/돌봄 신청 내역 상세 조회
-  async getReceivedApplicationDetail(applicationId: string): Promise<AdoptionApplicationDetail> {
-    const response = await apiClient.get<AdoptionApplicationDetail>(`/api/applies/received/detail?id=${applicationId}`);
+  async getReceivedApplicationDetail(typeId: string, type: string): Promise<AdoptionApplicationDetail> {
+    const response = await apiClient.get<AdoptionApplicationDetail>(`/api/applies/received/detail?typeId=${typeId}&type=${type}`);
     return response.content;
   },
 
   // 보호자가 받은 입양/돌봄 신청 내역 상태 변경 - 수락/거절
-  async updateAdoptionStatus(applicationId: string, statusData: UpdateAdoptionStatusRequest): Promise<AdoptionApplication> {
-    const response = await apiClient.put<AdoptionApplication>(`/api/applies/received?id=${applicationId}`, statusData);
+  async updateAdoptionStatus(typeId: string, type: string, statusData: UpdateAdoptionStatusRequest): Promise<AdoptionApplication> {
+    const requestData = {
+      id: parseInt(typeId),
+      type: type,
+      status: statusData.status
+    };
+    const response = await apiClient.put<AdoptionApplication>(`/api/applies/received`, requestData);
     return response.content;
   },
 

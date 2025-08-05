@@ -3,19 +3,22 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { AdoptionRecord } from '../types';
 import { format, parseISO } from 'date-fns';
 import { adoptionService } from '../../../shared/services/adoptionService';
 
-interface AdoptionDetail {
+interface ReceivedAdoptionRecord {
   id: number;
   title: string;
   type: 'ADOPTION' | 'CARE';
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
-  message: string;
+  memberName: string;
+  memberPhone: string;
+  memberEmail: string;
+  memberAddress: string;
   anotherPets: string;
   experience: string;
+  message: string;
   petInfo?: {
     id: number;
     name: string;
@@ -29,17 +32,17 @@ interface AdoptionDetail {
   desiredEndDate?: string;
 }
 
-export default function AdoptionHistory() {
+export default function ReceivedAdoptionHistory() {
   const router = useRouter();
-  const [adoptionRecords, setAdoptionRecords] = useState<AdoptionRecord[]>([]);
+  const [receivedRecords, setReceivedRecords] = useState<ReceivedAdoptionRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<AdoptionDetail | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<ReceivedAdoptionRecord | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
-    const loadAdoptionHistory = async () => {
+    const loadReceivedHistory = async () => {
       setIsLoading(true);
       
       const token = localStorage.getItem('accessToken');
@@ -52,29 +55,36 @@ export default function AdoptionHistory() {
       setIsAuthenticated(true);
       
       try {
-        const applications = await adoptionService.getAdoptionApplications();
+        const applications = await adoptionService.getReceivedApplications();
         
-        const records: AdoptionRecord[] = applications.map(app => ({
+        const records: ReceivedAdoptionRecord[] = applications.map(app => ({
           id: parseInt(app.id),
           title: app.title || `${app.type === 'ADOPTION' ? '입양' : '돌봄'} 신청`,
           type: app.type as 'ADOPTION' | 'CARE',
           status: app.status,
           createdAt: app.createdAt,
+          memberName: '신청자 정보 없음',
+          memberPhone: '',
+          memberEmail: '',
+          memberAddress: '',
+          anotherPets: '',
+          experience: '',
+          message: '',
           petInfo: undefined,
           desiredStartDate: undefined,
           desiredEndDate: undefined
         }));
         
-        setAdoptionRecords(records);
+        setReceivedRecords(records);
       } catch (error) {
-        console.error('입양 이력 로딩 실패:', error);
-        setAdoptionRecords([]);
+        console.error('받은 신청 내역 로딩 실패:', error);
+        setReceivedRecords([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadAdoptionHistory();
+    loadReceivedHistory();
   }, []);
 
   const getStatusLabel = (status: string) => {
@@ -100,68 +110,6 @@ export default function AdoptionHistory() {
       case 'ADOPTION': return '입양';
       case 'CARE': return '돌봄';
       default: return type;
-    }
-  };
-
-  const filteredRecords = adoptionRecords.filter(record => {
-    if (filter === 'all') return true;
-    return record.status === filter;
-  });
-
-  const handleDeleteApplication = async (recordId: number, type: string) => {
-    try {
-      await adoptionService.deleteAdoptionApplication(recordId.toString(), type);
-      setAdoptionRecords(prev => prev.filter(record => record.id !== recordId));
-    } catch (error) {
-      console.error('신청 취소 실패:', error);
-      alert('신청 취소에 실패했습니다.');
-    }
-  };
-
-  const handleDeleteAllApplications = async () => {
-    if (!confirm('정말로 모든 신청을 삭제하시겠습니까?')) return;
-    
-    try {
-      await adoptionService.deleteAllAdoptionApplications();
-      setAdoptionRecords([]);
-      alert('모든 신청을 삭제했습니다.');
-    } catch (error) {
-      console.error('전체 삭제 실패:', error);
-      alert('전체 삭제에 실패했습니다.');
-    }
-  };
-
-  const handleViewDetail = async (recordId: number, type: string) => {
-    try {
-      const detail = await adoptionService.getAdoptionApplicationDetail(recordId.toString(), type);
-      
-      const record: AdoptionDetail = {
-        id: parseInt(detail.id),
-        title: detail.title,
-        type: detail.type as 'ADOPTION' | 'CARE',
-        status: detail.status,
-        createdAt: detail.createdAt,
-        message: detail.message,
-        anotherPets: detail.anotherPets,
-        experience: detail.experience,
-        petInfo: detail.petInfo ? {
-          id: parseInt(detail.petInfo.id),
-          name: detail.petInfo.name,
-          species: detail.petInfo.species,
-          age: detail.petInfo.age,
-          gender: detail.petInfo.gender,
-          imageUrl: detail.petInfo.imageUrl,
-          shelterName: detail.petInfo.shelterName
-        } : undefined,
-        desiredStartDate: detail.desiredStartDate,
-        desiredEndDate: detail.desiredEndDate
-      };
-      
-      setSelectedRecord(record);
-      setShowDetailModal(true);
-    } catch (error) {
-      console.error('상세 정보 로딩 실패:', error);
-      alert('상세 정보를 불러오는데 실패했습니다.');
     }
   };
 
@@ -199,6 +147,99 @@ export default function AdoptionHistory() {
     }
   };
 
+  const filteredRecords = receivedRecords.filter(record => {
+    if (filter === 'all') return true;
+    return record.status === filter;
+  });
+
+  const handleAcceptApplication = async (recordId: number, type: string) => {
+    try {
+      await adoptionService.updateAdoptionStatus(recordId.toString(), type, { status: 'ACCEPTED' });
+      setReceivedRecords(prev => prev.map(record => 
+        record.id === recordId ? { ...record, status: 'ACCEPTED' } : record
+      ));
+    } catch (error) {
+      console.error('신청 승인 실패:', error);
+      alert('신청 승인에 실패했습니다.');
+    }
+  };
+
+  const handleRejectApplication = async (recordId: number, type: string) => {
+    try {
+      await adoptionService.updateAdoptionStatus(recordId.toString(), type, { status: 'REJECTED' });
+      setReceivedRecords(prev => prev.map(record => 
+        record.id === recordId ? { ...record, status: 'REJECTED' } : record
+      ));
+    } catch (error) {
+      console.error('신청 거절 실패:', error);
+      alert('신청 거절에 실패했습니다.');
+    }
+  };
+
+  const handleDeleteApplication = async (recordId: number, type: string) => {
+    if (!confirm('정말로 이 신청을 삭제하시겠습니까?')) return;
+    
+    try {
+      await adoptionService.deleteReceivedApplication(recordId.toString());
+      setReceivedRecords(prev => prev.filter(record => record.id !== recordId));
+      alert('신청을 삭제했습니다.');
+    } catch (error) {
+      console.error('신청 삭제 실패:', error);
+      alert('신청 삭제에 실패했습니다.');
+    }
+  };
+
+  const handleDeleteAllApplications = async () => {
+    if (!confirm('정말로 모든 신청을 삭제하시겠습니까?')) return;
+    
+    try {
+      await adoptionService.deleteAllReceivedApplications();
+      setReceivedRecords([]);
+      alert('모든 신청을 삭제했습니다.');
+    } catch (error) {
+      console.error('전체 삭제 실패:', error);
+      alert('전체 삭제에 실패했습니다.');
+    }
+  };
+
+  const handleViewDetail = async (recordId: number, type: string) => {
+    try {
+      const detail = await adoptionService.getReceivedApplicationDetail(recordId.toString(), type);
+      
+      const record: ReceivedAdoptionRecord = {
+        id: parseInt(detail.id),
+        title: detail.title,
+        type: detail.type as 'ADOPTION' | 'CARE',
+        status: detail.status,
+        createdAt: detail.createdAt,
+        memberName: detail.memberName,
+        memberPhone: detail.memberPhone,
+        memberEmail: detail.memberEmail,
+        memberAddress: detail.memberAddress,
+        anotherPets: detail.anotherPets,
+        experience: detail.experience,
+        message: detail.message,
+        petInfo: detail.petInfo ? {
+          id: parseInt(detail.petInfo.id),
+          name: detail.petInfo.name,
+          species: detail.petInfo.species,
+          age: detail.petInfo.age,
+          gender: detail.petInfo.gender,
+          imageUrl: detail.petInfo.imageUrl,
+          shelterName: detail.petInfo.shelterName
+        } : undefined,
+        desiredStartDate: detail.desiredStartDate,
+        desiredEndDate: detail.desiredEndDate
+      };
+      
+      setSelectedRecord(record);
+      setShowDetailModal(true);
+    } catch (error) {
+      console.error('상세 정보 로딩 실패:', error);
+      alert('상세 정보를 불러오는데 실패했습니다.');
+    }
+  };
+
   const handleLogin = () => {
     router.push('/login');
   };
@@ -207,7 +248,7 @@ export default function AdoptionHistory() {
     return (
       <div className="text-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-        <p className="text-gray-500 mt-2">입양 이력을 불러오는 중...</p>
+        <p className="text-gray-500 mt-2">받은 신청 내역을 불러오는 중...</p>
       </div>
     );
   }
@@ -217,7 +258,7 @@ export default function AdoptionHistory() {
       <div className="text-center py-12">
         <div className="text-6xl mb-4">🔐</div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">로그인이 필요합니다</h3>
-        <p className="text-gray-500 mb-6">입양/돌봄 이력을 확인하려면 로그인해주세요.</p>
+        <p className="text-gray-500 mb-6">받은 신청 내역을 확인하려면 로그인해주세요.</p>
         <button 
           onClick={handleLogin}
           className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
@@ -231,8 +272,8 @@ export default function AdoptionHistory() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-900">입양/돌봄 신청 이력</h2>
-        {adoptionRecords.length > 0 && (
+        <h2 className="text-xl font-semibold text-gray-900">받은 신청 내역</h2>
+        {receivedRecords.length > 0 && (
           <button 
             onClick={handleDeleteAllApplications}
             className="text-sm text-red-600 hover:text-red-700 font-medium bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-colors"
@@ -269,9 +310,9 @@ export default function AdoptionHistory() {
       <div className="space-y-4">
         {filteredRecords.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🐾</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">입양/돌봄 이력이 없습니다</h3>
-            <p className="text-gray-500">아직 입양/돌봄 신청을 하지 않으셨네요.</p>
+            <div className="text-6xl mb-4">📝</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">받은 신청 내역이 없습니다</h3>
+            <p className="text-gray-500">아직 받은 입양/돌봄 신청이 없네요.</p>
           </div>
         ) : (
           filteredRecords.map((record) => (
@@ -298,7 +339,7 @@ export default function AdoptionHistory() {
                       <h3 className="font-semibold text-gray-900">{record.petInfo?.name || '동물 정보 없음'}</h3>
                       <p className="text-sm text-gray-600">{record.title}</p>
                       <p className="text-xs text-gray-500 mt-1">
-                        {getTypeLabel(record.type)} 신청 • {record.petInfo?.shelterName || '개인'}
+                        {getTypeLabel(record.type)} 신청 • 신청자: {record.memberName}
                       </p>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
@@ -324,55 +365,58 @@ export default function AdoptionHistory() {
                 </div>
               </div>
 
-              {record.status === 'PENDING' && (
-                <div className="absolute bottom-4 right-4">
-                  <button 
-                    onClick={() => handleDeleteApplication(record.id, record.type)}
-                    className="text-sm text-red-600 hover:text-red-700 font-medium bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-colors"
-                  >
-                    신청 취소
-                  </button>
-                </div>
-              )}
-
-              {(record.status === 'ACCEPTED' || record.status === 'REJECTED') && (
-                <div className="absolute bottom-4 right-4">
-                  <button 
-                    onClick={() => handleDeleteApplication(record.id, record.type)}
-                    className="text-sm text-gray-600 hover:text-gray-700 font-medium bg-gray-50 hover:bg-gray-100 px-3 py-1 rounded-lg transition-colors"
-                  >
-                    삭제
-                  </button>
-                </div>
-              )}
+              <div className="absolute bottom-4 right-4 flex space-x-2">
+                {record.status === 'PENDING' && (
+                  <>
+                    <button 
+                      onClick={() => handleAcceptApplication(record.id, record.type)}
+                      className="text-sm text-green-600 hover:text-green-700 font-medium bg-green-50 hover:bg-green-100 px-3 py-1 rounded-lg transition-colors"
+                    >
+                      승인
+                    </button>
+                    <button 
+                      onClick={() => handleRejectApplication(record.id, record.type)}
+                      className="text-sm text-red-600 hover:text-red-700 font-medium bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition-colors"
+                    >
+                      거절
+                    </button>
+                  </>
+                )}
+                <button 
+                  onClick={() => handleDeleteApplication(record.id, record.type)}
+                  className="text-sm text-gray-600 hover:text-gray-700 font-medium bg-gray-50 hover:bg-gray-100 px-3 py-1 rounded-lg transition-colors"
+                >
+                  삭제
+                </button>
+              </div>
             </div>
           ))
         )}
       </div>
 
-      {adoptionRecords.length > 0 && (
+      {receivedRecords.length > 0 && (
         <div className="bg-gray-50 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-3">입양/돌봄 신청 통계</h4>
+          <h4 className="font-medium text-gray-900 mb-3">받은 신청 통계</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{adoptionRecords.length}</div>
+              <div className="text-2xl font-bold text-gray-900">{receivedRecords.length}</div>
               <div className="text-gray-600">전체 신청</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-yellow-600">
-                {adoptionRecords.filter(r => r.status === 'PENDING').length}
+                {receivedRecords.filter(r => r.status === 'PENDING').length}
               </div>
               <div className="text-gray-600">검토 중</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">
-                {adoptionRecords.filter(r => r.status === 'ACCEPTED').length}
+                {receivedRecords.filter(r => r.status === 'ACCEPTED').length}
               </div>
               <div className="text-gray-600">승인됨</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-red-600">
-                {adoptionRecords.filter(r => r.status === 'REJECTED').length}
+                {receivedRecords.filter(r => r.status === 'REJECTED').length}
               </div>
               <div className="text-gray-600">거절됨</div>
             </div>
@@ -380,7 +424,6 @@ export default function AdoptionHistory() {
         </div>
       )}
 
-      {/* 상세 정보 모달 */}
       {showDetailModal && selectedRecord && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
@@ -395,6 +438,16 @@ export default function AdoptionHistory() {
             </div>
             
             <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">신청자 정보</h4>
+                <div className="bg-gray-50 p-3 rounded-lg space-y-1 text-sm">
+                  <p><span className="font-medium">이름:</span> {selectedRecord.memberName}</p>
+                  <p><span className="font-medium">연락처:</span> {selectedRecord.memberPhone}</p>
+                  <p><span className="font-medium">이메일:</span> {selectedRecord.memberEmail}</p>
+                  <p><span className="font-medium">주소:</span> {selectedRecord.memberAddress}</p>
+                </div>
+              </div>
+
               {selectedRecord.petInfo && (
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">동물 정보</h4>
@@ -403,12 +456,6 @@ export default function AdoptionHistory() {
                     <p><span className="font-medium">종류:</span> {selectedRecord.petInfo.species}</p>
                     <p><span className="font-medium">나이:</span> {selectedRecord.petInfo.age}세</p>
                     <p><span className="font-medium">성별:</span> {selectedRecord.petInfo.gender}</p>
-                    {selectedRecord.petInfo.shelterName && (
-                      <p><span className="font-medium">보호소:</span> {selectedRecord.petInfo.shelterName}</p>
-                    )}
-                    {!selectedRecord.petInfo.shelterName && (
-                      <p><span className="font-medium">보호자:</span> 개인</p>
-                    )}
                   </div>
                 </div>
               )}
@@ -425,21 +472,35 @@ export default function AdoptionHistory() {
 
               {selectedRecord.type === 'CARE' && selectedRecord.desiredStartDate && selectedRecord.desiredEndDate && (
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">희망 돌봄 기간</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">돌봄 기간</h4>
                   <div className="bg-gray-50 p-3 rounded-lg text-sm">
                     <p>{formatDate(selectedRecord.desiredStartDate)} ~ {formatDate(selectedRecord.desiredEndDate)}</p>
                   </div>
                 </div>
               )}
 
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">신청 정보</h4>
-                <div className="bg-gray-50 p-3 rounded-lg space-y-1 text-sm">
-                  <p><span className="font-medium">신청 유형:</span> {getTypeLabel(selectedRecord.type)}</p>
-                  <p><span className="font-medium">신청일:</span> {formatDate(selectedRecord.createdAt)}</p>
-                  <p><span className="font-medium">상태:</span> <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(selectedRecord.status)}`}>{getStatusLabel(selectedRecord.status)}</span></p>
+              {selectedRecord.status === 'PENDING' && (
+                <div className="flex space-x-3 pt-4">
+                  <button 
+                    onClick={() => {
+                      handleAcceptApplication(selectedRecord.id, selectedRecord.type);
+                      setShowDetailModal(false);
+                    }}
+                    className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors"
+                  >
+                    승인
+                  </button>
+                  <button 
+                    onClick={() => {
+                      handleRejectApplication(selectedRecord.id, selectedRecord.type);
+                      setShowDetailModal(false);
+                    }}
+                    className="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors"
+                  >
+                    거절
+                  </button>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

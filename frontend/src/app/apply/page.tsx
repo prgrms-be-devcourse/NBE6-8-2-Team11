@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
-import { Pet, PetStatusType } from '../../shared/types';
+import { Pet } from '../../shared/types';
 import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../shared/utils';
 import { petService } from '../../shared/services/petService';
 import { adoptionService } from '../../shared/services/adoptionService';
@@ -155,13 +155,6 @@ const ActionButtons = ({
   onSubmit: (e: React.FormEvent) => void; 
 }) => (
   <div className="pt-6 border-t border-gray-200 space-y-4">
-    <button
-      type="button"
-      onClick={() => window.location.href = `/chat?petId=${petId}`}
-      className="w-full py-3 px-6 rounded-lg font-semibold text-lg border-2 border-orange-500 text-orange-500 hover:bg-orange-50 transition-colors"
-    >
-      상담하기
-    </button>
     
     <button
       type="submit"
@@ -184,15 +177,15 @@ const ApplicationTypeRadio = ({
   selectedType, 
   onTypeChange 
 }: { 
-  petStatuses?: PetStatusType[]; 
+  petStatuses?: string[]; 
   selectedType: 'adoption' | 'care'; 
   onTypeChange: (type: 'adoption' | 'care') => void; 
 }) => {
   // 상태에 따른 라디오 버튼 활성화 여부 결정
-  const canAdopt = petStatuses?.some((status: PetStatusType) => 
+  const canAdopt = petStatuses?.some((status) => 
     status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
   );
-  const canCare = petStatuses?.some((status: PetStatusType) => 
+  const canCare = petStatuses?.some((status) => 
     status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
   );
 
@@ -335,10 +328,10 @@ function ApplyPageContent() {
           let defaultApplicationType: 'adoption' | 'care' = 'adoption';
           
           if (petData.petStatuses && petData.petStatuses.length > 0) {
-            const canAdopt = petData.petStatuses.some((status: PetStatusType) => 
+            const canAdopt = petData.petStatuses.some((status) => 
               status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
             );
-            const canCare = petData.petStatuses.some((status: PetStatusType) => 
+            const canCare = petData.petStatuses.some((status) => 
               status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
             );
             
@@ -470,7 +463,7 @@ function ApplyPageContent() {
       setSubmitMessage('입양/돌봄 신청이 성공적으로 제출되었습니다!');
       
       setTimeout(() => {
-        router.push('/profile');
+        router.push('/profile?tab=history');
       }, 3000);
       
     } catch (error) {

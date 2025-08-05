@@ -1,16 +1,16 @@
 // 동물 정보 타입 (pet 테이블 기반)
 export interface Pet {
   id: number;
+  petOwnerId: number; // 보호소 ID 또는 사용자 ID
   name: string;
   species: string; // dog, cat, rabbit, bird, other
   age: number;
-  gender: 'MALE' | 'FEMALE' | 'UNKNOWN' | 'NEUTERED_MALE' | 'NEUTERED_FEMALE' ;
+  gender: 'MALE' | 'FEMALE' | 'UNKNOWN' | 'NEUTERED_MALE' | 'NEUTERED_FEMALE';
   description: string;
   imageUrl?: string;
-  shelterName?: string; // Backend DTO에서 제공하는 보호소 이름
-  memberIdCreatedBy: number;
   createdAt: Date;
-  petStatuses?: PetStatusType[]; // 동물 상태 배열
+  shelterName?: string; // Backend DTO에서 제공하는 보호소 이름
+  petStatuses?: string[]; // 백엔드에서 제공하는 상태 목록
 }
 
 // 보호소 정보 타입 (shelter 테이블 기반)

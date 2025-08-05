@@ -7,10 +7,12 @@ import com.back.domain.pet.dto.request.PetUpdateRequestDto;
 import com.back.domain.pet.enums.Gender;
 import com.back.domain.shelter.entity.Shelter;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.ArrayList;
@@ -47,6 +49,9 @@ public class Pet {
 
     @Column(name = "pet_image_url")
     private String imageUrl;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shelter_id", nullable = true) //보호소가 없는 경우 존재.

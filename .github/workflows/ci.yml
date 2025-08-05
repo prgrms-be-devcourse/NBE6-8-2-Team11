@@ -3,6 +3,9 @@ on:
   pull_request:
     branches:
       - develop
+      - main
+    # push 이벤트 제거 - PR에서만 실행
+
 jobs:
   backend-build:
     name: Backend - Build
@@ -17,7 +20,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
       - name: Gradle Cache
         uses: actions/cache@v4
         with:
@@ -29,6 +32,7 @@ jobs:
             gradle-
       - name: Gradle Build Only
         run: ./gradlew build -x test
+
   backend-test:
     name: Backend - Test
     runs-on: ubuntu-latest
@@ -43,7 +47,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
       - name: Gradle Cache
         uses: actions/cache@v4
         with:
@@ -55,6 +59,7 @@ jobs:
             gradle-
       - name: Run Tests
         run: ./gradlew test
+
   frontend-check:
     name: Frontend - Lint & Build
     runs-on: ubuntu-latest
@@ -67,7 +72,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
       - name: Cache node_modules
         uses: actions/cache@v4
         with:
@@ -81,29 +86,37 @@ jobs:
         run: npm run lint
       - name: Build Frontend
         run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: https://nbe6-8-2-team11.onrender.com
 
-  # CI 완료 후 Slack 알림
+  # CI 완료 후 Slack 알림 - PR에서만!
   notify-slack:
     name: Notify Slack
     runs-on: ubuntu-latest
     needs:
       - backend-test
       - frontend-check
-    # 일반 저장소에서만 실행 (Fork가 아닐 때)
-    if: ${{ success() && github.event.pull_request.head.repo.fork != true }}
+    # PR에서만 실행하도록 조건 강화
+    if: ${{ success() && github.repository == 'prgrms-be-devcourse/NBE6-8-2-Team11' && github.event_name == 'pull_request' }}
     steps:
       - name: Send Slack Notification
-        if: ${{ env.SLACK_WEBHOOK_URL != '' }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "⚠️ SLACK_WEBHOOK_URL이 설정되지 않았습니다."
+            echo "GitHub Secrets에 SLACK_WEBHOOK_URL을 추가해주세요."
+            exit 0
+          fi
+          
+          # PR 정보 수집
           pr_title="${{ github.event.pull_request.title }}"
           pr_url="${{ github.event.pull_request.html_url }}"
           pr_author="${{ github.event.pull_request.user.login }}"
           pr_number="${{ github.event.pull_request.number }}"
           
-          # 예쁜 Block Kit 메시지 생성
-          cat << 'EOF' > slack_message.json
+          # Slack 메시지 생성
+          cat << EOF > slack_message.json
           {
             "blocks": [
               {
@@ -117,7 +130,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "*제목*\n```TITLE_PLACEHOLDER```"
+                  "text": "*제목*\n\`\`\`${pr_title}\`\`\`"
                 }
               },
               {
@@ -125,15 +138,15 @@ jobs:
                 "fields": [
                   {
                     "type": "mrkdwn",
-                    "text": "*작성자*\n👤 @AUTHOR_PLACEHOLDER"
+                    "text": "*작성자*\n👤 @${pr_author}"
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "*PR 번호*\n<URL_PLACEHOLDER|#NUMBER_PLACEHOLDER>"
+                    "text": "*PR 번호*\n<${pr_url}|#${pr_number}>"
                   },
                   {
                     "type": "mrkdwn",
-                    "text": "*소스*\n🏠 Main Repo"
+                    "text": "*저장소*\n🏠 Main Repo"
                   },
                   {
                     "type": "mrkdwn",
@@ -151,7 +164,7 @@ jobs:
                       "text": "리뷰하러 가기 🚀"
                     },
                     "style": "primary",
-                    "url": "URL_PLACEHOLDER"
+                    "url": "${pr_url}"
                   },
                   {
                     "type": "button",
@@ -159,7 +172,7 @@ jobs:
                       "type": "plain_text",
                       "text": "변경사항 보기 📝"
                     },
-                    "url": "URL_PLACEHOLDER/files"
+                    "url": "${pr_url}/files"
                   }
                 ]
               },
@@ -176,40 +189,13 @@ jobs:
           }
           EOF
           
-          # 플레이스홀더 교체 (특수문자 안전 처리)
-          escaped_title=$(printf '%s\n' "$pr_title" | sed 's/[[\.*^$()+?{|]/\\&/g')
-          escaped_author=$(printf '%s\n' "$pr_author" | sed 's/[[\.*^$()+?{|]/\\&/g')
-          escaped_url=$(printf '%s\n' "$pr_url" | sed 's/[[\.*^$()+?{|]/\\&/g')
-          
-          sed -i "s|TITLE_PLACEHOLDER|$escaped_title|g" slack_message.json
-          sed -i "s|AUTHOR_PLACEHOLDER|$escaped_author|g" slack_message.json
-          sed -i "s|NUMBER_PLACEHOLDER|$pr_number|g" slack_message.json
-          sed -i "s|URL_PLACEHOLDER|$escaped_url|g" slack_message.json
-          
+          # Slack으로 메시지 전송
           curl -X POST -H 'Content-type: application/json' \
             --data @slack_message.json \
             "$SLACK_WEBHOOK_URL"
           
-          echo "✅ Main Repo PR 알림 전송 완료!"
-
-  # Fork PR에 대한 별도 알림
-  fork-notify:
-    name: Fork Slack Notify
-    runs-on: ubuntu-latest
-    needs:
-      - backend-test
-      - frontend-check
-    # Fork에서만 실행하되, secrets 접근 불가로 인해 실제로는 skipped
-    if: ${{ success() && github.event.pull_request.head.repo.fork == true }}
-    steps:
-      - name: Fork Notification Info
-        run: |
-          echo "🔀 Fork PR 감지됨"
-          echo "⚠️ Fork에서는 secrets 접근 불가로 슬랙 알림을 보낼 수 없습니다."
-          echo "PR 정보:"
-          echo "- 제목: ${{ github.event.pull_request.title }}"
-          echo "- 작성자: ${{ github.event.pull_request.user.login }}"
-          echo "- PR 번호: ${{ github.event.pull_request.number }}"
-          echo "- URL: ${{ github.event.pull_request.html_url }}"
-          echo ""
-          echo "💡 Fork PR의 슬랙 알림은 별도 워크플로우에서 처리됩니다."
+          if [ $? -eq 0 ]; then
+            echo "✅ Slack 알림 전송 완료!"
+          else
+            echo "❌ Slack 알림 전송 실패"
+          fi
