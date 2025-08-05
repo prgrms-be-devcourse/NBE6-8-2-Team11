@@ -1,12 +1,14 @@
-name: Main CI/CD Pipeline
+name: Deploy Pipeline
 
 on:
   push:
     branches: [ main, develop ]
 
 jobs:
-  test:
+  deploy-test:
     runs-on: ubuntu-latest
+    # 조직 레포에서만 실행
+    if: github.repository == 'prgrms-be-devcourse/NBE6-8-2-Team11'
     
     steps:
     - name: Checkout code
@@ -68,9 +70,9 @@ jobs:
         ./gradlew build -x test
 
   deploy-backend:
-    needs: test
+    needs: deploy-test
     runs-on: ubuntu-latest
-    if: success()
+    if: success() && github.repository == 'prgrms-be-devcourse/NBE6-8-2-Team11'
     
     steps:
     - name: Deploy Backend to Render
@@ -84,16 +86,12 @@ jobs:
     - name: Wait for backend deployment
       run: |
         echo "Waiting for Render deployment to complete..."
-        sleep 90
+        sleep 60
 
-    - name: Backend health check
-      run: |
-        curl -f ${{ secrets.BACKEND_URL }}/health || exit 1
-
-  push-to-fork:
-    needs: test
+  push-to-vercel-fork:
+    needs: deploy-test
     runs-on: ubuntu-latest
-    if: success()
+    if: success() && github.repository == 'prgrms-be-devcourse/NBE6-8-2-Team11'
     
     steps:
     - name: Checkout organization repo
@@ -107,29 +105,16 @@ jobs:
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
 
-    - name: Push to personal fork
+    - name: Push to Vercel deployment fork
       run: |
-        # Fork 저장소를 remote로 추가
-        git remote add fork https://${{ secrets.FORK_PUSH_TOKEN }}@github.com/loseminho/NBE6-8-2-Team11.git
+        # 특정 Vercel 배포용 Fork로만 푸시
+        git remote add vercel-fork https://${{ secrets.FORK_PUSH_TOKEN }}@github.com/loseminho/NBE6-8-2-Team11.git
         
         # 현재 브랜치 확인
         CURRENT_BRANCH=${GITHUB_REF#refs/heads/}
         echo "Current branch: $CURRENT_BRANCH"
         
-        # Fork로 푸시 (강제 푸시로 동기화)
-        git push fork $CURRENT_BRANCH:$CURRENT_BRANCH --force
+        # Vercel 배포용 Fork로만 푸시
+        git push vercel-fork $CURRENT_BRANCH:$CURRENT_BRANCH --force
         
-        echo "✅ Successfully pushed $CURRENT_BRANCH to fork"
-
-  notify:
-    needs: [deploy-backend, push-to-fork]
-    runs-on: ubuntu-latest
-    if: success()
-    
-    steps:
-    - name: Notify deployment success
-      run: |
-        echo "🎉 Full deployment pipeline completed successfully!"
-        echo "✅ Backend deployed to Render"
-        echo "✅ Code pushed to fork"
-        echo "🚀 Vercel will automatically deploy frontend from fork"
+        echo "✅ Successfully pushed $CURRENT_BRANCH to Vercel deployment fork"
