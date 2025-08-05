@@ -298,7 +298,6 @@ export default function AdoptionHistory() {
                       <h3 className="font-semibold text-gray-900">{record.petInfo?.name || '동물 정보 없음'}</h3>
                       <p className="text-sm text-gray-600">{record.title}</p>
                       <p className="text-xs text-gray-500 mt-1">
-                        {getTypeLabel(record.type)} 신청 • {record.petInfo?.shelterName || '보호소 정보 없음'}
                       </p>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
@@ -403,9 +402,6 @@ export default function AdoptionHistory() {
                     <p><span className="font-medium">종류:</span> {selectedRecord.petInfo.species}</p>
                     <p><span className="font-medium">나이:</span> {selectedRecord.petInfo.age}세</p>
                     <p><span className="font-medium">성별:</span> {selectedRecord.petInfo.gender}</p>
-                    {selectedRecord.petInfo.shelterName && (
-                      <p><span className="font-medium">보호소:</span> {selectedRecord.petInfo.shelterName}</p>
-                    )}
                   </div>
                 </div>
               )}
