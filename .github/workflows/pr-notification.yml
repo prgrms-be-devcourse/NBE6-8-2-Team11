@@ -1,2 +1,111 @@
-# DISABLED - This workflow is replaced by ci.yml Slack notification
-# This file creates duplicate Slack notifications
+name: Fork Slack Notify
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, synchronize, reopened]
+    branches:
+      - develop
+      - main
+
+jobs:
+  # CI가 완료될 때까지 대기
+  wait-for-ci:
+    name: Wait for CI
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'prgrms-be-devcourse/NBE6-8-2-Team11' && github.event.pull_request.head.repo.fork == true }}
+    steps:
+      - name: Wait for CI completion
+        run: |
+          echo "Waiting for CI to complete..."
+          sleep 30
+
+  fork-notify:
+    name: Fork Slack Notify
+    runs-on: ubuntu-latest
+    needs: wait-for-ci
+    # Fork PR이고 CI가 완료된 경우에만 실행
+    if: ${{ success() && github.repository == 'prgrms-be-devcourse/NBE6-8-2-Team11' && github.event.pull_request.head.repo.fork == true }}
+    steps:
+      - name: Send Fork Slack Notification
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "⚠️ SLACK_WEBHOOK_URL이 설정되지 않았습니다."
+            exit 0
+          fi
+          
+          pr_title="${{ github.event.pull_request.title }}"
+          pr_url="${{ github.event.pull_request.html_url }}"
+          pr_author="${{ github.event.pull_request.user.login }}"
+          pr_number="${{ github.event.pull_request.number }}"
+          
+          cat << EOF > slack_message.json
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🔔 Fork PR 리뷰 요청!"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*제목*\n\`\`\`${pr_title}\`\`\`"
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*작성자*\n👤 @${pr_author}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*PR 번호*\n<${pr_url}|#${pr_number}>"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*타입*\n🔀 Fork PR"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*상태*\n✅ 리뷰 대기 중"
+                  }
+                ]
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "리뷰하러 가기 🚀"
+                    },
+                    "style": "primary",
+                    "url": "${pr_url}"
+                  },
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "변경사항 확인 📝"
+                    },
+                    "url": "${pr_url}/files"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+          
+          curl -X POST -H 'Content-type: application/json' \
+            --data @slack_message.json \
+            "$SLACK_WEBHOOK_URL"
+          
+          echo "✅ Fork PR 알림 전송 완료!"
