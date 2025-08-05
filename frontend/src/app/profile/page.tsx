@@ -35,14 +35,19 @@ export default function ProfilePage() {
         if (!userInfoStr) throw new Error('No userInfo found');
 
         const userInfo = JSON.parse(userInfoStr);
-        const userId = Number(userInfo.sub);  // 토큰에 저장된 userId 사용
-
-        if (userId) {
+        console.log('parsed userInfo:', userInfo);
+        const userId = Number(userInfo.id);
+        console.log('userId:', userId);
+        console.log("userInfo in ProfilePage:", userInfo);
+        if (userId && !isNaN(userId)) {
           const fetchedUser = await ProfileService.fetchUserById(userId);
           setUser(fetchedUser);
+        } else {
+          throw new Error('Invalid userId in userInfo');
         }
       } catch (error) {
         console.error('사용자 정보 로딩 실패:', error);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }

@@ -48,6 +48,7 @@ public class JwtProvider {
 
         String email = null;
         String nickname = null;
+        Long id = null;
 
         Object principal = authentication.getPrincipal();
         if (principal instanceof CustomOAuth2User) {
@@ -57,6 +58,7 @@ public class JwtProvider {
             // Member 엔티티에 getName() 메서드가 닉네임을 반환한다고 가정합니다.
             // 만약 Member 엔티티의 name 필드가 닉네임이 아니라면, 해당 필드명으로 수정해야 합니다.
             nickname = customOAuth2User.getNickname(); // Member 엔티티의 name 필드가 닉네임이라고 가정
+            id = customOAuth2User.getId();
         } else if (principal instanceof UserDetails) {
             // 자체 로그인 등의 경우 UserDetails에서 정보를 가져올 수 있습니다.
             // 여기서는 OAuth2User 케이스에 집중합니다.
@@ -73,6 +75,7 @@ public class JwtProvider {
                 .claim("auth", authorities)
                 .claim("email", email)
                 .claim("nickname", nickname)
+                .claim("id", id)
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
