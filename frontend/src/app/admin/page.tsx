@@ -17,6 +17,16 @@ interface MemberData {
   createdAt: string;
 }
 
+// PetStatusType Enum 값 (백엔드와 동일하게 유지)
+const petStatusTypes = [
+  'AVAILABLE_BOTH',
+  'AVAILABLE_FOR_ADOPTION',
+  'ADOPTED',
+  'AVAILABLE_FOR_CARE',
+  'CARE_IN_PROGRESS',
+  'CARE_COMPLETED'
+];
+
 // 펫 폼 모달 컴포넌트
 const PetFormModal = ({ pet, onClose, onSave }: { pet: Partial<AdminPet> | null, onClose: () => void, onSave: (petData: CreatePetRequest | UpdatePetRequest) => void }) => {
   const [formData, setFormData] = useState({
@@ -27,7 +37,7 @@ const PetFormModal = ({ pet, onClose, onSave }: { pet: Partial<AdminPet> | null,
     description: '',
     imageUrl: '',
     shelterName: '',
-    statuses: [] as string[],
+    statuses: [] as string[], // statuses 필드를 배열로 초기화
     ...pet
   });
 
@@ -36,15 +46,25 @@ const PetFormModal = ({ pet, onClose, onSave }: { pet: Partial<AdminPet> | null,
     setFormData(prev => ({ ...prev, [name]: name === 'age' ? parseInt(value) : value }));
   };
 
+  // 다중 선택 핸들러
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    setFormData(prev => ({ ...prev, statuses: selectedOptions }));
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (formData.statuses.length === 0) {
+      alert('하나 이상의 펫 상태를 선택해야 합니다.');
+      return;
+    }
     onSave(formData as CreatePetRequest | UpdatePetRequest);
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
-        <h2 className="text-xl font-bold mb-4">{pet?.id ? '펫 정보 수정' : '새 펫 등록'}</h2>
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-6">{pet?.id ? '펫 정보 수정' : '새 펫 등록'}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input name="name" value={formData.name} onChange={handleChange} placeholder="이름" required className="w-full p-2 border rounded" />
           <input name="species" value={formData.species} onChange={handleChange} placeholder="종" required className="w-full p-2 border rounded" />
@@ -55,7 +75,26 @@ const PetFormModal = ({ pet, onClose, onSave }: { pet: Partial<AdminPet> | null,
           </select>
           <textarea name="description" value={formData.description} onChange={handleChange} placeholder="설명" className="w-full p-2 border rounded" />
           <input name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="이미지 URL" className="w-full p-2 border rounded" />
-          <div className="flex justify-end space-x-2">
+          <input name="shelterName" value={formData.shelterName} onChange={handleChange} placeholder="보호소 이름 (선택 사항)" className="w-full p-2 border rounded" />
+
+          {/* 펫 상태 선택 필드 추가 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">펫 상태 (다중 선택 가능: Ctrl/Cmd + 클릭)</label>
+            <select
+              name="statuses"
+              multiple
+              required
+              value={formData.statuses}
+              onChange={handleStatusChange}
+              className="mt-1 w-full p-2 border rounded h-32"
+            >
+              {petStatusTypes.map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
             <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">취소</button>
             <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">저장</button>
           </div>
@@ -64,7 +103,6 @@ const PetFormModal = ({ pet, onClose, onSave }: { pet: Partial<AdminPet> | null,
     </div>
   );
 };
-
 
 export default function AdminPage() {
   const { userInfo, isLoggedIn, isLoading: isAuthLoading } = useAuth();
@@ -79,7 +117,6 @@ export default function AdminPage() {
   const [isPetsLoading, setIsPetsLoading] = useState(true);
   const [petError, setPetError] = useState('');
 
-  // 펫 모달 상태
   const [isPetModalOpen, setIsPetModalOpen] = useState(false);
   const [editingPet, setEditingPet] = useState<Partial<AdminPet> | null>(null);
 
@@ -171,11 +208,9 @@ export default function AdminPage() {
   const handleSavePet = async (petData: CreatePetRequest | UpdatePetRequest) => {
     try {
       if (editingPet && editingPet.id) {
-        // 수정
         await adminService.updatePet(editingPet.id.toString(), petData as UpdatePetRequest);
         alert('펫 정보가 성공적으로 수정되었습니다.');
       } else {
-        // 등록
         await adminService.createPet(petData as CreatePetRequest);
         alert('펫이 성공적으로 등록되었습니다.');
       }
