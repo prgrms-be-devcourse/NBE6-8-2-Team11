@@ -4,6 +4,7 @@ on:
     branches:
       - develop
       - main
+    # push 이벤트 제거 - PR에서만 실행
 
 jobs:
   backend-build:
@@ -88,14 +89,15 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: https://nbe6-8-2-team11.onrender.com
 
-  # CI 완료 후 Slack 알림
+  # CI 완료 후 Slack 알림 - PR에서만!
   notify-slack:
     name: Notify Slack
     runs-on: ubuntu-latest
     needs:
       - backend-test
       - frontend-check
-    if: ${{ success() && github.repository == 'prgrms-be-devcourse/NBE6-8-2-Team11' }}
+    # PR에서만 실행하도록 조건 강화
+    if: ${{ success() && github.repository == 'prgrms-be-devcourse/NBE6-8-2-Team11' && github.event_name == 'pull_request' }}
     steps:
       - name: Send Slack Notification
         env:
