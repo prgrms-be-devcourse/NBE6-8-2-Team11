@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { User } from '../types';
+import { useMemberType } from '../../../context/MemberTypeContext';
 
 interface ProfileEditProps {
   user: User | null;
@@ -9,13 +10,16 @@ interface ProfileEditProps {
 }
 
 export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
+  const { memberType, setMemberType, getMemberType } = useMemberType();
+
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
     phone: user?.phone || '',
     address: user?.address || '',
     bio: user?.bio || '',
-    memberType: user?.memberType || 'adopter'
+    // Context 우선, User 객체 백업, 기본값 순서
+    memberType: getMemberType(user?.memberType)
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,6 +27,12 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    // memberType 변경 시 Context에 즉시 저장
+    if (name === 'memberType') {
+      setMemberType(value as 'adopter' | 'shelter');
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -74,7 +84,8 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
         address: data.content.address,
         bio: data.content.bio,
         createdAt,
-        memberType: formData.memberType,  // 기존 user에서 가져옴 (필수 필드)
+        // Context의 현재 값을 User 객체에도 동기화
+        memberType: getMemberType(),
       };
 
 
@@ -228,14 +239,17 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
           <button
               type="button"
               onClick={() => {
+                const resetMemberType = getMemberType(user?.memberType);
                 setFormData({
-                  name: user.name,
-                  email: user.email,
-                  phone: user.phone,
-                  address: user.address,
-                  bio: user.bio || '',
-                  memberType: user.memberType
+                  name: user?.name || '',
+                  email: user?.email || '',
+                  phone: user?.phone || '',
+                  address: user?.address || '',
+                  bio: user?.bio || '',
+                  memberType: resetMemberType
                 });
+                // Context도 원래 값으로 복원
+                setMemberType(resetMemberType);
                 setMessage('');
               }}
               className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"

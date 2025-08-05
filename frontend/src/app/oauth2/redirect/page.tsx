@@ -2,6 +2,7 @@
 import { useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
+import { useMemberType } from '../../../context/MemberTypeContext';
 
 // 동적 렌더링 강제
 export const dynamic = 'force-dynamic';
@@ -10,6 +11,7 @@ function OAuth2RedirectHandler() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { login } = useAuth();
+  const { memberType } = useMemberType();
   const hasProcessed = useRef(false);
 
   useEffect(() => {
@@ -49,8 +51,14 @@ function OAuth2RedirectHandler() {
 
         console.log('OAuth 로그인 및 정보 저장 완료:', userInfo);
 
-        // 성공적으로 처리된 후 홈으로 리다이렉트
-        router.replace('/');
+        // memberType이 설정되어 있는지 확인
+        if (!memberType) {
+          console.log('memberType이 설정되지 않음, 프로필 설정 페이지로 이동');
+          router.replace('/profile?tab=edit&memberTypeRequired=true');
+        } else {
+          console.log('memberType 이미 설정됨:', memberType, ', 홈으로 이동');
+          router.replace('/');
+        }
 
       } catch (error) {
         console.error("토큰 디코딩 또는 저장 중 오류 발생:", error);

@@ -1,12 +1,15 @@
 import Image from 'next/image';
 import { User } from '../types';
 import { formatDate } from '../../../shared/utils';
+import { useMemberType } from '../../../context/MemberTypeContext';
 
 interface ProfileInfoProps {
   user: User | null;
 }
 
 export default function ProfileInfo({ user }: ProfileInfoProps) {
+  const { getMemberType } = useMemberType();
+
   if (!user) {
     return (
         <div className="text-center py-8">
@@ -14,6 +17,9 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
         </div>
     );
   }
+
+  // Context 우선, User 객체 백업, 기본값 순서
+  const finalMemberType = getMemberType(user.memberType);
 
   const getMemberTypeLabel = (type: string) => {
     if (type === 'adopter') return '입양 희망자';
@@ -54,8 +60,8 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
             <p className="text-gray-600 mb-4">{user.email}</p>
 
             <div className="flex items-center space-x-4 text-sm text-gray-500">
-            <span className={`${getMemberTypeClass(user.memberType)} px-3 py-1 rounded-full`}>
-              {getMemberTypeLabel(user.memberType)}
+            <span className={`${getMemberTypeClass(finalMemberType)} px-3 py-1 rounded-full`}>
+              {getMemberTypeLabel(finalMemberType)}
             </span>
               <span>가입일: {formatDate(user.createdAt)}</span>
             </div>

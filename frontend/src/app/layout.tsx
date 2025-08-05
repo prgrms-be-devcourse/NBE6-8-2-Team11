@@ -3,6 +3,7 @@ import "./globals.css";
 import RealTimeNotificationManager from "../shared/components/common/notify/RealTimeNotificationManager";
 import WebSocketInitializer from "../shared/lib/WebSocketInitializer";
 import { AuthProvider } from '../context/AuthContext';
+import { MemberTypeProvider } from '../context/MemberTypeContext';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,9 +19,11 @@ export default function RootLayout({
     <html lang="ko">
       <body className="antialiased" suppressHydrationWarning={true}>
         <AuthProvider>
-          <main>{children}</main>
-          <RealTimeNotificationManager />
-          <WebSocketInitializer />
+          <MemberTypeProvider>
+            <main>{children}</main>
+            <RealTimeNotificationManager />
+            <WebSocketInitializer />
+          </MemberTypeProvider>
         </AuthProvider>
       </body>
     </html>
