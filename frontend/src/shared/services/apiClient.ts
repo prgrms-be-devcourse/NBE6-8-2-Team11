@@ -64,7 +64,6 @@ class ApiClient {
       
       // 응답이 비어있는지 확인
       const responseText = await response.text();
-      console.log('Response text:', responseText);
       
       // 응답이 비어있으면 빈 객체 반환
       if (!responseText.trim()) {

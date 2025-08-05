@@ -5,7 +5,7 @@ export interface Pet {
   name: string;
   species: string; // dog, cat, rabbit, bird, other
   age: number;
-  gender: 'MALE' | 'FEMALE' | 'UNKNOWN' | 'NEUTERED_MALE' | 'NEUTERED_FEMALE';
+  gender: 'MALE' | 'FEMALE';
   description: string;
   imageUrl?: string;
   createdAt: Date;

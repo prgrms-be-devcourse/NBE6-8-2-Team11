@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 interface UserInfo {
   id?: number;
   sub: string;
-  auth: string;
+  auth: 'ROLE_USER' | 'ROLE_ADMIN';
   exp: number;
   nickname?: string;
   email?: string;
@@ -13,6 +13,7 @@ interface UserInfo {
 interface AuthContextType {
   isLoggedIn: boolean;
   userInfo: UserInfo | null;
+  isLoading: boolean;
   login: (accessToken: string, refreshToken: string, userData: UserInfo) => void;
   logout: () => void;
 }
@@ -26,6 +27,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // 컴포넌트 마운트 시 localStorage에서 정보 로드
@@ -47,6 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoggedIn(false);
       setUserInfo(null);
     }
+    setIsLoading(false);
   }, []); // 빈 배열: 컴포넌트 마운트 시 한 번만 실행
 
   const login = (accessToken: string, refreshToken: string, userData: UserInfo) => {
@@ -64,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, userInfo, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, userInfo, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

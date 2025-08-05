@@ -1,15 +1,17 @@
 package com.back.domain.member.controller;
 
+import com.back.domain.member.service.AdminPetService;
 import com.back.domain.pet.dto.request.PetCreateRequestDto;
 import com.back.domain.pet.dto.request.PetUpdateRequestDto;
 import com.back.domain.pet.dto.response.PetInfoResponseDto;
-import com.back.domain.member.service.AdminPetService;
 import com.back.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +26,8 @@ public class AdminPetController {
 
     @PostMapping
     @Operation(summary = "관리자 펫 등록", description = "관리자가 새로운 펫을 등록합니다.")
-    public ResponseEntity<ApiResponse<PetInfoResponseDto>> createPet(@Valid @RequestBody PetCreateRequestDto requestDto) {
-        PetInfoResponseDto createdPet = adminPetService.createPet(requestDto);
+    public ResponseEntity<ApiResponse<PetInfoResponseDto>> createPet(@Valid @RequestBody PetCreateRequestDto requestDto, @AuthenticationPrincipal UserDetails userDetails) {
+        PetInfoResponseDto createdPet = adminPetService.createPet(requestDto, userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success("동물이 성공적으로 등록되었습니다.", createdPet));
     }
 

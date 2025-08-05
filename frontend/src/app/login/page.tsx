@@ -26,6 +26,21 @@ export default function LoginPage() {
     }));
   };
 
+  // JWT 토큰 디코딩 함수 추가
+  const decodeToken = (token: string) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error("Invalid token:", error);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -38,40 +53,22 @@ export default function LoginPage() {
       });
       
       console.log('로그인 성공:', response);
-      
-      // JWT accessToken에서 userInfo 파싱
-      const accessToken = response.accessToken;
-      const refreshToken = response.refreshToken;
-      let userInfo = null;
-      try {
-        const base64Url = accessToken.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const binaryString = atob(base64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        const decodedString = new TextDecoder('utf-8').decode(bytes);
-        const decodedPayload = JSON.parse(decodedString);
-        userInfo = {
-          id: decodedPayload.id || response.userId,
-          sub: decodedPayload.sub,
-          auth: decodedPayload.auth,
-          exp: decodedPayload.exp,
-          nickname: decodedPayload.nickname || null,
-          email: decodedPayload.email || null,
-        };
-      } catch (e) {
-        userInfo = {
-          id: response.userId,
-          sub: response.userId,
-          nickname: response.userName,
-          email: response.userEmail,
-          auth: '',
-          exp: 0,
-        };
+
+      const decodedToken = decodeToken(response.accessToken);
+      if (!decodedToken) {
+        throw new Error('Invalid token');
       }
-      login(accessToken, refreshToken, userInfo);
+    
+      // context/AuthContext의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
+      const userInfo = {
+        sub: response.userId.toString(),
+        auth: decodedToken.auth,
+        exp: decodedToken.exp,
+        nickname: response.userName,
+        email: response.userEmail,
+      };
+      
+      login(response.accessToken, response.refreshToken, userInfo);
       
       console.log('로그인 상태 업데이트 완료, 홈페이지로 이동합니다.');
       
