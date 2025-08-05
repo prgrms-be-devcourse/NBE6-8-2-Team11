@@ -338,10 +338,10 @@ function ApplyPageContent() {
           let defaultApplicationType: 'adoption' | 'care' = 'adoption';
           
           if (petData.petStatuses && petData.petStatuses.length > 0) {
-            const canAdopt = petData.petStatuses.some((status: PetStatusType) => 
+            const canAdopt = petData.petStatuses.some((status) => 
               status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
             );
-            const canCare = petData.petStatuses.some((status: PetStatusType) => 
+            const canCare = petData.petStatuses.some((status) => 
               status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
             );
             
