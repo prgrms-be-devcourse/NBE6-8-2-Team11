@@ -3,8 +3,8 @@
 -- Member 테이블 더미 데이터
 -- password는 BCryptPasswordEncoder로 인코딩된 값이어야 합니다. (예: 'password123' -> '$2a$10$...')
 INSERT INTO member (member_email, member_password, member_name, member_phone, member_role, created_at)
-VALUES ('user1@example.com', '$2a$10$LgL4qLhG2M.B3Z4mP3qX.e.O3B.Q.C.C.N.U.R.A.Q.I.E.F.E.I.D.M.A.C.M.O.K.0', '김철수', '010-1111-2222', 'USER', NOW());
-
+VALUES ('user1@example.com', '$2a$12$..bFUk2xL6M8yKo4ZOu0uu.Znfa5oWqVyhDUAuh.wO3v.umTxI0P2', '김철수', '010-1111-2222', 'USER', NOW());
+-- USER1 비밀번호: asd123
 INSERT INTO member (member_email, member_password, member_name, member_phone, member_role, created_at)
 VALUES ('shelter@example.com', '$2a$10$LgL4qLhG2M.B3Z4mP3qX.e.O3B.Q.C.C.N.U.R.A.Q.I.E.F.E.I.D.M.A.C.M.O.K.0', '행복보호소관리자', '010-3333-4444', 'USER', NOW());
 
