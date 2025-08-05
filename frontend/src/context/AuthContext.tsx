@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 interface UserInfo {
   sub: string;
-  auth: string;
+  auth: 'ROLE_USER' | 'ROLE_ADMIN';
   exp: number;
   nickname?: string;
   email?: string;
