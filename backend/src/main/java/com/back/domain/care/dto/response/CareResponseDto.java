@@ -10,6 +10,10 @@ public record CareResponseDto(
         Long careId,
         Long petId,
         Long memberId,
+        String memberName,
+        String memberPhone,
+        String memberEmail,
+        String memberAddress,
         String title,
         String message,
         String anotherPets,
@@ -25,6 +29,10 @@ public record CareResponseDto(
                 .careId(care.getId())
                 .petId(care.getPet().getId())
                 .memberId(care.getMember().getId())
+                .memberName(care.getMember().getName())
+                .memberPhone(care.getMember().getPhone())
+                .memberEmail(care.getMember().getEmail())
+                .memberAddress(care.getMember().getAddress())
                 .title(care.getTitle())
                 .anotherPets(care.getAnotherPets())
                 .experience(care.getExperience())

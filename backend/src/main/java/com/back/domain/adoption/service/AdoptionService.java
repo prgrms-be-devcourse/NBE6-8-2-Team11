@@ -47,7 +47,8 @@ public class AdoptionService {
                 .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
 
         boolean isAvailableForAdoption = pet.getPetStatuses().stream()
-                .anyMatch(status -> status.getStatus().equals(PetStatusType.AVAILABLE_FOR_ADOPTION));
+                .anyMatch(status -> status.getStatus().equals(PetStatusType.AVAILABLE_FOR_ADOPTION) ||
+                        status.getStatus().equals(PetStatusType.AVAILABLE_BOTH));
 
         if (!isAvailableForAdoption) {
             throw new PetException(PetErrorCode.PET_NOT_AVAILABLE_FOR_CARE);

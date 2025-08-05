@@ -9,6 +9,8 @@ import AdoptionHistory from '../../features/profile/components/AdoptionHistory';
 import LoadingSpinner from '../../shared/components/common/LoadingSpinner';
 import ErrorBoundary from '../../shared/components/common/ErrorBoundary';
 import { User } from '../../features/profile/types';
+import {ProfileService} from '../../shared/services/profileService'
+
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('info');
@@ -16,27 +18,19 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // 실제 API 호출 대신 모의 데이터 사용
     const loadUserData = async () => {
       setIsLoading(true);
       try {
-        // 모의 로딩 시간
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // 모의 사용자 데이터 (김동물로 설정)
-        const mockUser: User = {
-          id: 1,
-          name: '김동물',
-          email: 'kim@example.com',
-          phone: '010-1234-5678',
-          address: '서울시 강남구',
-          profileImage: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-          memberType: 'adopter', // adopter, shelter
-          createdAt: new Date('2024-01-15'),
-          bio: '동물을 사랑하는 사람입니다. 새로운 가족을 찾고 있어요!'
-        };
-        
-        setUser(mockUser);
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (!userInfoStr) throw new Error('No userInfo found');
+
+        const userInfo = JSON.parse(userInfoStr);
+        const userId = Number(userInfo.sub);  // 토큰에 저장된 userId 사용
+
+        if (userId) {
+          const fetchedUser = await ProfileService.fetchUserById(userId);
+          setUser(fetchedUser);
+        }
       } catch (error) {
         console.error('사용자 정보 로딩 실패:', error);
       } finally {

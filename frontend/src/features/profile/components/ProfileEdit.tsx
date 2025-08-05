@@ -27,35 +27,62 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
       [name]: value
     }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setMessage('');
 
     try {
-      // 모의 API 호출
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (user) {
-        const updatedUser: User = {
-          ...user,
+      if (!user) {
+        throw new Error('사용자 정보가 없습니다.');
+      }
+
+
+      const response = await fetch(`/api/members/${user.memberId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
+        },
+        body: JSON.stringify({
           name: formData.name,
-          email: formData.email,
           phone: formData.phone,
           address: formData.address,
-          bio: formData.bio
-        };
-        
-        setUser(updatedUser);
-        setMessage('정보가 성공적으로 수정되었습니다!');
+          bio: formData.bio,
+          currentPassword: '',
+          newPassword: '',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('서버 오류가 발생했습니다.');
       }
-    } catch {
+
+      const data = await response.json();
+      console.log('createdAt from API:', data.content.createdAt);
+
+
+      const updatedUser: User = {
+        memberId: data.content.memberId,
+        name: data.content.name,
+        email: data.content.email,
+        phone: data.content.phone,
+        address: data.content.address,
+        bio: data.content.bio,
+        createdAt: new Date(data.content.createdAt),
+        memberType: user.memberType,  // 기존 user에서 가져옴 (필수 필드)
+      };
+
+      setUser(updatedUser);
+      setMessage('정보가 성공적으로 수정되었습니다!');
+    } catch (error) {
+      console.error(error);
       setMessage('정보 수정에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   if (!user) {
     return (

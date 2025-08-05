@@ -12,6 +12,10 @@ public record ApplicationResponseDto(
     Long id,
     String title,
     String type, // "ADOPTION" 또는 "CARE"
+    String memberName,
+    String memberPhone,
+    String memberEmail,
+    String memberAddress,
     String anotherPets,
     String experience,
     String message,
@@ -27,6 +31,10 @@ public record ApplicationResponseDto(
                 .id(adoption.getId())
                 .title(adoption.getTitle())
                 .type("ADOPTION")
+                .memberName(adoption.getMember().getName())
+                .memberPhone(adoption.getMember().getPhone())
+                .memberEmail(adoption.getMember().getEmail())
+                .memberAddress(adoption.getMember().getAddress())
                 .anotherPets(adoption.getAnotherPets())
                 .experience(adoption.getExperience())
                 .message(adoption.getMessage())
@@ -41,6 +49,10 @@ public record ApplicationResponseDto(
                 .id(care.getId())
                 .title(care.getTitle())
                 .type("CARE")
+                .memberName(care.getMember().getName())
+                .memberPhone(care.getMember().getPhone())
+                .memberEmail(care.getMember().getEmail())
+                .memberAddress(care.getMember().getAddress())
                 .anotherPets(care.getAnotherPets())
                 .experience(care.getExperience())
                 .message(care.getMessage())

@@ -134,10 +134,10 @@ public class NotificationService {
     }
 
     /**
-     * 채팅 메시지 알림 전송
+     * 채팅방 생성 알림 전송
      */
     public void sendChatNotification(Long recipientId, String senderName, String title) {
-        String message = senderName + "님이 메시지를 보냈습니다.";
+        String message = senderName + "님이 채팅방을 생성했습니다.";
         sendRealTimeNotification(recipientId, NotificationType.NEW_MESSAGE, title, message);
     }
 

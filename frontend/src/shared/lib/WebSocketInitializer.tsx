@@ -2,49 +2,34 @@
 
 import { useEffect } from 'react';
 import { wsClient } from './websocket';
-import { useAuth } from '../../context/AuthContext';
+import { useNotificationStore } from '../components/common/notify/NotificationStore';
 
 export default function WebSocketInitializer() {
-  const { isLoggedIn, userInfo } = useAuth();
+  const { addNotification } = useNotificationStore();
 
   useEffect(() => {
     const initializeWebSocket = async () => {
       const token = localStorage.getItem('accessToken');
+      const userId = localStorage.getItem('userId');
       
-      console.log('WebSocket initialization - Token:', !!token, 'UserInfo:', userInfo, 'IsLoggedIn:', isLoggedIn);
-      
-      if (token && isLoggedIn && userInfo) {
+      if (token && userId) {
         // 기존 연결 해제
         wsClient.disconnect();
         
-        // 새로 연결 (userInfo.sub에서 userId 추출)
-        const userId = parseInt(userInfo.sub, 10);
-        console.log('Connecting WebSocket with userId:', userId);
-        wsClient.connect(token, userId);
+        // 새로 연결
+        wsClient.connect(token, parseInt(userId, 10));
         
         // 연결 후 구독 강제 실행
         setTimeout(() => {
           if (wsClient.getConnectionStatus()) {
-            console.log('WebSocket connected, subscribing to notifications...');
             wsClient.subscribeToPersonalNotifications();
-          } else {
-            console.warn('WebSocket not connected, retrying subscription...');
-            // 재시도
-            setTimeout(() => {
-              if (wsClient.getConnectionStatus()) {
-                console.log('WebSocket reconnected, subscribing to notifications...');
-                wsClient.subscribeToPersonalNotifications();
-              }
-            }, 2000);
           }
-        }, 2000);
-      } else {
-        console.warn('WebSocket initialization failed - missing token or user info');
+        }, 1000);
       }
     };
 
     initializeWebSocket();
-  }, [isLoggedIn, userInfo]);
+  }, []);
 
   // 실시간 알림 처리
   useEffect(() => {
@@ -52,13 +37,13 @@ export default function WebSocketInitializer() {
     const handleNotification = (notification: any) => {
       console.log('Received notification:', notification);
       
-      // RealTimeNotificationManager에서 처리하므로 여기서는 NotificationStore에 추가하지 않음
-      // addNotification({
-      //   title: notification.title || '새 알림',
-      //   message: notification.message || notification.content || '새로운 알림이 도착했습니다.',
-      //   type: notification.type || 'NEW_MESSAGE',
-      //   userId: userInfo ? parseInt(userInfo.sub, 10) : 0,
-      // });
+      // NotificationStore에 알림 추가
+      addNotification({
+        title: notification.title || '새 알림',
+        message: notification.message || notification.content || '새로운 알림이 도착했습니다.',
+        type: notification.type || 'NEW_MESSAGE',
+        userId: parseInt(localStorage.getItem('userId') || '0', 10),
+      });
     };
 
     // WebSocket 알림 핸들러 등록
@@ -68,7 +53,7 @@ export default function WebSocketInitializer() {
     return () => {
       wsClient.offNotification(handleNotification);
     };
-  }, [userInfo]);
+  }, [addNotification]);
 
   return null;
 } 

@@ -5,16 +5,23 @@ import { useEffect, useState } from 'react';
 import Header from '../../../shared/components/layout/Header';
 import Footer from '../../../shared/components/layout/Footer';
 import { petService } from '../../../shared/services/petService';
+import { chatService } from '../../../shared/services/chat';
 import { Pet } from '../../../shared/types';
-import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies, getPetStatusDisplayText, getPetStatusColorClass } from '../../../shared/utils';
+import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../../shared/utils';
+import { useAuth } from '../../../context/AuthContext';
+import { wsClient } from '../../../shared/lib/websocket';
+import { useNotificationStore } from '../../../shared/components/common/notify/NotificationStore';
 import Image from 'next/image';
 
 export default function AnimalDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { userInfo } = useAuth();
+  const { addNotification } = useNotificationStore();
   const [pet, setPet] = useState<Pet | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
 
   useEffect(() => {
     if (!params?.id) return;
@@ -34,6 +41,75 @@ export default function AnimalDetailPage() {
 
     loadPetData();
   }, [params?.id]);
+
+  // WebSocket 연결 및 알림 처리
+  useEffect(() => {
+    if (!userInfo) return;
+
+    const token = localStorage.getItem('accessToken');
+    if (token && userInfo) {
+      const userId = parseInt(userInfo.sub, 10);
+      console.log('Gallery page - Connecting WebSocket with userId:', userId);
+      
+      // WebSocket 연결
+      wsClient.connect(token, userId);
+      
+      // 알림 구독
+      setTimeout(() => {
+        if (wsClient.getConnectionStatus()) {
+          wsClient.subscribeToPersonalNotifications();
+        }
+      }, 1000);
+
+      // 알림 핸들러 등록
+      const handleNotification = (notification: { title?: string; message?: string; content?: string; type?: string }) => {
+        console.log('Gallery page - Received notification:', notification);
+        addNotification({
+          title: notification.title || '새 알림',
+          message: notification.message || notification.content || '새로운 알림이 도착했습니다.',
+          type: (notification.type as 'NEW_MESSAGE' | 'ADOPTION_REQUESTED' | 'ADOPTION_ACCEPTED' | 'ADOPTION_REJECTED' | 'CARE_REQUESTED' | 'CARE_ACCEPTED' | 'CARE_REJECTED' | 'CHAT_ROOM_DELETED') || 'NEW_MESSAGE',
+          userId: userId,
+        });
+      };
+
+      wsClient.onNotification(handleNotification);
+
+      // 컴포넌트 언마운트 시 정리
+      return () => {
+        wsClient.offNotification(handleNotification);
+      };
+    }
+  }, [userInfo, addNotification]);
+
+  const handleInquiryClick = async () => {
+    if (!userInfo || !pet) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+
+    try {
+      setIsCreatingChat(true);
+      const currentUserId = parseInt(userInfo.sub, 10);
+      
+      // 채팅방 생성
+      const chatRoom = await chatService.createChatRoom({
+        firstMemberId: currentUserId,
+        secondMemberId: pet.petOwnerId,
+      });
+
+      // 알림을 받을 시간을 위해 약간의 지연 추가
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // 채팅 페이지로 이동
+      router.push(`/allchat?roomId=${chatRoom.id}&petName=${encodeURIComponent(pet.name)}`);
+    } catch (error) {
+      console.error('채팅방 생성 실패:', error);
+      alert('채팅방 생성에 실패했습니다.');
+    } finally {
+      setIsCreatingChat(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -79,17 +155,33 @@ export default function AnimalDetailPage() {
             
             {/* 우측: 상태 */}
             <div className="text-right">
-              <div className="flex items-center justify-end">
-                {pet.petStatuses && pet.petStatuses.length > 0 ? (
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPetStatusColorClass(pet.petStatuses)}`}>
-                    {getPetStatusDisplayText(pet.petStatuses)}
-                  </span>
-                ) : (
-                  <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
-                    상태 미정
-                  </span>
-                )}
+              <div className="flex items-center justify-end mb-3">
+                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                  입양 가능
+                </span>
               </div>
+              {/* 1대1 문의 버튼 */}
+              <button
+                onClick={handleInquiryClick}
+                disabled={isCreatingChat}
+                className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white text-sm px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+                <span>{isCreatingChat ? '채팅방 생성 중...' : '1대1 문의'}</span>
+              </button>
             </div>
           </div>
         </div>

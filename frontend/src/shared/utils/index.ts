@@ -1,4 +1,4 @@
-import { PetStatusType } from '../types';
+// 동물 상태 관련 유틸리티 함수들
 
 // 숫자 포맷팅 함수
 export const formatNumber = (num: number): string => {
@@ -134,7 +134,7 @@ export const parseQueryParams = (queryString: string): Record<string, string> =>
 }; 
 
 // 동물 상태에 따른 표시 텍스트 반환
-export const getPetStatusDisplayText = (statuses: PetStatusType[] | undefined): string => {
+export const getPetStatusDisplayText = (statuses: string[] | undefined): string => {
   if (!statuses || statuses.length === 0) {
     return '상태 미정';
   }
@@ -163,7 +163,7 @@ export const getPetStatusDisplayText = (statuses: PetStatusType[] | undefined): 
 };
 
 // 동물 상태에 따른 배경색 클래스 반환
-export const getPetStatusColorClass = (statuses: PetStatusType[] | undefined): string => {
+export const getPetStatusColorClass = (statuses: string[] | undefined): string => {
   if (!statuses || statuses.length === 0) {
     return 'bg-gray-100 text-gray-800';
   }
@@ -192,26 +192,26 @@ export const getPetStatusColorClass = (statuses: PetStatusType[] | undefined): s
 };
 
 // 입양과 돌봄이 모두 가능한지 확인
-export const isAvailableForBoth = (statuses: PetStatusType[] | undefined): boolean => {
+export const isAvailableForBoth = (statuses: string[] | undefined): boolean => {
   if (!statuses || statuses.length === 0) return false;
   return statuses.includes('AVAILABLE_BOTH') || 
          (statuses.includes('AVAILABLE_FOR_ADOPTION') && statuses.includes('AVAILABLE_FOR_CARE'));
 };
 
 // 입양 가능한지 확인
-export const isAvailableForAdoption = (statuses: PetStatusType[] | undefined): boolean => {
+export const isAvailableForAdoption = (statuses: string[] | undefined): boolean => {
   if (!statuses || statuses.length === 0) return false;
   return statuses.includes('AVAILABLE_FOR_ADOPTION') || statuses.includes('AVAILABLE_BOTH');
 };
 
 // 돌봄 가능한지 확인
-export const isAvailableForCare = (statuses: PetStatusType[] | undefined): boolean => {
+export const isAvailableForCare = (statuses: string[] | undefined): boolean => {
   if (!statuses || statuses.length === 0) return false;
   return statuses.includes('AVAILABLE_FOR_CARE') || statuses.includes('AVAILABLE_BOTH');
 };
 
 // 입양/돌봄 불가능한지 확인
-export const isUnavailable = (statuses: PetStatusType[] | undefined): boolean => {
+export const isUnavailable = (statuses: string[] | undefined): boolean => {
   if (!statuses || statuses.length === 0) return false;
   return statuses.includes('ADOPTED') || statuses.includes('CARE_IN_PROGRESS') || statuses.includes('CARE_COMPLETED');
 }; 
