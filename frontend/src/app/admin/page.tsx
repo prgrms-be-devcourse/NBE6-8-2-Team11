@@ -44,6 +44,9 @@ interface PetFormData {
 
 // 펫 폼 모달 컴포넌트
 const PetFormModal = ({ pet, onClose, onSave }: { pet: Partial<AdminPet> | null, onClose: () => void, onSave: (petData: PetFormData) => void }) => {
+  // FIX: pet?.petStatuses가 있으면 그 값을, 없으면 기본값을 사용하도록 초기화 로직 수정
+  const initialStatuses = pet?.petStatuses && pet.petStatuses.length > 0 ? pet.petStatuses : ['AVAILABLE_FOR_ADOPTION'];
+
   const [formData, setFormData] = useState<PetFormData>({
     name: '',
     species: 'dog',
@@ -52,8 +55,8 @@ const PetFormModal = ({ pet, onClose, onSave }: { pet: Partial<AdminPet> | null,
     description: '',
     imageUrl: '',
     shelterName: '',
-    statuses: ['AVAILABLE_FOR_ADOPTION'], // 단일 선택이므로 하나의 요소만 있는 배열로 초기화
-    ...(pet || {})
+    ...pet,
+    statuses: initialStatuses, // petStatuses를 statuses로 매핑하여 초기화
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -92,7 +95,7 @@ const PetFormModal = ({ pet, onClose, onSave }: { pet: Partial<AdminPet> | null,
             <select
               name="statuses"
               required
-              value={formData.statuses[0]} // 배열의 첫 번째 요소를 값으로 사용
+              value={formData.statuses[0]}
               onChange={handleChange}
               className="mt-1 w-full p-2 border rounded"
             >
@@ -218,13 +221,12 @@ export default function AdminPage() {
   const handleSavePet = async (petData: PetFormData) => {
     try {
       if (editingPet && editingPet.id) {
-        // 수정 시: DTO에 불필요한 id와 petOwnerId를 제거하여 업데이트 데이터만 전달
-        const { id, petOwnerId, createdAt, ...updateData } = petData;
+        // FIX: 수정 시 DTO에 불필요한 id, petOwnerId, createdAt, 그리고 petStatuses 필드를 제거
+        const { id, petOwnerId, createdAt, petStatuses, ...updateData } = petData as any;
         
         await adminService.updatePet(editingPet.id.toString(), updateData as UpdatePetRequest);
         alert('펫 정보가 성공적으로 수정되었습니다.');
       } else {
-        // 등록 시: CreatePetRequest 타입으로 전달
         await adminService.createPet(petData as CreatePetRequest);
         alert('펫이 성공적으로 등록되었습니다.');
       }
