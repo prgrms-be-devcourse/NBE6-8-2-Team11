@@ -38,7 +38,7 @@ export default function ProfilePage() {
         console.log('parsed userInfo:', userInfo);
         const userId = Number(userInfo.id);
         console.log('userId:', userId);
-
+        console.log("userInfo in ProfilePage:", userInfo);
         if (userId && !isNaN(userId)) {
           const fetchedUser = await ProfileService.fetchUserById(userId);
           setUser(fetchedUser);
