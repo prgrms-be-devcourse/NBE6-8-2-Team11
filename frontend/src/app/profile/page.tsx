@@ -17,6 +17,14 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    // URL 파라미터에서 탭 정보 읽기
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    
+    if (tabParam && ['info', 'edit', 'history', 'getHistory'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+    
     // 실제 API 호출 대신 모의 데이터 사용
     const loadUserData = async () => {
       setIsLoading(true);

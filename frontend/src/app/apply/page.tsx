@@ -463,7 +463,7 @@ function ApplyPageContent() {
       setSubmitMessage('입양/돌봄 신청이 성공적으로 제출되었습니다!');
       
       setTimeout(() => {
-        router.push('/profile');
+        router.push('/profile?tab=history');
       }, 3000);
       
     } catch (error) {
