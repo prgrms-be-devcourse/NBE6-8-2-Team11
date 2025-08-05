@@ -39,6 +39,9 @@ interface PetFormData {
   imageUrl: string;
   shelterName: string;
   statuses: string[];
+  petOwnerId?: number;
+  createdAt?: Date | string;
+  petStatuses?: string[];
 }
 
 // 펫 폼 모달 컴포넌트
@@ -138,7 +141,7 @@ export default function AdminPage() {
     setMemberError('');
     try {
       const memberData = await adminService.getMembers();
-      setMembers(memberData as any);
+      setMembers(memberData as unknown as MemberData[]);
     } catch (error) {
       console.error('Failed to fetch members:', error);
       setMemberError('회원 목록을 불러오는 데 실패했습니다.');
@@ -221,7 +224,7 @@ export default function AdminPage() {
     try {
       if (editingPet && editingPet.id) {
         // FIX: 수정 시 DTO에 불필요한 id, petOwnerId, createdAt, 그리고 petStatuses 필드를 제거
-        const { id, petOwnerId, createdAt, petStatuses, ...updateData } = petData as any;
+        const { id, petOwnerId, createdAt, petStatuses, ...updateData } = petData;
         
         await adminService.updatePet(editingPet.id.toString(), updateData as UpdatePetRequest);
         alert('펫 정보가 성공적으로 수정되었습니다.');
