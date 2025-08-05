@@ -38,6 +38,8 @@ interface PetFormData {
   imageUrl: string;
   shelterName: string;
   statuses: string[];
+  petOwnerId?: number;
+  createdAt?: Date | string;
 }
 
 // 펫 폼 모달 컴포넌트
@@ -216,8 +218,8 @@ export default function AdminPage() {
   const handleSavePet = async (petData: PetFormData) => {
     try {
       if (editingPet && editingPet.id) {
-        // 수정 시: DTO에 불필요한 id와 petOwnerId를 제거
-        const { id, ...updateData } = petData;
+        // 수정 시: DTO에 불필요한 id와 petOwnerId를 제거하여 업데이트 데이터만 전달
+        const { id, petOwnerId, createdAt, ...updateData } = petData;
         
         await adminService.updatePet(editingPet.id.toString(), updateData as UpdatePetRequest);
         alert('펫 정보가 성공적으로 수정되었습니다.');
