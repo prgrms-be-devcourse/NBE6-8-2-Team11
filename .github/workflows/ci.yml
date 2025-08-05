@@ -96,8 +96,8 @@ jobs:
     needs:
       - backend-test
       - frontend-check
-    # PR에서만 실행하도록 조건 강화
-    if: ${{ success() && github.repository == 'prgrms-be-devcourse/NBE6-8-2-Team11' && github.event_name == 'pull_request' }}
+    # 조직 레포의 PR에서만 실행 (Fork PR 제외)
+    if: ${{ success() && github.repository == 'prgrms-be-devcourse/NBE6-8-2-Team11' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false }}
     steps:
       - name: Send Slack Notification
         env:
