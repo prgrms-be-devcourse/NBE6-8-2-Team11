@@ -84,6 +84,18 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+            
+            {/* ▼▼▼▼▼ 변경된 부분 ▼▼▼▼▼ */}
+            {/* 로그인 상태(isLoggedIn)가 true일 때만 '펫 등록하기' 링크가 보이도록 한다. */}
+            {isLoggedIn && (
+              <Link
+                href="/pets/register"
+                className="font-semibold text-orange-600 hover:text-orange-500 transition-colors"
+              >
+                펫 등록하기
+              </Link>
+            )}
+            {/* ▲▲▲▲▲ 여기까지 변경 ▲▲▲▲▲ */}
           </nav>
 
           {/* 오른쪽: 사용자 메뉴 */}
