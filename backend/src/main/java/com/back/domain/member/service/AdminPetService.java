@@ -6,6 +6,8 @@ import com.back.domain.pet.dto.request.PetCreateRequestDto;
 import com.back.domain.pet.dto.request.PetUpdateRequestDto;
 import com.back.domain.pet.dto.response.PetInfoResponseDto;
 import com.back.domain.pet.entity.Pet;
+import com.back.domain.pet.entity.PetStatus;
+import com.back.domain.pet.enums.PetStatusType;
 import com.back.domain.pet.exception.PetErrorCode;
 import com.back.domain.pet.exception.PetException;
 import com.back.domain.pet.repository.PetRepository;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +56,18 @@ public class AdminPetService {
                 .member(admin) // 관리자 멤버로 추가
                 .build();
 
+        // PetStatus 리스트를 생성하고 설정하는 로직 추가
+        List<PetStatus> statuses = new ArrayList<>();
+        if (requestDto.getStatuses() != null) {
+            statuses = requestDto.getStatuses().stream()
+                    .map(status -> PetStatus.builder()
+                            .status(PetStatusType.valueOf(status))
+                            .pet(pet)
+                            .build())
+                    .collect(Collectors.toList());
+        }
+        pet.setPetStatuses(statuses); // 생성된 상태 리스트를 펫 객체에 설정
+
         Pet savedPet = petRepository.save(pet);
         return PetInfoResponseDto.from(savedPet);
     }
@@ -78,10 +93,27 @@ public class AdminPetService {
         Pet pet = petRepository.findById(petId)
                 .orElseThrow(() -> new PetException(PetErrorCode.PET_NOT_FOUND));
 
-        Shelter shelter = shelterRepository.findByName(requestDto.getShelterName())
-                .orElseThrow(() -> new CustomException(ErrorCode.SHELTER_NOT_FOUND));
+        /* 필요시 주석 해제
+        Shelter shelter = null;
+        if (requestDto.getShelterName() != null && !requestDto.getShelterName().isBlank()) {
+            shelter = shelterRepository.findByName(requestDto.getShelterName())
+                    .orElseThrow(() -> new CustomException(ErrorCode.SHELTER_NOT_FOUND));
+        }
+        */
 
         pet.updatePet(requestDto);
+
+        // 수정 시에도 PetStatus 업데이트 로직 추가
+        List<PetStatus> statuses = new ArrayList<>();
+        if (requestDto.getStatuses() != null) {
+            statuses = requestDto.getStatuses().stream()
+                    .map(status -> PetStatus.builder()
+                            .status(PetStatusType.valueOf(status))
+                            .pet(pet)
+                            .build())
+                    .collect(Collectors.toList());
+        }
+        pet.setPetStatuses(statuses);
 
         return PetInfoResponseDto.from(pet);
     }
