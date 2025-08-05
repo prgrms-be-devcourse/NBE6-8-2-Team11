@@ -1,40 +1,87 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
 import LoadingSpinner from '../../shared/components/common/LoadingSpinner';
-import { adminService, AdminPet } from '../../shared/services/admin';
+import { adminService, AdminPet, CreatePetRequest, UpdatePetRequest } from '../../shared/services/admin';
 import { formatDate } from '../../shared/utils';
 
-// NOTE: API 응답과 일치하는 새로운 타입을 정의하여 문제를 해결합니다.
-// 기존 AdminUser 타입은 API 응답(memberId)과 일치하지 않았습니다.
+// 회원 데이터 타입 정의
 interface MemberData {
   memberId: number;
-  id: number; // 타입 호환성을 위해 유지할 수 있으나, memberId를 사용합니다.
   name: string;
   email: string;
-  // API 응답에 role이 없으므로 주석 처리합니다. 필요 시 백엔드 DTO에 추가해야 합니다.
-  // role: string; 
   createdAt: string;
 }
+
+// 펫 폼 모달 컴포넌트
+const PetFormModal = ({ pet, onClose, onSave }: { pet: Partial<AdminPet> | null, onClose: () => void, onSave: (petData: CreatePetRequest | UpdatePetRequest) => void }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    species: 'dog',
+    age: 0,
+    gender: 'MALE',
+    description: '',
+    imageUrl: '',
+    shelterName: '',
+    statuses: [] as string[],
+    ...pet
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: name === 'age' ? parseInt(value) : value }));
+  };
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    onSave(formData as CreatePetRequest | UpdatePetRequest);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+        <h2 className="text-xl font-bold mb-4">{pet?.id ? '펫 정보 수정' : '새 펫 등록'}</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input name="name" value={formData.name} onChange={handleChange} placeholder="이름" required className="w-full p-2 border rounded" />
+          <input name="species" value={formData.species} onChange={handleChange} placeholder="종" required className="w-full p-2 border rounded" />
+          <input name="age" type="number" value={formData.age} onChange={handleChange} placeholder="나이" required className="w-full p-2 border rounded" />
+          <select name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2 border rounded">
+            <option value="MALE">수컷</option>
+            <option value="FEMALE">암컷</option>
+          </select>
+          <textarea name="description" value={formData.description} onChange={handleChange} placeholder="설명" className="w-full p-2 border rounded" />
+          <input name="imageUrl" value={formData.imageUrl} onChange={handleChange} placeholder="이미지 URL" className="w-full p-2 border rounded" />
+          <div className="flex justify-end space-x-2">
+            <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">취소</button>
+            <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">저장</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 
 export default function AdminPage() {
   const { userInfo, isLoggedIn, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('members');
 
-  // States for Member Management
   const [members, setMembers] = useState<MemberData[]>([]);
   const [isMembersLoading, setIsMembersLoading] = useState(true);
   const [memberError, setMemberError] = useState('');
 
-  // States for Pet Management
   const [pets, setPets] = useState<AdminPet[]>([]);
   const [isPetsLoading, setIsPetsLoading] = useState(true);
   const [petError, setPetError] = useState('');
+
+  // 펫 모달 상태
+  const [isPetModalOpen, setIsPetModalOpen] = useState(false);
+  const [editingPet, setEditingPet] = useState<Partial<AdminPet> | null>(null);
 
   const isAdmin = userInfo?.auth?.includes('ADMIN');
 
@@ -42,9 +89,8 @@ export default function AdminPage() {
     setIsMembersLoading(true);
     setMemberError('');
     try {
-      // adminService.getMembers()는 AdminUser[]를 반환하지만, 실제 데이터는 MemberData 형태입니다.
       const memberData = await adminService.getMembers();
-      setMembers(memberData as any); // 타입 단언을 통해 데이터를 할당합니다.
+      setMembers(memberData as any);
     } catch (error) {
       console.error('Failed to fetch members:', error);
       setMemberError('회원 목록을 불러오는 데 실패했습니다.');
@@ -112,6 +158,35 @@ export default function AdminPage() {
     }
   };
 
+  const handleOpenPetModal = (pet: Partial<AdminPet> | null = null) => {
+    setEditingPet(pet);
+    setIsPetModalOpen(true);
+  };
+
+  const handleClosePetModal = () => {
+    setIsPetModalOpen(false);
+    setEditingPet(null);
+  };
+
+  const handleSavePet = async (petData: CreatePetRequest | UpdatePetRequest) => {
+    try {
+      if (editingPet && editingPet.id) {
+        // 수정
+        await adminService.updatePet(editingPet.id.toString(), petData as UpdatePetRequest);
+        alert('펫 정보가 성공적으로 수정되었습니다.');
+      } else {
+        // 등록
+        await adminService.createPet(petData as CreatePetRequest);
+        alert('펫이 성공적으로 등록되었습니다.');
+      }
+      handleClosePetModal();
+      fetchPets();
+    } catch (error) {
+      alert(`펫 ${editingPet?.id ? '수정' : '등록'}에 실패했습니다.`);
+      console.error('Failed to save pet:', error);
+    }
+  };
+
   if (isAuthLoading || !isLoggedIn || !isAdmin) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -162,21 +237,18 @@ export default function AdminPage() {
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이메일</th>
-                                        {/* FIX: API 응답에 역할(role)이 없어 테이블에서 제외 */}
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가입일</th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">작업</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {members.map(member => (
-                                        // FIX: key prop에 고유하고 올바른 값인 memberId를 사용합니다.
                                         <tr key={member.memberId}>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.memberId}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{member.name}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.email}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(new Date(member.createdAt))}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                {/* FIX: handleDeleteMember에 올바른 ID(memberId)를 전달합니다. */}
                                                 <button onClick={() => handleDeleteMember(member.memberId)} className="text-red-600 hover:text-red-900">삭제</button>
                                             </td>
                                         </tr>
@@ -192,7 +264,7 @@ export default function AdminPage() {
                 <div>
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-gray-800">펫 목록</h2>
-                        <button className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600">
+                        <button onClick={() => handleOpenPetModal()} className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600">
                             새 펫 등록
                         </button>
                     </div>
@@ -218,7 +290,7 @@ export default function AdminPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pet.age}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(new Date(pet.createdAt))}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
-                                                <button className="text-indigo-600 hover:text-indigo-900">수정</button>
+                                                <button onClick={() => handleOpenPetModal(pet)} className="text-indigo-600 hover:text-indigo-900">수정</button>
                                                 <button onClick={() => handleDeletePet(pet.id)} className="text-red-600 hover:text-red-900">삭제</button>
                                             </td>
                                         </tr>
@@ -230,6 +302,8 @@ export default function AdminPage() {
                 </div>
             )}
         </div>
+        
+        {isPetModalOpen && <PetFormModal pet={editingPet} onClose={handleClosePetModal} onSave={handleSavePet} />}
       </main>
       <Footer />
     </div>
