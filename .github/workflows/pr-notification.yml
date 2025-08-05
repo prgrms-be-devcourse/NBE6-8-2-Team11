@@ -7,21 +7,48 @@ on:
       - develop
 
 jobs:
+  # CI 체크 job 추가
+  check-ci:
+    name: Check CI Status
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.head.repo.fork == true }}
+    outputs:
+      ci-success: ${{ steps.check.outputs.success }}
+    steps:
+      - name: Check CI Status
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: checkRuns } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.pull_request.head.sha
+            });
+            
+            // CI 관련 체크만 필터링
+            const ciChecks = checkRuns.check_runs.filter(check => 
+              check.name.includes('Backend') || 
+              check.name.includes('Frontend') ||
+              check.name.includes('CI')
+            );
+            
+            const allSuccess = ciChecks.length > 0 && ciChecks.every(check => check.conclusion === 'success');
+            
+            console.log('CI Checks:', ciChecks.map(c => `${c.name}: ${c.conclusion}`));
+            console.log('All CI Success:', allSuccess);
+            
+            core.setOutput('success', allSuccess);
+            
+            return allSuccess;
+
   fork-notify:
     name: Fork Slack Notify
     runs-on: ubuntu-latest
-    # Fork에서만 실행
-    if: ${{ !github.event.pull_request.draft && github.event.pull_request.head.repo.fork == true }}
+    needs: check-ci
+    # CI가 성공했을 때만 실행
+    if: ${{ needs.check-ci.outputs.ci-success == 'true' }}
     steps:
-      - name: Wait for CI completion
-        run: |
-          echo "Fork PR CI 완료를 기다리는 중..."
-          # CI가 완료될 때까지 간단히 대기 (2분)
-          sleep 120
-          echo "CI 대기 완료"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Send Fork Slack Notification
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
