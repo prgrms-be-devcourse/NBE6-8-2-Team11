@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
 import { memberService } from '../../shared/services/member';
-import { useAuth } from '../../shared/hooks/useAuth';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,40 +30,48 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
+  
     try {
       const response = await memberService.login({
         email: formData.email,
         password: formData.password,
       });
-
-      // userInfo 객체
-      const userInfo = {
-        id: response.userId,         // 이게 없으면 아래에서 처리
-        sub: response.userId.toString(),
-        auth: 'USER',
-        exp: Date.now() + 3600000,
-        nickname: response.userName,
-        email: response.userEmail,
-      };
-
-      const userId = userInfo.id ?? parseInt(userInfo.sub, 10);
-      if (isNaN(userId)) {
-        throw new Error('Invalid userId in userInfo');
-      }
-      // useAuth의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
-      login(
-        {
-
-          id:userId,
-          email: response.userEmail, 
-          name: response.userName 
-        },
-        { 
-          accessToken: response.accessToken, 
-          refreshToken: response.refreshToken 
+      
+      console.log('로그인 성공:', response);
+      
+      // JWT accessToken에서 userInfo 파싱
+      const accessToken = response.accessToken;
+      const refreshToken = response.refreshToken;
+      let userInfo = null;
+      try {
+        const base64Url = accessToken.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
         }
-      );
+        const decodedString = new TextDecoder('utf-8').decode(bytes);
+        const decodedPayload = JSON.parse(decodedString);
+        userInfo = {
+          id: decodedPayload.id,
+          sub: decodedPayload.sub,
+          auth: decodedPayload.auth,
+          exp: decodedPayload.exp,
+          nickname: decodedPayload.nickname || null,
+          email: decodedPayload.email || null,
+        };
+      } catch (e) {
+        userInfo = {
+          id: response.userId,
+          sub: response.userId,
+          nickname: response.userName,
+          email: response.userEmail,
+          auth: '',
+          exp: 0,
+        };
+      }
+      login(accessToken, refreshToken, userInfo);
       
       console.log('로그인 상태 업데이트 완료, 홈페이지로 이동합니다.');
       
