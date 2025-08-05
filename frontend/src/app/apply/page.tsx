@@ -184,15 +184,15 @@ const ApplicationTypeRadio = ({
   selectedType, 
   onTypeChange 
 }: { 
-  petStatuses?: PetStatusType[]; 
+  petStatuses?: string[]; 
   selectedType: 'adoption' | 'care'; 
   onTypeChange: (type: 'adoption' | 'care') => void; 
 }) => {
   // 상태에 따른 라디오 버튼 활성화 여부 결정
-  const canAdopt = petStatuses?.some((status: PetStatusType) => 
+  const canAdopt = petStatuses?.some((status) => 
     status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
   );
-  const canCare = petStatuses?.some((status: PetStatusType) => 
+  const canCare = petStatuses?.some((status) => 
     status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
   );
 
@@ -335,10 +335,10 @@ function ApplyPageContent() {
           let defaultApplicationType: 'adoption' | 'care' = 'adoption';
           
           if (petData.petStatuses && petData.petStatuses.length > 0) {
-            const canAdopt = petData.petStatuses.some((status: PetStatusType) => 
+            const canAdopt = petData.petStatuses.some((status) => 
               status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
             );
-            const canCare = petData.petStatuses.some((status: PetStatusType) => 
+            const canCare = petData.petStatuses.some((status) => 
               status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
             );
             

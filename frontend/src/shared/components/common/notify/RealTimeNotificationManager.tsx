@@ -44,7 +44,7 @@ export default function RealTimeNotificationManager() {
         id: Date.now(), // Use client-side timestamp for unique ID for popups
         title: notification.title || '새 알림',
         message: notification.message || notification.content || '새로운 알림이 도착했습니다.',
-        type: notification.type as 'NEW_MESSAGE' | 'ADOPTION_REQUESTED' | 'ADOPTION_ACCEPTED' | 'ADOPTION_REJECTED' | 'CARE_REQUESTED' | 'CARE_ACCEPTED' | 'CARE_REJECTED' | 'CHAT_ROOM_DELETED' | 'CHAT_ROOM_CREATED', // Explicitly cast type
+        type: notification.type as Notification['type'], // Use the type from Notification interface
         isRead: false,
         createdAt: new Date().toISOString(),
         userId: 0, // Placeholder, as userId might not be directly in real-time payload
