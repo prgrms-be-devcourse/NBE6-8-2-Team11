@@ -1,3 +1,5 @@
+import { PetStatusType } from '../types';
+
 // 숫자 포맷팅 함수
 export const formatNumber = (num: number): string => {
   if (typeof num !== 'number' || isNaN(num)) {
@@ -129,4 +131,87 @@ export const parseQueryParams = (queryString: string): Record<string, string> =>
   }
   
   return result;
+}; 
+
+// 동물 상태에 따른 표시 텍스트 반환
+export const getPetStatusDisplayText = (statuses: PetStatusType[] | undefined): string => {
+  if (!statuses || statuses.length === 0) {
+    return '상태 미정';
+  }
+
+  // 입양 및 돌봄 가능이 있으면 "입양 및 돌봄 가능"
+  if (statuses.includes('AVAILABLE_BOTH')) {
+    return '입양 및 돌봄 가능';
+  }
+  
+  // 입양 가능이 있으면 "입양 가능"
+  if (statuses.includes('AVAILABLE_FOR_ADOPTION')) {
+    return '입양 가능';
+  }
+  
+  // 돌봄 가능이 있으면 "돌봄 가능"
+  if (statuses.includes('AVAILABLE_FOR_CARE')) {
+    return '돌봄 가능';
+  }
+  
+  // 입양 완료, 돌봄 진행중, 돌봄 완료가 있으면 "입양/돌봄 불가능"
+  if (statuses.includes('ADOPTED') || statuses.includes('CARE_IN_PROGRESS') || statuses.includes('CARE_COMPLETED')) {
+    return '입양/돌봄 불가능';
+  }
+  
+  return '상태 미정';
+};
+
+// 동물 상태에 따른 배경색 클래스 반환
+export const getPetStatusColorClass = (statuses: PetStatusType[] | undefined): string => {
+  if (!statuses || statuses.length === 0) {
+    return 'bg-gray-100 text-gray-800';
+  }
+
+  // 입양 및 돌봄 가능이 있으면 주황색
+  if (statuses.includes('AVAILABLE_BOTH')) {
+    return 'bg-orange-100 text-orange-800';
+  }
+  
+  // 입양 가능이 있으면 초록색
+  if (statuses.includes('AVAILABLE_FOR_ADOPTION')) {
+    return 'bg-green-100 text-green-800';
+  }
+  
+  // 돌봄 가능이 있으면 파란색
+  if (statuses.includes('AVAILABLE_FOR_CARE')) {
+    return 'bg-blue-100 text-blue-800';
+  }
+  
+  // 입양 완료, 돌봄 진행중, 돌봄 완료가 있으면 회색
+  if (statuses.includes('ADOPTED') || statuses.includes('CARE_IN_PROGRESS') || statuses.includes('CARE_COMPLETED')) {
+    return 'bg-gray-100 text-gray-800';
+  }
+  
+  return 'bg-gray-100 text-gray-800';
+};
+
+// 입양과 돌봄이 모두 가능한지 확인
+export const isAvailableForBoth = (statuses: PetStatusType[] | undefined): boolean => {
+  if (!statuses || statuses.length === 0) return false;
+  return statuses.includes('AVAILABLE_BOTH') || 
+         (statuses.includes('AVAILABLE_FOR_ADOPTION') && statuses.includes('AVAILABLE_FOR_CARE'));
+};
+
+// 입양 가능한지 확인
+export const isAvailableForAdoption = (statuses: PetStatusType[] | undefined): boolean => {
+  if (!statuses || statuses.length === 0) return false;
+  return statuses.includes('AVAILABLE_FOR_ADOPTION') || statuses.includes('AVAILABLE_BOTH');
+};
+
+// 돌봄 가능한지 확인
+export const isAvailableForCare = (statuses: PetStatusType[] | undefined): boolean => {
+  if (!statuses || statuses.length === 0) return false;
+  return statuses.includes('AVAILABLE_FOR_CARE') || statuses.includes('AVAILABLE_BOTH');
+};
+
+// 입양/돌봄 불가능한지 확인
+export const isUnavailable = (statuses: PetStatusType[] | undefined): boolean => {
+  if (!statuses || statuses.length === 0) return false;
+  return statuses.includes('ADOPTED') || statuses.includes('CARE_IN_PROGRESS') || statuses.includes('CARE_COMPLETED');
 }; 

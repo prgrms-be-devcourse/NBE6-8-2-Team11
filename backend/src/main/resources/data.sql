@@ -8,6 +8,9 @@ VALUES ('user1@example.com', '$2a$10$LgL4qLhG2M.B3Z4mP3qX.e.O3B.Q.C.C.N.U.R.A.Q.
 INSERT INTO member (member_email, member_password, member_name, member_phone, member_role, created_at)
 VALUES ('shelter@example.com', '$2a$10$LgL4qLhG2M.B3Z4mP3qX.e.O3B.Q.C.C.N.U.R.A.Q.I.E.F.E.I.D.M.A.C.M.O.K.0', '행복보호소관리자', '010-3333-4444', 'USER', NOW());
 
+INSERT INTO member (member_email, member_password, member_name, member_phone, member_role, created_at)
+VALUES ('ex@mail.com', 'asd123', '홍길동', '010-9999-9999', 'USER', NOW());
+
 INSERT INTO shelter (shelter_id, shelter_name, shelter_address, shelter_city, shelter_state, shelter_zip_code, shelter_phone, created_at) VALUES
 (1, '사랑의 동물보호소', '서울시 강남구 테헤란로 123', '서울', '강남구', '06123', '02-1234-5678', '2024-01-01T00:00:00'),
 (2, '희망의 동물보호소', '서울시 서초구 서초대로 456', '서울', '서초구', '06678', '02-2345-6789', '2024-01-02T00:00:00'),
@@ -23,9 +26,9 @@ INSERT INTO pet (pet_name, pet_species, pet_age, pet_gender, pet_description, pe
 
 -- 모든 동물을 '입양 가능' 상태로 초기화
 INSERT INTO pet_status (pet_status_type, pet_id) VALUES
-('AVAILABLE_FOR_ADOPTION', 1),
+('ADOPTED', 1),
 ('AVAILABLE_FOR_ADOPTION', 2),
-('AVAILABLE_FOR_ADOPTION', 3),
-('AVAILABLE_FOR_ADOPTION', 4),
-('AVAILABLE_FOR_ADOPTION', 5),
-('AVAILABLE_FOR_ADOPTION', 6);
+('AVAILABLE_FOR_CARE', 3),
+('AVAILABLE_BOTH', 4),
+('CARE_IN_PROGRESS', 5),
+('CARE_COMPLETED', 6);

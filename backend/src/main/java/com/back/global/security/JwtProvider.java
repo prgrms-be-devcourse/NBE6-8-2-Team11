@@ -105,7 +105,9 @@ public class JwtProvider {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        String email = (String) claims.get("email");
+        // 기존 claims.getSubject()는 고유 id를 반환 -> email 로 변경
+        UserDetails principal = new User(email, "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 

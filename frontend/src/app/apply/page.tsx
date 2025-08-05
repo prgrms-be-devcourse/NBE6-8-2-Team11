@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
-import { Pet } from '../../shared/types';
+import { Pet, PetStatusType } from '../../shared/types';
 import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../shared/utils';
 import { petService } from '../../shared/services/petService';
 import { adoptionService } from '../../shared/services/adoptionService';
@@ -13,6 +13,7 @@ import Image from 'next/image';
 interface AdoptionFormData {
   petId: number;
   title: string;
+
   contactPhone: string;
   contactEmail: string;
   address: string;
@@ -24,6 +25,280 @@ interface AdoptionFormData {
   careStartDate?: string;
   careEndDate?: string;
 }
+
+// 로딩 컴포넌트
+const LoadingSpinner = () => (
+  <div className="min-h-screen bg-gray-50">
+    <Header />
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+    </div>
+    <Footer />
+  </div>
+);
+
+// 에러 컴포넌트
+const ErrorPage = ({ onBackToGallery }: { onBackToGallery: () => void }) => (
+  <div className="min-h-screen bg-gray-50">
+    <Header />
+    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <div className="text-6xl mb-4">🐾</div>
+      <h2 className="text-2xl font-bold mb-2">동물 정보가 없습니다</h2>
+      <p className="text-gray-500 mb-6">올바른 경로로 접근해주세요.</p>
+      <button 
+        onClick={onBackToGallery} 
+        className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+      >
+        갤러리로 돌아가기
+      </button>
+    </div>
+    <Footer />
+  </div>
+);
+
+// 선택된 동물 정보 컴포넌트
+const SelectedPetInfo = ({ pet }: { pet: Pet }) => (
+  <div className="mb-8 pb-6 border-b border-gray-200">
+    <h2 className="text-xl font-semibold text-gray-900 mb-4">입양/돌봄 신청 동물</h2>
+    <div className="flex items-center space-x-4">
+      {pet.imageUrl && (
+        <div className="w-24 h-24 relative rounded-lg overflow-hidden">
+          <Image
+            src={pet.imageUrl.split('?')[0]}
+            alt={pet.name}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">{pet.name}</h3>
+        <p className="text-sm text-gray-600 mb-2">
+          {formatAnimalSpecies(pet.species)} • {formatAnimalAge(pet.age)} • {formatAnimalGender(pet.gender)}
+        </p>
+        <p className="text-sm text-gray-500">
+          보호소: {pet.shelterName || '정보 없음'}
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+// 폼 입력 필드 컴포넌트
+const FormField = ({ 
+  label, 
+  name, 
+  type = 'text', 
+  value, 
+  onChange, 
+  placeholder, 
+  required = false,
+  rows = undefined 
+}: {
+  label: string;
+  name: string;
+  type?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  placeholder?: string;
+  required?: boolean;
+  rows?: number;
+}) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      {label}
+    </label>
+    {type === 'textarea' ? (
+      <textarea
+        name={name}
+        value={value}
+        onChange={onChange}
+        rows={rows}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+        placeholder={placeholder}
+        required={required}
+      />
+    ) : (
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+        placeholder={placeholder}
+        required={required}
+      />
+    )}
+  </div>
+);
+
+// 메시지 컴포넌트
+const MessageDisplay = ({ message }: { message: string }) => {
+  if (!message) return null;
+  
+  const isSuccess = message.includes('성공');
+  return (
+    <div className={`p-4 rounded-lg ${
+      isSuccess ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+    }`}>
+      {message}
+    </div>
+  );
+};
+
+// 액션 버튼 컴포넌트
+const ActionButtons = ({ 
+  petId, 
+  isSubmitting, 
+  onSubmit 
+}: { 
+  petId: number; 
+  isSubmitting: boolean; 
+  onSubmit: (e: React.FormEvent) => void; 
+}) => (
+  <div className="pt-6 border-t border-gray-200 space-y-4">
+    <button
+      type="button"
+      onClick={() => window.location.href = `/chat?petId=${petId}`}
+      className="w-full py-3 px-6 rounded-lg font-semibold text-lg border-2 border-orange-500 text-orange-500 hover:bg-orange-50 transition-colors"
+    >
+      상담하기
+    </button>
+    
+    <button
+      type="submit"
+      disabled={isSubmitting}
+      onClick={onSubmit}
+      className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-colors ${
+        isSubmitting
+          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          : 'bg-orange-500 text-white hover:bg-orange-600'
+      }`}
+    >
+      {isSubmitting ? '제출 중...' : '입양/돌봄 신청하기'}
+    </button>
+  </div>
+);
+
+// 라디오 버튼 컴포넌트
+const ApplicationTypeRadio = ({ 
+  petStatuses, 
+  selectedType, 
+  onTypeChange 
+}: { 
+  petStatuses?: PetStatusType[]; 
+  selectedType: 'adoption' | 'care'; 
+  onTypeChange: (type: 'adoption' | 'care') => void; 
+}) => {
+  // 상태에 따른 라디오 버튼 활성화 여부 결정
+  const canAdopt = petStatuses?.some((status: PetStatusType) => 
+    status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
+  );
+  const canCare = petStatuses?.some((status: PetStatusType) => 
+    status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
+  );
+
+  // 기본적으로 두 옵션 모두 활성화 (petStatuses가 없거나 빈 배열인 경우)
+  const isAdoptEnabled = canAdopt !== false;
+  const isCareEnabled = canCare !== false;
+
+  return (
+    <div className="mb-6">
+      <label className="block text-sm font-medium text-gray-700 mb-3">
+        신청 유형
+      </label>
+      <div className="space-y-3">
+        <label className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-colors ${
+          selectedType === 'adoption' 
+            ? 'border-orange-500 bg-orange-50' 
+            : 'border-gray-200 hover:border-gray-300'
+        } ${!isAdoptEnabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+          <input
+            type="radio"
+            name="applicationType"
+            value="adoption"
+            checked={selectedType === 'adoption'}
+            onChange={() => isAdoptEnabled && onTypeChange('adoption')}
+            disabled={!isAdoptEnabled}
+            className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
+          />
+          <span className="text-sm font-medium text-gray-900">입양 신청</span>
+          {!isAdoptEnabled && (
+            <span className="text-xs text-gray-500 ml-2">(현재 입양 불가)</span>
+          )}
+        </label>
+
+        <label className={`flex items-center space-x-3 p-3 rounded-lg border-2 transition-colors ${
+          selectedType === 'care' 
+            ? 'border-orange-500 bg-orange-50' 
+            : 'border-gray-200 hover:border-gray-300'
+        } ${!isCareEnabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+          <input
+            type="radio"
+            name="applicationType"
+            value="care"
+            checked={selectedType === 'care'}
+            onChange={() => isCareEnabled && onTypeChange('care')}
+            disabled={!isCareEnabled}
+            className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500"
+          />
+          <span className="text-sm font-medium text-gray-900">돌봄 신청</span>
+          {!isCareEnabled && (
+            <span className="text-xs text-gray-500 ml-2">(현재 돌봄 불가)</span>
+          )}
+        </label>
+      </div>
+    </div>
+  );
+};
+
+// 돌봄 날짜 입력 컴포넌트
+const CareDateFields = ({ 
+  startDate, 
+  endDate, 
+  onStartDateChange, 
+  onEndDateChange 
+}: { 
+  startDate: string; 
+  endDate: string; 
+  onStartDateChange: (date: string) => void; 
+  onEndDateChange: (date: string) => void; 
+}) => {
+  // 최소 날짜를 오늘로 설정
+  const today = new Date().toISOString().split('T')[0];
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          돌봄 시작일 *
+        </label>
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => onStartDateChange(e.target.value)}
+          min={today}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          required
+        />
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          돌봄 종료일 *
+        </label>
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => onEndDateChange(e.target.value)}
+          min={startDate || today}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          required
+        />
+      </div>
+    </div>
+  );
+};
 
 function ApplyPageContent() {
   const router = useRouter();
@@ -55,11 +330,36 @@ function ApplyPageContent() {
       try {
         setIsLoading(true);
         
-        // URL에서 petId가 있으면 해당 동물 정보 로드
         if (petIdFromUrl) {
           const petData = await petService.getPet(petIdFromUrl);
           setSelectedPet(petData);
-          setFormData(prev => ({ ...prev, petId: petData.id }));
+          
+          // petStatuses에 따라 기본 선택값 설정
+          let defaultApplicationType: 'adoption' | 'care' = 'adoption';
+          
+          if (petData.petStatuses && petData.petStatuses.length > 0) {
+            const canAdopt = petData.petStatuses.some((status: PetStatusType) => 
+              status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
+            );
+            const canCare = petData.petStatuses.some((status: PetStatusType) => 
+              status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
+            );
+            
+            // 입양 및 돌봄 모두 가능하면 입양을 기본값으로 설정
+            if (canAdopt && canCare) {
+              defaultApplicationType = 'adoption';
+            } else if (canAdopt) {
+              defaultApplicationType = 'adoption';
+            } else if (canCare) {
+              defaultApplicationType = 'care';
+            }
+          }
+          
+          setFormData(prev => ({ 
+            ...prev, 
+            petId: petData.id,
+            applicationType: defaultApplicationType
+          }));
         }
       } catch (error) {
         console.error('Failed to load pet data:', error);
@@ -86,6 +386,26 @@ function ApplyPageContent() {
     if (!selectedPet) {
       setSubmitMessage('동물 정보가 없습니다. 다시 시도해주세요.');
       return;
+    }
+
+    // 필수 필드 검증
+    if (!formData.contactName || !formData.contactEmail || !formData.contactPhone || !formData.address || !formData.reason) {
+      setSubmitMessage('필수 항목을 모두 입력해주세요.');
+      return;
+    }
+
+    // 돌봄 신청 시 날짜 필드 검증
+    if (formData.applicationType === 'care' && (!formData.careStartDate || !formData.careEndDate)) {
+      setSubmitMessage('돌봄 시작일과 종료일을 모두 입력해주세요.');
+      return;
+    }
+
+    // 돌봄 종료일이 시작일보다 이전인지 검증
+    if (formData.applicationType === 'care' && formData.careStartDate && formData.careEndDate) {
+      if (formData.careEndDate < formData.careStartDate) {
+        setSubmitMessage('돌봄 종료일은 시작일보다 늦어야 합니다.');
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -116,7 +436,6 @@ function ApplyPageContent() {
         setSubmitMessage('돌봄 신청이 성공적으로 제출되었습니다!');
       }
       
-      // 3초 후 프로필 페이지로 이동
       setTimeout(() => {
         router.push('/profile');
       }, 3000);
@@ -129,31 +448,16 @@ function ApplyPageContent() {
     }
   };
 
+  const handleBackToGallery = () => {
+    router.push('/gallery');
+  };
+
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (!selectedPet) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex flex-col items-center justify-center min-h-[60vh]">
-          <div className="text-6xl mb-4">🐾</div>
-          <h2 className="text-2xl font-bold mb-2">동물 정보가 없습니다</h2>
-          <p className="text-gray-500 mb-6">올바른 경로로 접근해주세요.</p>
-          <button onClick={() => router.push('/gallery')} className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">갤러리로 돌아가기</button>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <ErrorPage onBackToGallery={handleBackToGallery} />;
   }
 
   return (
@@ -161,11 +465,10 @@ function ApplyPageContent() {
       <Header />
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">입양 신청</h1>
-          <p className="text-gray-600">입양 신청서를 작성해주세요.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">입양/돌봄 신청</h1>
+          <p className="text-gray-600">입양/돌봄 신청서를 작성해주세요.</p>
         </div>
 
-        {/* 통합된 입양 신청서 */}
         <div className="bg-white rounded-lg shadow-lg p-8">
           {/* 선택된 동물 정보 */}
           <div className="mb-8 pb-6 border-b border-gray-200">
@@ -292,20 +595,15 @@ function ApplyPageContent() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                주소
-              </label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="서울시 강남구..."
-                required
+            {/* 돌봄 신청 선택 시 날짜 입력란 표시 */}
+            {formData.applicationType === 'care' && (
+              <CareDateFields
+                startDate={formData.careStartDate || ''}
+                endDate={formData.careEndDate || ''}
+                onStartDateChange={handleCareStartDateChange}
+                onEndDateChange={handleCareEndDateChange}
               />
-            </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -332,11 +630,9 @@ function ApplyPageContent() {
                 name="experience"
                 value={formData.experience}
                 onChange={handleInputChange}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="이전에 반려동물을 키운 경험이 있다면 간단히 설명해주세요."
+                placeholder="이름을 입력해주세요"
+                required
               />
-            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -346,22 +642,20 @@ function ApplyPageContent() {
                 name="message"
                 value={formData.message}
                 onChange={handleInputChange}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="이 동물을 입양하고 싶은 이유를 설명해주세요."
+                placeholder="이메일을 입력해주세요"
                 required
               />
             </div>
 
-            {submitMessage && (
-              <div className={`p-4 rounded-lg ${
-                submitMessage.includes('성공') 
-                  ? 'bg-green-50 text-green-800' 
-                  : 'bg-red-50 text-red-800'
-              }`}>
-                {submitMessage}
-              </div>
-            )}
+            <FormField
+              label="연락처 (전화번호)"
+              name="contactPhone"
+              type="tel"
+              value={formData.contactPhone}
+              onChange={handleInputChange}
+              placeholder="연락 가능한 전화번호를 입력해주세요"
+              required
+            />
 
             <div className="pt-6 border-t border-gray-200 space-y-4">
               
@@ -387,15 +681,7 @@ function ApplyPageContent() {
 
 export default function ApplyPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
-        </div>
-        <Footer />
-      </div>
-    }>
+    <Suspense fallback={<LoadingSpinner />}>
       <ApplyPageContent />
     </Suspense>
   );

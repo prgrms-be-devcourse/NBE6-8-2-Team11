@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Pet } from '../../../shared/types';
-import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../../shared/utils';
+import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies, getPetStatusDisplayText, getPetStatusColorClass } from '../../../shared/utils';
 
 interface AnimalCardProps {
   pet: Pet;
@@ -26,11 +26,13 @@ export default function AnimalCard({ pet }: AnimalCardProps) {
         )}
         
         {/* 상태 배지 */}
-        <div className="absolute top-2 right-2">
-          <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full">
-            입양 가능
-          </span>
-        </div>
+        {pet.petStatuses && pet.petStatuses.length > 0 && (
+          <div className="absolute top-2 right-2">
+            <span className={`text-xs px-2 py-1 rounded-full font-medium ${getPetStatusColorClass(pet.petStatuses)}`}>
+              {getPetStatusDisplayText(pet.petStatuses)}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* 정보 */}

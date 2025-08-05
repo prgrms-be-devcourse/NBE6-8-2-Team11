@@ -34,6 +34,8 @@ export interface CreateAdoptionRequest {
   anotherPets: string;
   experience: string;
   message: string;
+  anotherPets: string;
+  experience: string;
 }
 
 export interface CreateCareRequest {
@@ -44,6 +46,8 @@ export interface CreateCareRequest {
   experience: string;
   desiredStartDate: Date;
   desiredEndDate: Date;
+  anotherPets: string;
+  experience: string;
 }
 
 export interface UpdateAdoptionStatusRequest {
