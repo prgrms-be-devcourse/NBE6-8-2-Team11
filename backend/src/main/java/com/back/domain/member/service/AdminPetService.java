@@ -28,8 +28,12 @@ public class AdminPetService {
 
     // 새로운 동물 등록
     public PetInfoResponseDto createPet(PetCreateRequestDto requestDto) {
-        Shelter shelter = shelterRepository.findByName(requestDto.getShelterName())
-                .orElseThrow(() -> new CustomException(ErrorCode.SHELTER_NOT_FOUND));
+        // 보호소 null 값 허용
+        Shelter shelter = null;
+        if (requestDto.getShelterName() != null && !requestDto.getShelterName().isBlank()) {
+            shelter = shelterRepository.findByName(requestDto.getShelterName())
+                    .orElseThrow(() -> new CustomException(ErrorCode.SHELTER_NOT_FOUND));
+        }
 
         Pet pet = Pet.builder()
                 .name(requestDto.getName())
