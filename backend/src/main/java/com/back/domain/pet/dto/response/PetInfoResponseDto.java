@@ -32,6 +32,7 @@ public record PetInfoResponseDto(
                 .description(pet.getDescription())
                 .imageUrl(pet.getImageUrl())
                 .shelterName(getShelterName(pet))
+                .createdAt(pet.getCreatedAt())
                 .petStatuses(
                         pet.getPetStatuses().stream()
                                 .map(ps -> ps.getStatus().name())
