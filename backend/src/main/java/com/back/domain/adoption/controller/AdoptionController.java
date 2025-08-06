@@ -123,7 +123,7 @@ public class AdoptionController {
         );
     }
 
-    @DeleteMapping("/received/all")
+    @DeleteMapping("/received")
     @Operation(summary = "보호자가 받은 입양/돌봄 등록 내역 단건 취소(삭제)",
             description = "보호자가 받은 입양 및 돌봄 등록 내역 하나를 취소합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteReceivedApplication(
@@ -135,7 +135,7 @@ public class AdoptionController {
         );
     }
 
-    @DeleteMapping("/received")
+    @DeleteMapping("/received/all")
     @Operation(summary = "보호자가 받은 입양/돌봄 등록 내역 전체 취소(삭제)",
             description = "보호자가 받은 입양 및 돌봄 등록 내역 전체를 취소합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteReceivedApplicationsAll(

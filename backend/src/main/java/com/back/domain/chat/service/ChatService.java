@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -50,39 +51,36 @@ public class ChatService {
         Member member2 = memberRepository.findById(member2Id)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found: " + member2Id));
 
-        ChatRoom chatRoom = chatRoomRepository.findByMembers(member1, member2)
-                .orElseGet(() -> {
-                    ChatRoom newRoom = ChatRoom.builder()
-                            .firstMember(member1)
-                            .secondMember(member2)
-                            .build();
-                    return chatRoomRepository.save(newRoom);
-                });
-
-        // 새로 생성된 채팅방인 경우에만 상대방에게 알림
-        if (chatRoom.getCreatedAt() != null &&
-            chatRoom.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1))) {
-            // 상대방에게만 채팅방 생성 알림 전송
-            Long myId = !member1Id.equals(member1.getId()) ? member2Id : member1Id;
-            Long opponentId = member1Id.equals(member1.getId()) ? member2Id : member1Id;
-
-            Member myMember = memberRepository.findById(myId)
-                    .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-
-            Member opponent = memberRepository.findById(opponentId)
-                    .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-
-            notificationService.sendChatNotification(opponent.getId(), myMember.getName(),
-                    "새 채팅방이 생성되었습니다");
-            notificationService.sendChatNotification(myId, myMember.getName(),
-                    "새 채팅방이 생성되었습니다");
-
-
-            log.info("New chat room {} created, notified opponent {}", chatRoom.getId(), opponentId);
-            notifyChatRoomCreated(chatRoom);
+        // 기존 채팅방 찾기
+        Optional<ChatRoom> existingRoom = chatRoomRepository.findByMembers(member1, member2);
+        
+        if (existingRoom.isPresent()) {
+            log.info("Found existing chat room: {}", existingRoom.get().getId());
+            return ChatRoomResponseDto.from(existingRoom.get());
         }
 
-        return ChatRoomResponseDto.from(chatRoom);
+        // 새 채팅방 생성
+        ChatRoom chatRoom = ChatRoom.builder()
+                .firstMember(member1)
+                .secondMember(member2)
+                .build();
+        
+        ChatRoom savedRoom = chatRoomRepository.save(chatRoom);
+        log.info("Created new chat room: {}", savedRoom.getId());
+
+        // 상대방에게 채팅방 생성 알림 전송 (member1이 요청자라고 가정)
+        try {
+            notificationService.sendChatNotification(member2.getId(), member1.getName(),
+                    "새 채팅방이 생성되었습니다");
+            
+            notifyChatRoomCreated(savedRoom);
+            log.info("New chat room {} created, notified member {}", savedRoom.getId(), member2.getId());
+        } catch (Exception e) {
+            log.error("Failed to send notification for new chat room", e);
+            // 알림 실패해도 채팅방 생성은 성공으로 처리
+        }
+
+        return ChatRoomResponseDto.from(savedRoom);
     }
 
     private void notifyChatRoomCreated(ChatRoom chatRoom) {

@@ -7,6 +7,21 @@ export interface AdoptionApplication {
   type: 'ADOPTION' | 'CARE';
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
+  memberInfo?: {
+    name: string;
+    email: string;
+  };
+  petInfo?: {
+    id: string;
+    name: string;
+    species: string;
+    age: number;
+    gender: string;
+    imageUrl: string;
+    shelterName?: string;
+  };
+  desiredStartDate?: string; // Care인 경우에만
+  desiredEndDate?: string;   // Care인 경우에만
 }
 
 export interface AdoptionApplicationDetail extends AdoptionApplication {
@@ -112,8 +127,8 @@ export const adoptionService = {
   },
 
   // 보호자가 받은 입양/돌봄 등록 내역 단건 취소(삭제)
-  async deleteReceivedApplication(applicationId: string): Promise<void> {
-    await apiClient.delete(`/api/applies/received?id=${applicationId}`);
+  async deleteReceivedApplication(typeId: string, type: string): Promise<void> {
+    await apiClient.delete(`/api/applies/received?typeId=${typeId}&type=${type}`);
   },
 
   // 보호자가 받은 입양/돌봄 등록 내역 전체 취소(삭제)

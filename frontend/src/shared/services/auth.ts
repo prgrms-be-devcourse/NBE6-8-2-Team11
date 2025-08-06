@@ -37,6 +37,18 @@ export async function getCurrentUserId(): Promise<number | null> {
 
 export function getCurrentUserIdSync(): number {
   if (typeof window !== 'undefined') {
+    // userInfo에서 사용자 ID 추출
+    const userInfoStr = localStorage.getItem('userInfo');
+    if (userInfoStr) {
+      try {
+        const userInfo = JSON.parse(userInfoStr);
+        return userInfo.id || (userInfo.sub ? parseInt(userInfo.sub, 10) : 0) || 0;
+      } catch (error) {
+        console.error('Failed to parse userInfo from localStorage:', error);
+      }
+    }
+    
+    // 백업으로 userId도 확인
     const userId = localStorage.getItem('userId');
     if (userId) {
       try {
@@ -46,7 +58,7 @@ export function getCurrentUserIdSync(): number {
       }
     }
   }
-  return 1; // 기본값
+  return 0; // 기본값을 0으로 변경
 }
 
 export async function initializeUserFromToken(): Promise<User | null> {

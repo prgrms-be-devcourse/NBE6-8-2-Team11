@@ -35,8 +35,22 @@ export default function PetRegistrationPage() {
   useEffect(() => {
     if (!isLoggedIn) {
       alert('로그인이 필요한 서비스입니다.');
-      router.replace('/');
+      router.replace('/login');
+      return;
     }
+
+    // 추가 토큰 검증
+    const token = localStorage.getItem('accessToken');
+    const userInfo = localStorage.getItem('userInfo');
+    
+    if (!token || !userInfo) {
+      alert('인증 정보가 없습니다. 다시 로그인해주세요.');
+      localStorage.clear(); // 모든 localStorage 초기화
+      router.replace('/login');
+      return;
+    }
+
+    console.log('✅ Pet Registration Access Check Passed');
   }, [isLoggedIn, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -55,12 +69,30 @@ export default function PetRegistrationPage() {
       setError('이름, 품종, 성별은 필수 항목입니다.');
       return;
     }
+
+    // 토큰 및 로그인 상태 재확인
+    const token = localStorage.getItem('accessToken');
+    const userInfo = localStorage.getItem('userInfo');
+
+    console.log('🔐 Login Status Check:', {
+      hasToken: !!token,
+      hasUserInfo: !!userInfo,
+      isLoggedIn: isLoggedIn
+    });
+
+    if (!token || !userInfo || !isLoggedIn) {
+      alert('로그인이 필요합니다. 다시 로그인해주세요.');
+      router.push('/login');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     try {
       // 4. formData 자체가 백엔드 DTO와 형식이 일치하므로 그대로 전송한다.
       //    (500 에러 및 타입 불일치 오류 해결)
+      console.log('📝 Submitting Pet Data:', formData);
       await petService.createPet(formData);
       
       alert('펫 등록이 성공적으로 완료되었습니다! 갤러리 페이지로 이동합니다.');
@@ -75,9 +107,11 @@ export default function PetRegistrationPage() {
         if (responseError.response?.data?.message) {
           errorMessage = responseError.response.data.message;
         }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
       setError(errorMessage);
-      console.error(err);
+      console.error('🚨 Pet Creation Error:', err);
     } finally {
       setIsLoading(false);
     }

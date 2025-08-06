@@ -30,6 +30,7 @@ export default function Header() {
   };
 
   // 테스트용 알림 추가 함수 (개발 중에만 사용)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const addTestNotification = () => {
     addNotification({
       title: '새 메시지',
