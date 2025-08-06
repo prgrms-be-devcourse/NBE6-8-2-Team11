@@ -42,10 +42,14 @@ class WebSocketClient {
     this.currentUserId = userId;
     
     // 환경에 따른 WebSocket URL 설정
-    const wsUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const wsUrl = apiUrl.replace('https://', 'wss://').replace('http://', 'ws://');
     const wsEndpoint = `${wsUrl}/ws-chat`;
     
+    console.log('API URL:', apiUrl);
+    console.log('WebSocket URL:', wsUrl);
     console.log('Connecting to WebSocket:', wsEndpoint);
+    console.log('Current environment:', process.env.NODE_ENV);
     
     this.client = new Client({
       webSocketFactory: () => new SockJS(wsEndpoint),
@@ -53,7 +57,7 @@ class WebSocketClient {
         'Authorization': `Bearer ${token}`
       },
       debug: function (str: string) {
-        console.log(str);
+        console.log('STOMP Debug:', str);
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
@@ -93,7 +97,12 @@ class WebSocketClient {
     };
 
     this.client.onStompError = (frame: StompFrame) => {
-      console.error('WebSocket error:', frame);
+      console.error('WebSocket STOMP error:', frame);
+      console.error('Error details:', {
+        command: frame.command,
+        headers: frame.headers,
+        body: frame.body
+      });
       this.isConnected = false;
       this.connectionStatusHandlers.forEach(handler => handler(false));
       
@@ -102,9 +111,7 @@ class WebSocketClient {
         this.reconnectAttempts++;
         console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
         setTimeout(() => {
-          if (this.client) {
-            this.client.activate();
-          }
+          this.connect(token, userId);
         }, 5000);
       } else {
         console.error('Max reconnection attempts reached');
