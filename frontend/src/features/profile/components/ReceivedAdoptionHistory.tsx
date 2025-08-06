@@ -184,11 +184,11 @@ export default function ReceivedAdoptionHistory() {
     }
   };
 
-  const handleDeleteApplication = async (recordId: number) => {
+  const handleDeleteApplication = async (recordId: number, type: string) => {
     if (!confirm('정말로 이 신청을 삭제하시겠습니까?')) return;
     
     try {
-      await adoptionService.deleteReceivedApplication(recordId.toString());
+      await adoptionService.deleteReceivedApplication(recordId.toString(), type);
       setReceivedRecords(prev => prev.filter(record => record.id !== recordId));
       alert('신청을 삭제했습니다.');
     } catch (error) {
@@ -391,7 +391,7 @@ export default function ReceivedAdoptionHistory() {
                   </>
                 )}
                 <button 
-                  onClick={() => handleDeleteApplication(record.id)}
+                  onClick={() => handleDeleteApplication(record.id, record.type)}
                   className="text-sm text-gray-600 hover:text-gray-700 font-medium bg-gray-50 hover:bg-gray-100 px-3 py-1 rounded-lg transition-colors"
                 >
                   삭제
