@@ -42,7 +42,7 @@ export function getCurrentUserIdSync(): number {
     if (userInfoStr) {
       try {
         const userInfo = JSON.parse(userInfoStr);
-        return userInfo.id || parseInt(userInfo.sub, 10) || 0;
+        return userInfo.id || (userInfo.sub ? parseInt(userInfo.sub, 10) : 0) || 0;
       } catch (error) {
         console.error('Failed to parse userInfo from localStorage:', error);
       }

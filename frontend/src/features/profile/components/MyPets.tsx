@@ -27,7 +27,7 @@ export default function MyPets() {
         
         // 사용자 ID 추출 (JWT 토큰의 id 클레임 우선 사용)
         const currentUserId = userInfo.id || 
-                             parseInt(userInfo.sub, 10) || 
+                             (userInfo.sub ? parseInt(userInfo.sub, 10) : 0) || 
                              0;
         
         if (currentUserId === 0) {
