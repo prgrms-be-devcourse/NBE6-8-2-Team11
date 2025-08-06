@@ -83,7 +83,8 @@ export default function LoginPage() {
 
   const handleKakaoLogin = () => {
     // 백엔드의 OAuth2 엔드포인트로 리다이렉트
-    window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    window.location.href = `${apiBaseUrl}/oauth2/authorization/kakao`;
   };
 
   return (
