@@ -154,8 +154,8 @@ export default function AdminPage() {
     setIsPetsLoading(true);
     setPetError('');
     try {
-      const petData = await adminService.getPets();
-      setPets(petData);
+      const pets = await adminService.getPets();
+      setPets(pets);
     } catch (error) {
       console.error('Failed to fetch pets:', error);
       setPetError('펫 목록을 불러오는 데 실패했습니다.');

@@ -1,4 +1,4 @@
-import { PetStatusType } from '../../../shared/types';
+import React from 'react';
 
 interface FilterState {
   species: string;
