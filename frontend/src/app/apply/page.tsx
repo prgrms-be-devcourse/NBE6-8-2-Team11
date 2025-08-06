@@ -327,10 +327,8 @@ function ApplyPageContent() {
         
         if (petIdFromUrl) {
           // API 호출을 병렬로 처리하여 로딩 속도 개선
-          const [petData, userData] = await Promise.all([
-            petService.getPet(petIdFromUrl),
-            memberService.getCurrentUser()
-          ]);
+          const petData = await petService.getPet(petIdFromUrl);
+          setSelectedPet(petData);
           
           // petStatuses에 따라 기본 선택값 설정
           let defaultApplicationType: 'adoption' | 'care' = 'adoption';
