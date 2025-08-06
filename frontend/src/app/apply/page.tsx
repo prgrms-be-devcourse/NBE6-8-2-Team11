@@ -4,11 +4,12 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
-import { Pet } from '../../shared/types';
+import { Pet, Member } from '../../shared/types';
 import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../shared/utils';
 import { petService } from '../../shared/services/petService';
 import { adoptionService } from '../../shared/services/adoptionService';
 import Image from 'next/image';
+import { memberService } from '../../shared/services/member'; // 사용자 서비스 추가
 
 interface AdoptionFormData {
   petId: number;
@@ -146,11 +147,9 @@ const MessageDisplay = ({ message }: { message: string }) => {
 
 // 액션 버튼 컴포넌트
 const ActionButtons = ({ 
-  petId, 
   isSubmitting, 
   onSubmit 
 }: { 
-  petId: number; 
   isSubmitting: boolean; 
   onSubmit: (e: React.FormEvent) => void; 
 }) => (
@@ -182,12 +181,8 @@ const ApplicationTypeRadio = ({
   onTypeChange: (type: 'adoption' | 'care') => void; 
 }) => {
   // 상태에 따른 라디오 버튼 활성화 여부 결정
-  const canAdopt = petStatuses?.some((status) => 
-    status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
-  );
-  const canCare = petStatuses?.some((status) => 
-    status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
-  );
+  const canAdopt = petStatuses?.includes('AVAILABLE_FOR_ADOPTION');
+  const canCare = petStatuses?.includes('AVAILABLE_FOR_CARE');
 
   // 기본적으로 두 옵션 모두 활성화 (petStatuses가 없거나 빈 배열인 경우)
   const isAdoptEnabled = canAdopt !== false;
@@ -297,6 +292,7 @@ function ApplyPageContent() {
   const petIdFromUrl = searchParams.get('petId');
   
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
+  const [currentUser, setCurrentUser] = useState<Member | null>(null); // 추가됨
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
@@ -316,51 +312,74 @@ function ApplyPageContent() {
   });
 
   useEffect(() => {
-    const loadPetData = async () => {
+    const loadInitialData = async () => {
       try {
         setIsLoading(true);
-        
-        if (petIdFromUrl) {
-          const petData = await petService.getPet(petIdFromUrl);
-          setSelectedPet(petData);
-          
-          // petStatuses에 따라 기본 선택값 설정
-          let defaultApplicationType: 'adoption' | 'care' = 'adoption';
-          
-          if (petData.petStatuses && petData.petStatuses.length > 0) {
-            const canAdopt = petData.petStatuses.some((status) => 
-              status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
-            );
-            const canCare = petData.petStatuses.some((status) => 
-              status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
-            );
-            
-            // 입양 및 돌봄 모두 가능하면 입양을 기본값으로 설정
-            if (canAdopt && canCare) {
-              defaultApplicationType = 'adoption';
-            } else if (canAdopt) {
-              defaultApplicationType = 'adoption';
-            } else if (canCare) {
-              defaultApplicationType = 'care';
-            }
-          }
-          
-          setFormData(prev => ({ 
-            ...prev, 
-            petId: petData.id,
-            applicationType: defaultApplicationType
-          }));
+        if (!petIdFromUrl) {
+          throw new Error("Pet ID is missing from URL.");
         }
+
+        // 1. 동물 정보 가져오기
+        const petData = await petService.getPet(petIdFromUrl);
+        setSelectedPet(petData);
+        
+        // 2. 사용자 정보 가져오기 (API 호출) - 새로 추가됨
+        const userData = await memberService.getCurrentUser();
+        setCurrentUser(userData as Member);
       } catch (error) {
-        console.error('Failed to load pet data:', error);
-        setSubmitMessage('동물 정보를 불러오는데 실패했습니다.');
+        console.error('Failed to load initial data:', error);
+        setSubmitMessage('페이지를 불러오는 데 실패했습니다.');
       } finally {
         setIsLoading(false);
       }
     };
+    
+    loadInitialData();
+  }, [petIdFromUrl]);
+
+  useEffect(() => {
+    const loadPetData = async () => {
+      if (!petIdFromUrl) return;
+      
+      // 동물 정보만 로딩
+      const petData = await petService.getPet(petIdFromUrl);
+      setSelectedPet(petData);
+      
+      // petStatuses에 따라 기본 선택값 설정
+      let defaultApplicationType: 'adoption' | 'care' = 'adoption';
+      
+      if (petData.petStatuses && petData.petStatuses.length > 0) {
+        const canAdopt = petData.petStatuses.some((status) => 
+          status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
+        );
+        const canCare = petData.petStatuses.some((status) => 
+          status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
+        );
+        
+        // 입양 및 돌봄 모두 가능하면 입양을 기본값으로 설정
+        if (canAdopt && canCare) {
+          defaultApplicationType = 'adoption';
+        } else if (canAdopt) {
+          defaultApplicationType = 'adoption';
+        } else if (canCare) {
+          defaultApplicationType = 'care';
+        }
+      }
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        petId: petData.id,
+        applicationType: defaultApplicationType,
+        // 사용자 정보로 폼 필드 자동 채우기
+        contactName: currentUser?.name || '',
+        contactEmail: currentUser?.email || '',
+        contactPhone: currentUser?.phone || '',
+        address: '', 
+      }));
+    };
 
     loadPetData();
-  }, [petIdFromUrl]);
+  }, [petIdFromUrl, currentUser]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -440,9 +459,7 @@ function ApplyPageContent() {
         await adoptionService.createAdoption({
           petId: selectedPet.id.toString(),
           title: `${selectedPet.name} 입양 신청`,
-          message: formData.reason,
-          anotherPets: formData.otherPets,
-          experience: formData.experience,
+          message: formData.reason
         });
       } else {
         // 돌봄 신청 - 날짜 필드가 이미 검증되었으므로 안전하게 변환
@@ -516,14 +533,7 @@ function ApplyPageContent() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                label="신청자 성함"
-                name="contactName"
-                value={formData.contactName}
-                onChange={handleInputChange}
-                placeholder="이름을 입력해주세요"
-                required
-              />
+              <FormField label="신청자 성함" name="contactName" value={formData.contactName} onChange={handleInputChange} required />
 
               <FormField
                 label="이메일"
@@ -587,7 +597,6 @@ function ApplyPageContent() {
             <MessageDisplay message={submitMessage} />
 
             <ActionButtons 
-              petId={selectedPet.id} 
               isSubmitting={isSubmitting} 
               onSubmit={handleSubmit}
             />
