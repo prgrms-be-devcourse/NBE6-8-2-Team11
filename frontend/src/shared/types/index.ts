@@ -35,7 +35,6 @@ export interface Member {
   role: 'USER' | 'ADMIN';
   phone?: string;
   createdAt: Date;
-  address?: string;
 }
 
 // 입양 신청 타입 (adoption 테이블 기반)

@@ -47,7 +47,7 @@ const createNotificationStore = () => {
 
               return {
                 notifications: updatedNotifications,
-                unreadCount: state.unreadCount + 1,
+              unreadCount: state.unreadCount + 1,
               };
             });
           },

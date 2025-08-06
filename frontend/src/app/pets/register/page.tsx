@@ -49,10 +49,21 @@ export default function PetRegistrationPage() {
     }));
   };
 
+  const handleStatusChange = (status: string) => {
+    setFormData((prev: PetCreateRequestDto) => ({
+      ...prev,
+      statuses: [status] // 라디오 버튼이므로 하나만 선택
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.species || !formData.gender) {
       setError('이름, 품종, 성별은 필수 항목입니다.');
+      return;
+    }
+    if (formData.statuses.length === 0) {
+      setError('동물 상태를 선택해주세요.');
       return;
     }
     setIsLoading(true);
@@ -124,6 +135,40 @@ export default function PetRegistrationPage() {
                 <option value="NEUTERED_FEMALE">중성화 (암컷)</option>
                 <option value="UNKNOWN">모름</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">동물 상태 *</label>
+              <div className="space-y-3">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    checked={formData.statuses.includes('AVAILABLE_FOR_ADOPTION')}
+                    onChange={() => handleStatusChange('AVAILABLE_FOR_ADOPTION')}
+                    className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                  />
+                  <span className="text-sm text-gray-700">입양 가능</span>
+                </label>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    checked={formData.statuses.includes('AVAILABLE_FOR_CARE')}
+                    onChange={() => handleStatusChange('AVAILABLE_FOR_CARE')}
+                    className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                  />
+                  <span className="text-sm text-gray-700">돌봄 가능</span>
+                </label>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    checked={formData.statuses.includes('AVAILABLE_BOTH')}
+                    onChange={() => handleStatusChange('AVAILABLE_BOTH')}
+                    className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                  />
+                  <span className="text-sm text-gray-700">입양과 돌봄 모두 가능</span>
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">하나의 상태를 선택해주세요.</p>
             </div>
 
             <div>
