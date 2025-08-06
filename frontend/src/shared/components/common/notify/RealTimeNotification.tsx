@@ -72,6 +72,29 @@ const getNotificationColor = (type: Notification['type']) => {
   }
 };
 
+const getNotificationTitle = (type: Notification['type'], originalTitle: string) => {
+  switch (type) {
+    case 'ADOPTION_ACCEPTED':
+      return '입양 신청 승인';
+    case 'ADOPTION_REJECTED':
+      return '입양 신청 거절';
+    case 'CARE_ACCEPTED':
+      return '돌봄 신청 승인';
+    case 'CARE_REJECTED':
+      return '돌봄 신청 거절';
+    case 'ADOPTION_REQUESTED':
+      return '입양 신청';
+    case 'CARE_REQUESTED':
+      return '돌봄 신청';
+    case 'NEW_MESSAGE':
+      return '새 메시지';
+    case 'CHAT_ROOM_DELETED':
+      return '채팅방 삭제';
+    default:
+      return originalTitle;
+  }
+};
+
 export default function RealTimeNotification({ notification, onClose }: RealTimeNotificationProps) {
   // 5초 후 자동으로 닫기
   useEffect(() => {
@@ -90,7 +113,7 @@ export default function RealTimeNotification({ notification, onClose }: RealTime
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900">
-            {notification.title}
+            {getNotificationTitle(notification.type, notification.title)}
           </p>
           <p className="text-sm text-gray-600 mt-1">
             {notification.message}

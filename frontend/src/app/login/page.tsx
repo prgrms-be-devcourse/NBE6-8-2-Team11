@@ -7,6 +7,7 @@ import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
 import { memberService } from '../../shared/services/member';
 import { useAuth } from '../../context/AuthContext';
+import { getUserInfoFromToken } from '../../shared/utils/jwt';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,11 +42,14 @@ export default function LoginPage() {
       
       console.log('로그인 성공:', response);
 
-      // 로그인 응답에서 사용자 정보를 직접 생성
+      // JWT 토큰에서 사용자 정보 추출
+      const userInfoFromToken = getUserInfoFromToken(response.accessToken);
+      
+      // 로그인 응답에서 사용자 정보를 생성
       const userInfo = {
         id: response.userId,
         sub: response.userEmail, // 이메일을 subject로 사용
-        auth: 'ROLE_USER' as const, // 일반 사용자
+        auth: userInfoFromToken?.auth || 'ROLE_USER', // JWT 토큰에서 추출한 권한 정보 사용
         exp: Date.now() + 24 * 60 * 60 * 1000, // 24시간 후 만료
         nickname: response.userName,
         email: response.userEmail,

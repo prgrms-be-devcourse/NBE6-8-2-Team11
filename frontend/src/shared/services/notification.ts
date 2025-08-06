@@ -22,7 +22,7 @@ export const notificationService = {
       message: notification.message,
       type: notification.type,
       isRead: notification.isRead,
-      createdAt: new Date(notification.createdAt),
+      createdAt: notification.createdAt, // Date 객체 대신 string 그대로 사용
       memberId: notification.memberId || 0, // Added memberId mapping
     }));
   },

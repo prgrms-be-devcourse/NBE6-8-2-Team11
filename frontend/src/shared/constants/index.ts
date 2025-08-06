@@ -2,7 +2,6 @@
 export const NAV_ITEMS = [
   { label: '홈', href: '/' },
   { label: '보호중인 동물', href: '/gallery' },
-  { label: '입양/돌봄 신청', href: '/apply' },
 ];
 
 // 서비스 카드 데이터
@@ -12,12 +11,6 @@ export const SERVICE_CARDS = [
     title: '동물 검색',
     description: '다양한 유기동물들을 갤러리 형태로 쉽게 찾아보고 상세 정보를 확인할 수 있습니다.',
     icon: '🔍',
-  },
-  {
-    id: 'apply',
-    title: '입양/돌봄 신청',
-    description: '간편한 신청서를 통해 원하는 동물에 대한 입양 및 돌봄을 신청할 수 있습니다.',
-    icon: '📝',
   },
   {
     id: 'matching',

@@ -8,7 +8,7 @@ export interface Pet {
   gender: 'MALE' | 'FEMALE';
   description: string;
   imageUrl?: string;
-  createdAt: Date;
+  createdAt: string; // 백엔드에서 DateTime을 문자열로 전송
   shelterName?: string; // Backend DTO에서 제공하는 보호소 이름
   petStatuses?: string[]; // 백엔드에서 제공하는 상태 목록
 }
@@ -22,7 +22,7 @@ export interface Shelter {
   state?: string;
   zipCode?: string;
   phone?: string;
-  createdAt: Date;
+  createdAt: string; // 백엔드에서 DateTime을 문자열로 전송
 }
 
 // 사용자 정보 타입 (member 테이블 기반)
@@ -34,7 +34,7 @@ export interface Member {
   name: string;
   role: 'USER' | 'ADMIN';
   phone?: string;
-  createdAt: Date;
+  createdAt: string; // 백엔드에서 DateTime을 문자열로 전송
   address?: string;
 }
 
@@ -45,7 +45,7 @@ export interface Adoption {
   petId: number;
   message: string;
   status: 'pending' | 'approved' | 'rejected';
-  createdAt: Date;
+  createdAt: string; // 백엔드에서 DateTime을 문자열로 전송
 }
 
 // 임시 보호 신청 타입 (care 테이블 기반)
@@ -54,10 +54,10 @@ export interface Care {
   memberId: number;
   petId: number;
   message: string;
-  desiredStartDate: Date;
-  desiredEndDate: Date;
+  desiredStartDate: string; // 백엔드에서 DateTime을 문자열로 전송
+  desiredEndDate: string; // 백엔드에서 DateTime을 문자열로 전송
   status: 'pending' | 'approved' | 'rejected';
-  createdAt: Date;
+  createdAt: string; // 백엔드에서 DateTime을 문자열로 전송
 }
 
 // 입양/돌봄 신청 이력을 위한 타입 (백엔드 ApplicationSimpleListResponseDto와 일치)
@@ -85,7 +85,7 @@ export interface PetStatus {
   id: number;
   petId: number;
   status: PetStatusType;
-  createdAt: Date;
+  createdAt: string; // 백엔드에서 DateTime을 문자열로 전송
 }
 
 // 동물 상태 enum (백엔드 PetStatusType과 일치)
@@ -102,7 +102,7 @@ export interface ChatRoom {
   id: number;
   member1Id: number;
   member2Id: number;
-  createdAt: Date;
+  createdAt: string; // 백엔드에서 DateTime을 문자열로 전송
 }
 
 // 채팅 메시지 타입 (chat_message 테이블 기반)
@@ -111,7 +111,7 @@ export interface ChatMessage {
   chatRoomId: number;
   senderId: number;
   message: string;
-  sentAt: Date;
+  sentAt: string; // 백엔드에서 DateTime을 문자열로 전송
 }
 
 // 알림 타입 (notification 테이블 기반)
@@ -123,7 +123,7 @@ export interface Notification {
   type: string;
   message: string;
   isRead: boolean;
-  createdAt: Date;
+  createdAt: string; // 백엔드에서 DateTime을 문자열로 전송
 }
 
 // 통계 정보 타입
@@ -162,7 +162,7 @@ export interface PetCreateRequestDto {
   species: string;
   age: number;
   // 'gender' 필드의 타입을 기존 Pet 인터페이스의 타입과 일치시킨다.
-  gender: 'MALE' | 'FEMALE' | 'UNKNOWN' | 'NEUTERED_MALE' | 'NEUTERED_FEMALE';
+  gender: 'MALE' | 'FEMALE';
   description: string;
   imageUrl: string;
   shelterName?: string; // 일반 사용자는 이 필드를 보내지 않으므로 optional 처리.
@@ -173,7 +173,7 @@ export interface PetUpdateRequestDto {
   name: string;
   species: string;
   age: number;
-  gender: 'MALE' | 'FEMALE' | 'UNKNOWN' | 'NEUTERED_MALE' | 'NEUTERED_FEMALE';
+  gender: 'MALE' | 'FEMALE';
   description: string;
   imageUrl: string;
   shelterName?: string;

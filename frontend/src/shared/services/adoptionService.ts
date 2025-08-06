@@ -122,7 +122,7 @@ export const adoptionService = {
       type: type,
       status: statusData.status
     };
-    const response = await apiClient.put<AdoptionApplication>(`/api/applies/received`, requestData);
+    const response = await apiClient.put<AdoptionApplication>('/api/applies/received', requestData);
     return response.content;
   },
 

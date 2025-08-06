@@ -64,7 +64,7 @@ public class AdoptionService {
                 .status(RequestStatus.PENDING)
                 .build();
         adoptionRepository.save(adoption);
-        notificationService.sendAdoptionRequestNotification(member.getId(), "입양을 신청하였습니다.", pet.getName());
+        notificationService.sendAdoptionRequestNotification(member.getId(), "입양을 신청하였습니다.", member.getName());
 
         try {
             Thread.sleep(100);

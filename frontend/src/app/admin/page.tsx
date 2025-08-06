@@ -44,6 +44,41 @@ interface PetFormData {
   petStatuses?: string[];
 }
 
+// 안전한 날짜 포맷팅 함수 (다른 컴포넌트들과 동일한 로직)
+const formatDateSafe = (timestamp: string | number | Array<number> | null | undefined): string => {
+  if (!timestamp) return '날짜 정보 없음';
+  
+  try {
+    let date: Date;
+    
+    if (Array.isArray(timestamp)) {
+      // 배열 형태의 날짜 처리 [year, month, day, hour, minute, second, nano]
+      const [year, month, day, hour, minute, second] = timestamp;
+      date = new Date(year, month - 1, day, hour, minute, second);
+    } else if (typeof timestamp === 'string') {
+      // ISO 문자열인 경우
+      if (timestamp.includes('T')) {
+        date = new Date(timestamp);
+      } else {
+        // 일반 문자열인 경우
+        date = new Date(timestamp);
+      }
+    } else if (typeof timestamp === 'number') {
+      date = new Date(timestamp);
+    } else {
+      return '날짜 정보 없음';
+    }
+  
+    if (isNaN(date.getTime())) {
+      return '날짜 정보 없음';
+    }
+    
+    return formatDate(date);
+  } catch {
+    return '날짜 정보 없음';
+  }
+};
+
 // 펫 폼 모달 컴포넌트
 const PetFormModal = ({ pet, onClose, onSave }: { pet: Partial<Pet> | null, onClose: () => void, onSave: (petData: PetFormData) => void }) => {
   // FIX: pet?.petStatuses가 있으면 그 값을, 없으면 기본값을 사용하도록 초기화 로직 수정
@@ -134,7 +169,7 @@ export default function AdminPage() {
   const [isPetModalOpen, setIsPetModalOpen] = useState(false);
   const [editingPet, setEditingPet] = useState<Partial<Pet> | null>(null);
 
-  const isAdmin = userInfo?.auth?.includes('ADMIN');
+  const isAdmin = userInfo?.auth?.includes('ADMIN')
 
   const fetchMembers = useCallback(async () => {
     setIsMembersLoading(true);
@@ -302,7 +337,7 @@ export default function AdminPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.memberId}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{member.name}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.email}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(new Date(member.createdAt))}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateSafe(member.createdAt)}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <button onClick={() => handleDeleteMember(member.memberId)} className="text-red-600 hover:text-red-900">삭제</button>
                                             </td>
@@ -343,7 +378,7 @@ export default function AdminPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{pet.name}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pet.species}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pet.age}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(new Date(pet.createdAt))}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDateSafe(pet.createdAt)}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
                                                 <button onClick={() => handleOpenPetModal(pet)} className="text-indigo-600 hover:text-indigo-900">수정</button>
                                                 <button onClick={() => handleDeletePet(pet.id)} className="text-red-600 hover:text-red-900">삭제</button>
