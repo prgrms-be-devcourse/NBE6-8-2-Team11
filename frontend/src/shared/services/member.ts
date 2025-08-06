@@ -6,6 +6,7 @@ export interface User {
   name: string;
   phone?: string;
   role: string;
+  address?: string;
 }
 
 export interface LoginRequest {
@@ -44,25 +45,36 @@ export const memberService = {
   // 현재 사용자 정보 조회 (저장된 사용자 정보 사용)
   async getCurrentUser(): Promise<User> {
     try {
-      // localStorage에서 사용자 정보 가져오기
+      // 1. localStorage에서 사용자 정보 확인
       const userStr = localStorage.getItem('user');
       if (userStr) {
-        const user = JSON.parse(userStr);
-        console.log('Current user from localStorage:', user);
-        return user;
+        return JSON.parse(userStr);
       }
-      // localStorage에 없으면 API에서 가져오기 (fallback)
-      const response = await apiClient.get<User>('/members/1');
-      return response.content;
+      
+      // 2. userInfo에서 사용자 ID 가져오기
+      const userInfoStr = localStorage.getItem('userInfo');
+      if (userInfoStr) {
+        const userInfo = JSON.parse(userInfoStr);
+        const response = await apiClient.get<User>(`/members/${userInfo.id}`);
+        return response.content;
+      }
+      
+      // 3. 로그인되지 않은 경우 빈 값 반환
+      return {
+        id: 0,
+        email: '',
+        name: '',
+        phone: '',
+        role: ''
+      };
     } catch (error) {
       console.error('Failed to get current user:', error);
-      // 기본 사용자 정보 반환
       return {
-        id: 1,
-        email: 'user@example.com',
-        name: '사용자',
+        id: 0,
+        email: '',
+        name: '',
         phone: '',
-        role: 'USER'
+        role: ''
       };
     }
   },
