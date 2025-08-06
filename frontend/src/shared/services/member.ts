@@ -43,27 +43,36 @@ export const memberService = {
 
   // 현재 사용자 정보 조회 (저장된 사용자 정보 사용)
   async getCurrentUser(): Promise<User> {
+    console.log('🔍 [DEBUG] memberService.getCurrentUser() 시작');
+    
     try {
       // localStorage에서 사용자 정보 가져오기
       const userStr = localStorage.getItem('user');
+      console.log('🔍 [DEBUG] localStorage.getItem("user"):', userStr);
+      
       if (userStr) {
         const user = JSON.parse(userStr);
-        console.log('Current user from localStorage:', user);
+        console.log('🔍 [DEBUG] localStorage에서 파싱된 사용자:', user);
         return user;
       }
+      
+      console.log('🔍 [DEBUG] localStorage에 사용자 정보 없음, API 호출');
       // localStorage에 없으면 API에서 가져오기 (fallback)
       const response = await apiClient.get<User>('/members/1');
+      console.log('🔍 [DEBUG] API 응답:', response);
       return response.content;
     } catch (error) {
-      console.error('Failed to get current user:', error);
+      console.error('❌ [DEBUG] getCurrentUser 실패:', error);
       // 기본 사용자 정보 반환
-      return {
+      const defaultUser = {
         id: 1,
         email: 'user@example.com',
         name: '사용자',
         phone: '',
         role: 'USER'
       };
+      console.log('🔍 [DEBUG] 기본 사용자 정보 반환:', defaultUser);
+      return defaultUser;
     }
   },
 
