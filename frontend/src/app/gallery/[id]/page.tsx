@@ -165,9 +165,8 @@ export default function AnimalDetailPage() {
         {/* 헤더 영역 */}
         <div className="border-b border-gray-200 p-6 mb-8">
           <div className="flex justify-between items-start">
-            {/* 좌측: 입양 + 동물 이름 */}
+            {/* 좌측: 동물 이름 */}
             <div>
-              <div className="text-sm text-orange-600 font-medium mb-3">입양</div>
               <h1 className="text-3xl font-bold text-gray-900">{pet.name}</h1>
             </div>
             
