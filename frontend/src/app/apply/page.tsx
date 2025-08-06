@@ -617,8 +617,7 @@ function ApplyPageContent() {
             <MessageDisplay message={submitMessage} />
 
             <ActionButtons 
-              petId={selectedPet.id} 
-              <ActionButtons 
+                petId={selectedPet.id} 
                 isSubmitting={isSubmitting} 
                 onSubmit={handleSubmit}
               />
