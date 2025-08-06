@@ -319,10 +319,18 @@ function ApplyPageContent() {
     const loadPetData = async () => {
       try {
         setIsLoading(true);
+
+        if (!petIdFromUrl) {
+          setSubmitMessage('올바른 경로로 접근해주세요. 갤러리에서 동물을 선택한 후 신청해주세요.');
+          return;
+        }
         
         if (petIdFromUrl) {
-          const petData = await petService.getPet(petIdFromUrl);
-          setSelectedPet(petData);
+          // API 호출을 병렬로 처리하여 로딩 속도 개선
+          const [petData, userData] = await Promise.all([
+            petService.getPet(petIdFromUrl),
+            memberService.getCurrentUser()
+          ]);
           
           // petStatuses에 따라 기본 선택값 설정
           let defaultApplicationType: 'adoption' | 'care' = 'adoption';
@@ -474,16 +482,32 @@ function ApplyPageContent() {
     }
   };
 
-  const handleBackToGallery = () => {
-    router.push('/gallery');
-  };
-
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
-  if (!selectedPet) {
-    return <ErrorPage onBackToGallery={handleBackToGallery} />;
+  if (!petIdFromUrl) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <div className="text-6xl mb-4">🐾</div>
+          <h2 className="text-2xl font-bold mb-2">잘못된 접근입니다</h2>
+          <p className="text-gray-500 mb-6">갤러리에서 동물을 선택한 후 신청해주세요.</p>
+          <button 
+            onClick={() => router.push('/gallery')} 
+            className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            갤러리로 이동
+          </button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!selectedPet && !submitMessage) {
+    return <ErrorPage onBackToGallery={() => router.push('/gallery')} />;
   }
 
   return (
@@ -496,55 +520,61 @@ function ApplyPageContent() {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-8">
-          <SelectedPetInfo pet={selectedPet} />
+          {selectedPet && <SelectedPetInfo pet={selectedPet} />}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <ApplicationTypeRadio 
-              petStatuses={selectedPet?.petStatuses}
-              selectedType={formData.applicationType}
-              onTypeChange={handleApplicationTypeChange}
-            />
-
-            {/* 돌봄 신청 선택 시 날짜 입력란 표시 */}
-            {formData.applicationType === 'care' && (
-              <CareDateFields
-                startDate={formData.careStartDate || ''}
-                endDate={formData.careEndDate || ''}
-                onStartDateChange={handleCareStartDateChange}
-                onEndDateChange={handleCareEndDateChange}
-              />
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                label="신청자 성함"
-                name="contactName"
-                value={formData.contactName}
-                onChange={handleInputChange}
-                placeholder="이름을 입력해주세요"
-                required
-              />
-
-              <FormField
-                label="이메일"
-                name="contactEmail"
-                type="email"
-                value={formData.contactEmail}
-                onChange={handleInputChange}
-                placeholder="이메일을 입력해주세요"
-                required
-              />
+          {submitMessage && !selectedPet ? (
+            <div className="text-center py-8">
+              <MessageDisplay message={submitMessage} />
+              <div className="mt-6">
+                <button 
+                  onClick={() => router.push('/gallery')} 
+                  className="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+                >
+                  갤러리로 이동
+                </button>
+              </div>
             </div>
+          ) : selectedPet ? (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <ApplicationTypeRadio 
+                petStatuses={selectedPet?.petStatuses}
+                selectedType={formData.applicationType}
+                onTypeChange={handleApplicationTypeChange}
+              />
 
-            <FormField
-              label="연락처 (전화번호)"
-              name="contactPhone"
-              type="tel"
-              value={formData.contactPhone}
-              onChange={handleInputChange}
-              placeholder="연락 가능한 전화번호를 입력해주세요"
-              required
-            />
+              {/* 돌봄 신청 선택 시 날짜 입력란 표시 */}
+              {formData.applicationType === 'care' && (
+                <CareDateFields
+                  startDate={formData.careStartDate || ''}
+                  endDate={formData.careEndDate || ''}
+                  onStartDateChange={handleCareStartDateChange}
+                  onEndDateChange={handleCareEndDateChange}
+                />
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField label="신청자 성함" name="contactName" value={formData.contactName} onChange={handleInputChange} required />
+
+                <FormField
+                  label="이메일"
+                  name="contactEmail"
+                  type="email"
+                  value={formData.contactEmail}
+                  onChange={handleInputChange}
+                  placeholder="이메일을 입력해주세요"
+                  required
+                />
+              </div>
+
+              <FormField
+                label="연락처 (전화번호)"
+                name="contactPhone"
+                type="tel"
+                value={formData.contactPhone}
+                onChange={handleInputChange}
+                placeholder="연락 가능한 전화번호를 입력해주세요"
+                required
+              />
 
             <FormField
               label="주소"
@@ -588,10 +618,12 @@ function ApplyPageContent() {
 
             <ActionButtons 
               petId={selectedPet.id} 
-              isSubmitting={isSubmitting} 
-              onSubmit={handleSubmit}
-            />
-          </form>
+              <ActionButtons 
+                isSubmitting={isSubmitting} 
+                onSubmit={handleSubmit}
+              />
+            </form>
+          ) : null}
         </div>
       </main>
       <Footer />

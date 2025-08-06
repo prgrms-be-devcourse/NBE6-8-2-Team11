@@ -3,33 +3,43 @@
 import { useEffect } from 'react';
 import { wsClient } from './websocket';
 import { useNotificationStore } from '../components/common/notify/NotificationStore';
+import { useAuth } from '../../context/AuthContext';
 
 export default function WebSocketInitializer() {
   const { addNotification } = useNotificationStore();
+  const { userInfo, isLoggedIn } = useAuth();
 
   useEffect(() => {
     const initializeWebSocket = async () => {
       const token = localStorage.getItem('accessToken');
-      const userId = localStorage.getItem('userId');
       
-      if (token && userId) {
-        // 기존 연결 해제
-        wsClient.disconnect();
+      if (token && userInfo && isLoggedIn) {
+        // 사용자 ID를 userInfo에서 가져오기
+        const userId = userInfo.id;
         
-        // 새로 연결
-        wsClient.connect(token, parseInt(userId, 10));
-        
-        // 연결 후 구독 강제 실행
-        setTimeout(() => {
-          if (wsClient.getConnectionStatus()) {
-            wsClient.subscribeToPersonalNotifications();
-          }
-        }, 1000);
+        if (userId) {
+          console.log('Initializing WebSocket with userId:', userId);
+          
+          // 기존 연결 해제
+          wsClient.disconnect();
+          
+          // 새로 연결
+          wsClient.connect(token, userId);
+          
+          // 연결 후 구독 강제 실행
+          setTimeout(() => {
+            if (wsClient.getConnectionStatus()) {
+              wsClient.subscribeToPersonalNotifications();
+            }
+          }, 1000);
+        } else {
+          console.warn('User ID not found in userInfo:', userInfo);
+        }
       }
     };
 
     initializeWebSocket();
-  }, []);
+  }, [userInfo, isLoggedIn]);
 
   // 실시간 알림 처리
   useEffect(() => {
@@ -42,7 +52,7 @@ export default function WebSocketInitializer() {
         title: notification.title || '새 알림',
         message: notification.message || notification.content || '새로운 알림이 도착했습니다.',
         type: notification.type || 'NEW_MESSAGE',
-        userId: parseInt(localStorage.getItem('userId') || '0', 10),
+        userId: userInfo?.id || 0,
       });
     };
 
@@ -53,7 +63,7 @@ export default function WebSocketInitializer() {
     return () => {
       wsClient.offNotification(handleNotification);
     };
-  }, [addNotification]);
+  }, [addNotification, userInfo]);
 
   return null;
 } 

@@ -336,7 +336,7 @@ class AdoptionControllerIntegrationTest {
     @WithMockUser(username = "owner@example.com", roles = {"USER"})
     void deleteReceivedApplication_Success() throws Exception {
         // when & then
-        mockMvc.perform(delete("/api/applies/received/all")
+        mockMvc.perform(delete("/api/applies/received")
                         .param("typeId", testAdoption.getId().toString())
                         .param("type", "ADOPTION"))
                 .andExpect(status().isOk())
@@ -348,7 +348,7 @@ class AdoptionControllerIntegrationTest {
     @WithMockUser(username = "owner@example.com", roles = {"USER"})
     void deleteReceivedApplicationsAll_Success() throws Exception {
         // when & then
-        mockMvc.perform(delete("/api/applies/received"))
+        mockMvc.perform(delete("/api/applies/received/all"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }

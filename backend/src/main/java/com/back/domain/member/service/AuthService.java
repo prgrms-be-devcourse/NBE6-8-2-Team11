@@ -9,6 +9,7 @@ import com.back.domain.member.enums.UserRole;
 import com.back.domain.member.exception.MemberErrorCode;
 import com.back.domain.member.exception.MemberException;
 import com.back.domain.member.repository.MemberRepository;
+import com.back.global.security.CustomAuthentication;
 import com.back.global.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,15 +48,19 @@ public class AuthService {
     }
 
     public TokenResponseDto login(LoginRequestDto requestDto) {
+        Member member = memberRepository.findByEmail(requestDto.email())
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 인증 토큰 생성
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(requestDto.email(), requestDto.password());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        Member member = memberRepository.findByEmail(requestDto.email())
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        // 사용자 정보가 포함된 커스텀 Authentication 생성
+        CustomAuthentication customAuth = new CustomAuthentication(authentication, member);
 
-        // 토큰 생성
-        TokenResponseDto tokenResponse = jwtProvider.generateToken(authentication);
+        // 토큰 생성 (Member 정보 포함)
+        TokenResponseDto tokenResponse = jwtProvider.generateToken(customAuth);
 
         // 사용자 정보 포함하여 반환
         return TokenResponseDto.builder()

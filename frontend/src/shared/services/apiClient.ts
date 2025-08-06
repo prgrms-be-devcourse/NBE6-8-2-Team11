@@ -20,6 +20,11 @@ class ApiClient {
 
   private getAuthHeaders(): Record<string, string> {
     const token = localStorage.getItem('accessToken');
+    console.log('🔑 Auth Token Check:', {
+      hasToken: !!token,
+      tokenLength: token ? token.length : 0,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : 'none'
+    });
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
 
@@ -31,13 +36,22 @@ class ApiClient {
     const normalizedEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
     const url = `${this.baseURL}${normalizedEndpoint}`;
     
+    console.log('🌐 API Request:', {
+      method: options.method || 'GET',
+      url: url,
+      baseURL: this.baseURL,
+      endpoint: endpoint,
+      normalizedEndpoint: normalizedEndpoint
+    });
+    
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
         ...this.getAuthHeaders(),
         ...options.headers,
       },
-      credentials: 'include', // Include cookies for authentication
+      // CORS 문제 해결을 위해 credentials 제거
+      // credentials: 'include', 
       ...options,
     };
 
@@ -45,6 +59,12 @@ class ApiClient {
       const response = await fetch(url, config);
       
       if (!response.ok) {
+        console.error('❌ API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: url
+        });
+        
         // 401 Unauthorized 에러 처리
         if (response.status === 401) {
           // 토큰이 만료되었거나 유효하지 않은 경우
@@ -59,7 +79,7 @@ class ApiClient {
             window.location.href = '/login';
           }
         }
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
       }
       
       // 응답이 비어있는지 확인
@@ -67,6 +87,7 @@ class ApiClient {
       
       // 응답이 비어있으면 빈 객체 반환
       if (!responseText.trim()) {
+        console.log('✅ API Success (Empty Response):', url);
         return {
           content: undefined as T,
           message: 'Success',
@@ -77,10 +98,20 @@ class ApiClient {
       
       // JSON 파싱
       const data = JSON.parse(responseText);
-      console.log('Response data:', data);
+      console.log('✅ API Success:', { url: url, data: data });
       return data;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('🚨 API Request Failed:', {
+        url: url,
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+      
+      // Network error에 대한 더 구체적인 메시지
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        throw new Error(`서버에 연결할 수 없습니다. 백엔드 서버(${this.baseURL})가 실행 중인지 확인해주세요.`);
+      }
+      
       throw error;
     }
   }

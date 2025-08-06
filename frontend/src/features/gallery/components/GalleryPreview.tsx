@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Pet } from '../../../shared/types';
 import { formatAnimalAge, formatAnimalGender } from '../../../shared/utils';
 
@@ -23,12 +24,13 @@ export default function GalleryPreview({ pets = [] }: GalleryPreviewProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {pets.slice(0, 4).map((pet: Pet) => (
             <div key={pet.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group">
-              <div className="h-48 bg-gradient-to-br from-orange-200 to-yellow-200 flex items-center justify-center">
+              <div className="h-48 bg-gradient-to-br from-orange-200 to-yellow-200 flex items-center justify-center relative">
                 {pet.imageUrl ? (
-                  <img 
+                  <Image 
                     src={pet.imageUrl} 
                     alt={pet.name} 
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <span className="text-6xl">🐕</span>

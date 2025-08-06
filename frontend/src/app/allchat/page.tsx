@@ -145,9 +145,6 @@ export default function AllChatPage() {
             }
           }
           
-          // 이전 채팅방 구독 해제 (필요한 경우)
-          // wsClient.unsubscribeFromRoom(previousRoom);
-          
           // 새로운 채팅방 구독
           wsClient.subscribeToRoom(selectedChat);
           

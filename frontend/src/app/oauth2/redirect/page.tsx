@@ -11,57 +11,39 @@ function OAuth2RedirectHandler() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { login } = useAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { memberType } = useMemberType();
 
   useEffect(() => {
     const handleOAuthRedirect = async () => {
       try {
-        const accessToken = searchParams.get('accessToken');
-        const refreshToken = searchParams.get('refreshToken');
-        const memberType = searchParams.get('memberType');
+        hasProcessed.current = true; // 처리 시작을 표시
 
-        if (accessToken && refreshToken) {
-          // 토큰에서 사용자 정보 추출
-          const base64Url = accessToken.split('.')[1];
-          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-          const binaryString = atob(base64);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-          }
-          const decodedString = new TextDecoder('utf-8').decode(bytes);
-          const decodedPayload = JSON.parse(decodedString);
+        // AuthContext의 login 함수에 토큰만 전달 (사용자 정보는 토큰에서 추출)
+        login(accessToken, refreshToken || '');
 
-          const userInfo = {
-            id: decodedPayload.id,
-            sub: decodedPayload.sub,
-            auth: decodedPayload.auth,
-            exp: decodedPayload.exp,
-            nickname: decodedPayload.nickname || null,
-            email: decodedPayload.email || null,
-          };
-          
-          if (memberType) {
-            localStorage.setItem('memberType', memberType);
-          }
+        console.log('OAuth 로그인 완료');
 
-          // 로그인 처리
-          login(accessToken, refreshToken, userInfo);
-          
-          // 메인 페이지로 리다이렉트
-          router.push('/');
+        // memberType이 설정되어 있는지 확인
+        const savedMemberType = localStorage.getItem('memberType');
+        if (!savedMemberType) {
+          console.log('memberType이 설정되지 않음, 프로필 설정 페이지로 이동');
+          router.replace('/profile?tab=edit&memberTypeRequired=true');
         } else {
-          console.error('OAuth redirect failed: missing tokens');
-          router.push('/login');
+          console.log('memberType 이미 설정됨:', savedMemberType, ', 홈으로 이동');
+          router.replace('/');
         }
       } catch (error) {
-        console.error('OAuth redirect error:', error);
-        router.push('/login');
+        console.error("토큰 처리 중 오류 발생:", error);
+        hasProcessed.current = true;
+        router.replace('/');
       }
-    };
-
-    handleOAuthRedirect();
-  }, [searchParams, login, memberType, router]); 
+    } else {
+      console.warn("URL에 accessToken이 없습니다.");
+      hasProcessed.current = true;
+      router.replace('/');
+    }
+  }, [login, router, searchParams]); 
 
   return (
     <div className="flex items-center justify-center min-h-screen">

@@ -1,6 +1,7 @@
 package com.back.global.security;
 
 import com.back.domain.member.dto.response.TokenResponseDto;
+import com.back.domain.member.entity.Member;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -51,19 +52,23 @@ public class JwtProvider {
         Long id = null;
 
         Object principal = authentication.getPrincipal();
-        if (principal instanceof CustomOAuth2User) {
+        
+        // CustomAuthentication인 경우 (일반 로그인)
+        if (authentication instanceof CustomAuthentication) {
+            CustomAuthentication customAuth = (CustomAuthentication) authentication;
+            Member member = customAuth.getMember();
+            email = member.getEmail();
+            nickname = member.getName();
+            id = member.getId();
+        } else if (principal instanceof CustomOAuth2User) {
+            // OAuth2 로그인인 경우
             CustomOAuth2User customOAuth2User = (CustomOAuth2User) principal;
-            email = customOAuth2User.getEmail(); // CustomOAuth2User에 getEmail() 메서드가 있으므로 사용
-            // CustomOAuth2User의 member 필드에서 name (닉네임)을 가져옵니다.
-            // Member 엔티티에 getName() 메서드가 닉네임을 반환한다고 가정합니다.
-            // 만약 Member 엔티티의 name 필드가 닉네임이 아니라면, 해당 필드명으로 수정해야 합니다.
-            nickname = customOAuth2User.getNickname(); // Member 엔티티의 name 필드가 닉네임이라고 가정
+            email = customOAuth2User.getEmail();
+            nickname = customOAuth2User.getNickname();
             id = customOAuth2User.getId();
         } else if (principal instanceof UserDetails) {
-            // 자체 로그인 등의 경우 UserDetails에서 정보를 가져올 수 있습니다.
-            // 여기서는 OAuth2User 케이스에 집중합니다.
-            email = ((UserDetails) principal).getUsername(); // UserDetails의 username은 보통 이메일입니다.
-            // 닉네임은 UserDetails에 직접 포함되지 않을 수 있으므로, 별도 처리가 필요합니다.
+            // 기본 UserDetails인 경우
+            email = ((UserDetails) principal).getUsername();
         }
 
         long now = (new Date()).getTime();
@@ -71,7 +76,7 @@ public class JwtProvider {
         // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + this.accessTokenExpiration);
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(authentication.getName()) // 이메일 또는 사용자 식별자
                 .claim("auth", authorities)
                 .claim("email", email)
                 .claim("nickname", nickname)
@@ -90,7 +95,7 @@ public class JwtProvider {
         return TokenResponseDto.builder()
                 .grantType("Bearer")
                 .accessToken(accessToken)
-                .refreshToken(refreshToken) // RefreshToken 추가
+                .refreshToken(refreshToken)
                 .build();
     }
 

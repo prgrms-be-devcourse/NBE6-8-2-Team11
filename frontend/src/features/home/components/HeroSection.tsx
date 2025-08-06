@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function HeroSection() {
   return (
@@ -33,40 +34,44 @@ export default function HeroSection() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4">
                 <div className="bg-white rounded-2xl p-4 shadow-lg transform rotate-3 hover:rotate-0 transition-transform">
-                  <div className="w-full h-48 bg-gradient-to-br from-orange-200 to-yellow-200 rounded-xl flex items-center justify-center">
-                    <img 
+                  <div className="w-full h-48 bg-gradient-to-br from-orange-200 to-yellow-200 rounded-xl flex items-center justify-center relative">
+                    <Image 
                       src="https://images.unsplash.com/photo-1615751072497-5f5169febe17?auto=format&fit=crop&crop=face" 
                       alt="강아지" 
-                      className="w-full h-full object-cover rounded-xl"
+                      fill
+                      className="object-cover rounded-xl"
                     />
                   </div>
                 </div>
                 <div className="bg-white rounded-2xl p-4 shadow-lg transform -rotate-2 hover:rotate-0 transition-transform">
-                  <div className="w-full h-32 bg-gradient-to-br from-blue-200 to-purple-200 rounded-xl flex items-center justify-center">
-                    <img 
+                  <div className="w-full h-32 bg-gradient-to-br from-blue-200 to-purple-200 rounded-xl flex items-center justify-center relative">
+                    <Image 
                       src="https://images.unsplash.com/photo-1567270671170-fdc10a5bf831?auto=format&fit=crop&crop=face" 
                       alt="고양이" 
-                      className="w-full h-full object-cover rounded-xl"
+                      fill
+                      className="object-cover rounded-xl"
                     />
                   </div>
                 </div>
               </div>
               <div className="space-y-4 pt-8">
                 <div className="bg-white rounded-2xl p-4 shadow-lg transform -rotate-1 hover:rotate-0 transition-transform">
-                  <div className="w-full h-32 bg-gradient-to-br from-green-200 to-teal-200 rounded-xl flex items-center justify-center">
-                    <img 
+                  <div className="w-full h-32 bg-gradient-to-br from-green-200 to-teal-200 rounded-xl flex items-center justify-center relative">
+                    <Image 
                       src="https://images.unsplash.com/photo-1695827406639-befb948fb513?auto=format&fit=crop&crop=face" 
                       alt="토끼" 
-                      className="w-full h-full object-cover rounded-xl"
+                      fill
+                      className="object-cover rounded-xl"
                     />
                   </div>
                 </div>
                 <div className="bg-white rounded-2xl p-4 shadow-lg transform rotate-2 hover:rotate-0 transition-transform">
-                  <div className="w-full h-48 bg-gradient-to-br from-pink-200 to-red-200 rounded-xl flex items-center justify-center">
-                    <img 
+                  <div className="w-full h-48 bg-gradient-to-br from-pink-200 to-red-200 rounded-xl flex items-center justify-center relative">
+                    <Image 
                       src="https://images.unsplash.com/photo-1667149047504-778bea76cf50?auto=format&fit=crop&crop=face" 
                       alt="새" 
-                      className="w-full h-full object-cover rounded-xl"
+                      fill
+                      className="object-cover rounded-xl"
                     />
                   </div>
                 </div>

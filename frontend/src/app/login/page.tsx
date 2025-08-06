@@ -26,20 +26,7 @@ export default function LoginPage() {
     }));
   };
 
-  // JWT 토큰 디코딩 함수 추가
-  const decodeToken = (token: string) => {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      return JSON.parse(jsonPayload);
-    } catch (error) {
-      console.error("Invalid token:", error);
-      return null;
-    }
-  };
+  // JWT 토큰 디코딩 함수 제거 (AuthContext에서 처리)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,21 +41,17 @@ export default function LoginPage() {
       
       console.log('로그인 성공:', response);
 
-      const decodedToken = decodeToken(response.accessToken);
-      if (!decodedToken) {
-        throw new Error('Invalid token');
-      }
-    
-      // context/AuthContext의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
+      // 로그인 응답에서 사용자 정보를 직접 생성
       const userInfo = {
-        id: response.userId,  // id 필드 추가 (숫자형)
-        sub: response.userId.toString(),
-        auth: decodedToken.auth,
-        exp: decodedToken.exp,
+        id: response.userId,
+        sub: response.userEmail, // 이메일을 subject로 사용
+        auth: 'ROLE_USER' as const, // 일반 사용자
+        exp: Date.now() + 24 * 60 * 60 * 1000, // 24시간 후 만료
         nickname: response.userName,
         email: response.userEmail,
       };
-      
+
+      // AuthContext의 login 함수에 사용자 정보 전달
       login(response.accessToken, response.refreshToken, userInfo);
       
       console.log('로그인 상태 업데이트 완료, 홈페이지로 이동합니다.');
@@ -100,7 +83,8 @@ export default function LoginPage() {
 
   const handleKakaoLogin = () => {
     // 백엔드의 OAuth2 엔드포인트로 리다이렉트
-    window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    window.location.href = `${apiBaseUrl}/oauth2/authorization/kakao`;
   };
 
   return (

@@ -1,7 +1,7 @@
 import { apiClient } from './apiClient';
-// ▼▼▼ 1. 변경된 부분: PetCreateRequestDto 타입을 추가로 import 한다. ▼▼▼
+// ▼▼▼ 1. 변경된 부분: PetUpdateRequestDto 타입을 추가로 import 한다. ▼▼▼
 import { Pet } from '../types';
-import { PetCreateRequestDto } from '../types'; // index.ts에 PetCreateRequestDto를 추가했으므로 여기서 가져온다.
+import { PetCreateRequestDto, PetUpdateRequestDto } from '../types'; // PetUpdateRequestDto 추가
 
 export const petService = {
   // 모든 동물 조회
@@ -23,19 +23,19 @@ export const petService = {
    * @returns 생성된 펫 정보 (Pet)
    */
   async createPet(petData: PetCreateRequestDto): Promise<Pet> {
-    const response = await apiClient.post<Pet>('/api/pets', petData);
+    const response = await apiClient.post<Pet>('/pets', petData);
     return response.content;
   },
   // ▲▲▲▲▲ 여기까지 수정 ▲▲▲▲▲
 
   // 특정 동물 정보 수정
-  async updatePet(petId: string, petData: Partial<Pet>): Promise<Pet> {
-    const response = await apiClient.put<Pet>(`/api/pets/${petId}`, petData);
+  async updatePet(petId: string, petData: PetUpdateRequestDto): Promise<Pet> {
+    const response = await apiClient.put<Pet>(`/pets/${petId}`, petData);
     return response.content;
   },
 
   // 특정 동물 삭제
   async deletePet(petId: string): Promise<void> {
-    await apiClient.delete(`/api/pets/${petId}`);
+    await apiClient.delete(`/pets/${petId}`);
   },
 };

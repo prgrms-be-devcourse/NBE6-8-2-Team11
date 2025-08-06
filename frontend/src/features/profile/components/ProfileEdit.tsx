@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User } from '../types';
 import { useMemberType } from '../../../context/MemberTypeContext';
 
@@ -10,34 +10,62 @@ interface ProfileEditProps {
 }
 
 export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
-  const { memberType, setMemberType, getMemberType } = useMemberType();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { memberType, setMemberType, getMemberType, tempFormData, setTempFormData, clearTempFormData } = useMemberType();
 
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    address: user?.address || '',
-    bio: user?.bio || '',
-    // Context 우선, User 객체 백업, 기본값 순서
-    memberType: getMemberType(user?.memberType)
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    bio: '',
+    memberType: 'adopter' as 'adopter' | 'shelter'
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
+  // 초기화 및 데이터 복원
+  useEffect(() => {
+    if (user) {
+      // 임시 저장된 데이터가 있으면 우선 사용, 없으면 사용자 데이터 사용
+      setFormData({
+        name: tempFormData.name || user.name || '',
+        email: user.email || '',
+        phone: tempFormData.phone || user.phone || '',
+        address: tempFormData.address || user.address || '',
+        bio: tempFormData.bio || user.bio || '',
+        memberType: getMemberType(user.memberType)
+      });
+    }
+  }, [user, tempFormData, getMemberType]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    const newFormData = {
+      ...formData,
+      [name]: value
+    };
+    
+    setFormData(newFormData);
+    
+    // 입력 값을 임시 저장 (이메일 제외)
+    if (name !== 'email') {
+      setTempFormData({
+        name: newFormData.name,
+        phone: newFormData.phone,
+        address: newFormData.address,
+        bio: newFormData.bio
+      });
+    }
     
     // memberType 변경 시 Context에 즉시 저장
     if (name === 'memberType') {
       setMemberType(value as 'adopter' | 'shelter');
     }
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -48,6 +76,10 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
         throw new Error('사용자 정보가 없습니다.');
       }
 
+      // memberType 설정 여부 확인
+      if (!formData.memberType) {
+        throw new Error('회원 유형을 선택해주세요.');
+      }
 
       const response = await fetch(`/api/members/${user.memberId}`, {
         method: 'PUT',
@@ -88,17 +120,18 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
         memberType: getMemberType(),
       };
 
-
       setUser(updatedUser);
+      // 성공적으로 저장되면 임시 데이터 삭제
+      clearTempFormData();
       setMessage('정보가 성공적으로 수정되었습니다!');
     } catch (error) {
       console.error(error);
-      setMessage('정보 수정에 실패했습니다. 다시 시도해주세요.');
+      const errorMessage = error instanceof Error ? error.message : '정보 수정에 실패했습니다. 다시 시도해주세요.';
+      setMessage(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
-
 
   if (!user) {
     return (
@@ -152,7 +185,7 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
                   onChange={handleInputChange}
                   readOnly
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
               />
             </div>
 
@@ -188,35 +221,42 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
               회원 유형 *
             </label>
 
-            <div className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-lg flex space-x-6 items-center">
-              <label className="flex items-center space-x-2">
-                <input
-                    type="radio"
-                    name="memberType"
-                    value="adopter"
-                    checked={formData.memberType === 'adopter'}
-                    onChange={handleInputChange}
-                />
-                <span>🙋 입양 희망자</span>
-              </label>
+            <div className="w-full md:w-1/2 px-4 py-3 border border-gray-300 rounded-lg bg-white">
+              <div className="flex space-x-6">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                      type="radio"
+                      name="memberType"
+                      value="adopter"
+                      checked={formData.memberType === 'adopter'}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500 focus:ring-2"
+                  />
+                  <span className="text-sm font-medium text-gray-700">🙋 입양 희망자</span>
+                </label>
 
-              <label className="flex items-center space-x-2">
-                <input
-                    type="radio"
-                    name="memberType"
-                    value="shelter"
-                    checked={formData.memberType === 'shelter'}
-                    onChange={handleInputChange}
-                />
-                <span>💒 보호소</span>
-              </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                      type="radio"
+                      name="memberType"
+                      value="shelter"
+                      checked={formData.memberType === 'shelter'}
+                      onChange={handleInputChange}
+                      className="w-4 h-4 text-orange-500 border-gray-300 focus:ring-orange-500 focus:ring-2"
+                  />
+                  <span className="text-sm font-medium text-gray-700">💒 보호소</span>
+                </label>
+              </div>
             </div>
+            
+            {!formData.memberType && (
+              <p className="mt-1 text-sm text-red-600">회원 유형을 선택해주세요.</p>
+            )}
           </div>
-
 
           <div>
             <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
@@ -248,8 +288,9 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
                   bio: user?.bio || '',
                   memberType: resetMemberType
                 });
-                // Context도 원래 값으로 복원
+                // Context도 원래 값으로 복원하고 임시 데이터 삭제
                 setMemberType(resetMemberType);
+                clearTempFormData();
                 setMessage('');
               }}
               className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
@@ -258,7 +299,7 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
           </button>
           <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !formData.memberType}
               className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isSubmitting ? '저장 중...' : '저장'}
@@ -266,4 +307,4 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
         </div>
       </form>
   );
-} 
+}

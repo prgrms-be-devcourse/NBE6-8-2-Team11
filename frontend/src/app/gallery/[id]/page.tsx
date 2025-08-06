@@ -24,6 +24,42 @@ export default function AnimalDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
 
+  // 현재 사용자가 펫의 소유자인지 확인
+  const isOwner = userInfo && pet ? (() => {
+    // 여러 방법으로 사용자 ID 확인
+    let currentUserId: number;
+    
+    if (userInfo.id && userInfo.id !== null && userInfo.id !== undefined) {
+      currentUserId = typeof userInfo.id === 'number' ? userInfo.id : parseInt(String(userInfo.id), 10);
+    } else if (userInfo.sub) {
+      currentUserId = parseInt(userInfo.sub, 10);
+    } else {
+      // localStorage에서 userInfo 다시 확인
+      const storedUserInfo = localStorage.getItem('userInfo');
+      if (storedUserInfo) {
+        try {
+          const parsedUserInfo = JSON.parse(storedUserInfo);
+          currentUserId = parseInt(parsedUserInfo.id || parsedUserInfo.sub || '0', 10);
+        } catch {
+          currentUserId = 0;
+        }
+      } else {
+        currentUserId = 0;
+      }
+    }
+    
+    console.log('갤러리 소유자 확인:', {
+      currentUserId,
+      petOwnerId: pet.petOwnerId,
+      isOwner: currentUserId === pet.petOwnerId,
+      userInfo
+    });
+    
+    return currentUserId === pet.petOwnerId;
+  })() : false;
+  
+  const isAdmin = userInfo?.auth?.includes('ADMIN') || userInfo?.auth === 'ROLE_ADMIN';
+
   useEffect(() => {
     if (!params?.id) return;
     
@@ -45,11 +81,12 @@ export default function AnimalDetailPage() {
 
   // WebSocket 연결 및 알림 처리
   useEffect(() => {
-    if (!userInfo) return;
+    if (!userInfo || !userInfo.id) return;
 
     const token = localStorage.getItem('accessToken');
-    if (token && userInfo) {
-      const userId = parseInt(userInfo.sub, 10);
+    const userId = userInfo.id;
+    
+    if (token && userId) {
       console.log('Gallery page - Connecting WebSocket with userId:', userId);
       
       // WebSocket 연결
@@ -69,7 +106,7 @@ export default function AnimalDetailPage() {
           title: notification.title || '새 알림',
           message: notification.message || notification.content || '새로운 알림이 도착했습니다.',
           type: (notification.type as 'NEW_MESSAGE' | 'ADOPTION_REQUESTED' | 'ADOPTION_ACCEPTED' | 'ADOPTION_REJECTED' | 'CARE_REQUESTED' | 'CARE_ACCEPTED' | 'CARE_REJECTED' | 'CHAT_ROOM_DELETED') || 'NEW_MESSAGE',
-          userId: userId,
+          userId: userId || 0,
         });
       };
 
@@ -91,7 +128,7 @@ export default function AnimalDetailPage() {
 
     try {
       setIsCreatingChat(true);
-      const currentUserId = parseInt(userInfo.sub, 10);
+      const currentUserId = userInfo.id || parseInt(userInfo.sub || '0', 10);
       
       // 채팅방 생성
       const chatRoom = await chatService.createChatRoom({
@@ -170,39 +207,54 @@ export default function AnimalDetailPage() {
               <h1 className="text-3xl font-bold text-gray-900">{pet.name}</h1>
             </div>
             
-            {/* 우측: 상태 */}
+            {/* 우측: 상태 및 버튼들 */}
             <div className="text-right">
               <div className="flex items-center justify-end mb-3">
                 <span className={`text-xs px-2 py-1 rounded-full font-medium ${getPetStatusColorClass(pet.petStatuses)}`}>
                   {getPetStatusDisplayText(pet.petStatuses)}
                 </span>
               </div>
-              {/* 1대1 문의 버튼 */}
-              <button
-                onClick={handleInquiryClick}
-                disabled={isCreatingChat || !canApply()}
-                className={`text-sm px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2 ${
-                  canApply() 
-                    ? 'bg-orange-500 hover:bg-orange-600 text-white' 
-                    : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                }`}
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+              
+              {/* 관리 버튼들 (소유자 또는 관리자에게만 표시) */}
+              {(isOwner || isAdmin) && (
+                <div className="flex gap-2 mb-3">
+                  <button
+                    onClick={() => router.push(`/pets/edit/${pet.id}`)}
+                    className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-1 rounded text-xs transition-colors duration-200"
+                  >
+                    수정
+                  </button>
+                </div>
+              )}
+              
+              {/* 1대1 문의 버튼 (소유자가 아닌 경우에만 표시) */}
+              {!isOwner && (
+                <button
+                  onClick={handleInquiryClick}
+                  disabled={isCreatingChat || !canApply()}
+                  className={`text-sm px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2 ${
+                    canApply() 
+                      ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                      : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  }`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  />
-                </svg>
-                <span>{isCreatingChat ? '채팅방 생성 중...' : '1대1 문의'}</span>
-              </button>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    />
+                  </svg>
+                  <span>{isCreatingChat ? '채팅방 생성 중...' : '1대1 문의'}</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -264,8 +316,9 @@ export default function AnimalDetailPage() {
             )}
           </div>
 
-          {/* 입양·돌봄 신청 버튼 */}
-          <div className="mt-10 mb-10 pt-6 border-t border-gray-200 flex justify-center">
+          {/* 입양·돌봄 신청 버튼 (소유자가 아닌 경우에만 표시) */}
+          {!isOwner && (
+            <div className="mt-10 mb-10 pt-6 border-t border-gray-200 flex justify-center">
             <div className="w-60 h-16 flex items-center justify-center">
               <button 
                 onClick={() => router.push(`/apply?petId=${pet.id}`)}
@@ -279,8 +332,9 @@ export default function AnimalDetailPage() {
               >
                 {canApply() ? '입양 · 돌봄 신청하기' : '신청 불가'}
               </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
       <Footer />

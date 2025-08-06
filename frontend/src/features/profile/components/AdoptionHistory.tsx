@@ -60,9 +60,17 @@ export default function AdoptionHistory() {
           type: app.type as 'ADOPTION' | 'CARE',
           status: app.status,
           createdAt: app.createdAt,
-          petInfo: undefined,
-          desiredStartDate: undefined,
-          desiredEndDate: undefined
+          petInfo: app.petInfo ? {
+            id: parseInt(app.petInfo.id),
+            name: app.petInfo.name,
+            species: app.petInfo.species,
+            age: app.petInfo.age,
+            gender: app.petInfo.gender,
+            imageUrl: app.petInfo.imageUrl,
+            shelterName: app.petInfo.shelterName
+          } : undefined,
+          desiredStartDate: app.desiredStartDate,
+          desiredEndDate: app.desiredEndDate
         }));
         
         setAdoptionRecords(records);

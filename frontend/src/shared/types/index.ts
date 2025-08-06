@@ -59,6 +59,26 @@ export interface Care {
   createdAt: Date;
 }
 
+// 입양/돌봄 신청 이력을 위한 타입 (백엔드 ApplicationSimpleListResponseDto와 일치)
+export interface AdoptionRecord {
+  id: number;
+  title: string;
+  type: 'ADOPTION' | 'CARE';
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  createdAt: string;
+  petInfo?: {
+    id: number;
+    name: string;
+    species: string;
+    age: number;
+    gender: string;
+    imageUrl: string;
+    shelterName?: string;
+  };
+  desiredStartDate?: string;
+  desiredEndDate?: string;
+}
+
 // 동물 상태 타입 (pet_status 테이블 기반)
 export interface PetStatus {
   id: number;
@@ -145,5 +165,16 @@ export interface PetCreateRequestDto {
   description: string;
   imageUrl: string;
   shelterName?: string; // 일반 사용자는 이 필드를 보내지 않으므로 optional 처리.
+  statuses: string[];
+}
+
+export interface PetUpdateRequestDto {
+  name: string;
+  species: string;
+  age: number;
+  gender: 'MALE' | 'FEMALE' | 'UNKNOWN' | 'NEUTERED_MALE' | 'NEUTERED_FEMALE';
+  description: string;
+  imageUrl: string;
+  shelterName?: string;
   statuses: string[];
 }

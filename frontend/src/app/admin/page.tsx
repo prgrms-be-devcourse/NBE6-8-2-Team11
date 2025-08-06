@@ -223,7 +223,8 @@ export default function AdminPage() {
   const handleSavePet = async (petData: PetFormData) => {
     try {
       if (editingPet && editingPet.id) {
-        // FIX: 수정 시 DTO에 불필요한 id, petOwnerId, createdAt, 그리고 petStatuses 필드를 제거
+        // FIX: 수정 시 DTO에 불필요한 필드들을 제거
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id, petOwnerId, createdAt, petStatuses, ...updateData } = petData;
         
         await adminService.updatePet(editingPet.id.toString(), updateData as UpdatePetRequest);
