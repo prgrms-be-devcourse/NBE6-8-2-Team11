@@ -181,8 +181,8 @@ const ApplicationTypeRadio = ({
   onTypeChange: (type: 'adoption' | 'care') => void; 
 }) => {
   // 상태에 따른 라디오 버튼 활성화 여부 결정
-  const canAdopt = petStatuses?.includes('AVAILABLE_FOR_ADOPTION');
-  const canCare = petStatuses?.includes('AVAILABLE_FOR_CARE');
+  const canAdopt = petStatuses?.includes('AVAILABLE_FOR_ADOPTION') || petStatuses?.includes('AVAILABLE_BOTH');
+  const canCare = petStatuses?.includes('AVAILABLE_FOR_CARE') || petStatuses?.includes('AVAILABLE_BOTH');
 
   // 기본적으로 두 옵션 모두 활성화 (petStatuses가 없거나 빈 배열인 경우)
   const isAdoptEnabled = canAdopt !== false;
@@ -315,28 +315,20 @@ function ApplyPageContent() {
     const loadInitialData = async () => {
       try {
         setIsLoading(true);
-        console.log('🔍 [DEBUG] loadInitialData 시작');
-        console.log('🔍 [DEBUG] petIdFromUrl:', petIdFromUrl);
         
         if (!petIdFromUrl) {
           throw new Error("Pet ID is missing from URL.");
         }
 
         // 1. 동물 정보 가져오기
-        console.log('🔍 [DEBUG] 동물 정보 가져오기 시작');
         const petData = await petService.getPet(petIdFromUrl);
-        console.log('🔍 [DEBUG] 동물 정보:', petData);
         setSelectedPet(petData);
         
         // 2. 사용자 정보 가져오기 (API 호출) - 새로 추가됨
-        console.log('🔍 [DEBUG] 사용자 정보 가져오기 시작');
         const userData = await memberService.getCurrentUser();
-        console.log('🔍 [DEBUG] 사용자 정보:', userData);
         setCurrentUser(userData as Member);
-        
-        console.log('🔍 [DEBUG] loadInitialData 완료');
       } catch (error) {
-        console.error('❌ [DEBUG] loadInitialData 실패:', error);
+        console.error('Failed to load initial data:', error);
         setSubmitMessage('페이지를 불러오는 데 실패했습니다.');
       } finally {
         setIsLoading(false);
@@ -348,11 +340,8 @@ function ApplyPageContent() {
 
   useEffect(() => {
     const loadPetData = async () => {
-      console.log('🔍 [DEBUG] loadPetData 시작');
-      console.log('🔍 [DEBUG] currentUser:', currentUser);
       
       if (!petIdFromUrl) {
-        console.log('🔍 [DEBUG] petIdFromUrl이 없어서 종료');
         return;
       }
       
@@ -381,11 +370,6 @@ function ApplyPageContent() {
         }
       }
       
-      console.log('🔍 [DEBUG] 폼 데이터 설정 시작');
-      console.log('🔍 [DEBUG] currentUser?.name:', currentUser?.name);
-      console.log('🔍 [DEBUG] currentUser?.email:', currentUser?.email);
-      console.log('🔍 [DEBUG] currentUser?.phone:', currentUser?.phone);
-      
       setFormData(prev => ({ 
         ...prev, 
         petId: petData.id,
@@ -397,7 +381,6 @@ function ApplyPageContent() {
         address: '', 
       }));
       
-      console.log('🔍 [DEBUG] loadPetData 완료');
     };
 
     loadPetData();
@@ -446,26 +429,20 @@ function ApplyPageContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🔍 [DEBUG] 폼 제출 시작');
-    console.log('🔍 [DEBUG] formData:', formData);
-    console.log('🔍 [DEBUG] selectedPet:', selectedPet);
     
     if (!selectedPet) {
-      console.log('❌ [DEBUG] selectedPet이 없음');
       setSubmitMessage('동물 정보가 없습니다. 다시 시도해주세요.');
       return;
     }
 
     // 필수 필드 검증
     if (!formData.contactName || !formData.contactEmail || !formData.contactPhone || !formData.address || !formData.reason) {
-      console.log('❌ [DEBUG] 필수 필드 누락');
       setSubmitMessage('필수 항목을 모두 입력해주세요.');
       return;
     }
 
     // 돌봄 신청 시 날짜 필드 검증
     if (formData.applicationType === 'care' && (!formData.careStartDate || !formData.careEndDate)) {
-      console.log('❌ [DEBUG] 돌봄 날짜 필드 누락');
       setSubmitMessage('돌봄 시작일과 종료일을 모두 입력해주세요.');
       return;
     }
@@ -473,7 +450,6 @@ function ApplyPageContent() {
     // 돌봄 종료일이 시작일보다 이전인지 검증
     if (formData.applicationType === 'care' && formData.careStartDate && formData.careEndDate) {
       if (formData.careEndDate < formData.careStartDate) {
-        console.log('❌ [DEBUG] 돌봄 종료일이 시작일보다 이전');
         setSubmitMessage('돌봄 종료일은 시작일보다 늦어야 합니다.');
         return;
       }
@@ -481,11 +457,9 @@ function ApplyPageContent() {
 
     setIsSubmitting(true);
     setSubmitMessage('');
-    console.log('🔍 [DEBUG] API 호출 시작');
 
     try {
       if (formData.applicationType === 'adoption') {
-        console.log('🔍 [DEBUG] 입양 신청 API 호출');
         // 입양 신청
         await adoptionService.createAdoption({
           petId: selectedPet.id.toString(),
@@ -495,7 +469,6 @@ function ApplyPageContent() {
           experience: formData.experience,
         });
       } else {
-        console.log('🔍 [DEBUG] 돌봄 신청 API 호출');
         // 돌봄 신청 - 날짜 필드가 이미 검증되었으므로 안전하게 변환
         const startDate = new Date(formData.careStartDate!);
         const endDate = new Date(formData.careEndDate!);
@@ -511,7 +484,6 @@ function ApplyPageContent() {
         });
       }
 
-      console.log('✅ [DEBUG] 신청 성공');
       setSubmitMessage('입양/돌봄 신청이 성공적으로 제출되었습니다!');
       
       setTimeout(() => {
@@ -519,7 +491,7 @@ function ApplyPageContent() {
       }, 3000);
       
     } catch (error) {
-      console.error('❌ [DEBUG] 신청 실패:', error);
+      console.error('신청 실패:', error);
       setSubmitMessage('입양/돌봄 신청에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
