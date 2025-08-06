@@ -6,13 +6,13 @@ import { PetCreateRequestDto } from '../types'; // index.ts에 PetCreateRequestD
 export const petService = {
   // 모든 동물 조회
   async getPets(): Promise<Pet[]> {
-    const response = await apiClient.get<Pet[]>('/api/pets');
+    const response = await apiClient.get<Pet[]>('/pets');
     return response.content;
   },
 
   // 특정 동물 조회
   async getPet(petId: string): Promise<Pet> {
-    const response = await apiClient.get<Pet>(`/api/pets/${petId}`);
+    const response = await apiClient.get<Pet>(`/pets/${petId}`);
     return response.content;
   },
 

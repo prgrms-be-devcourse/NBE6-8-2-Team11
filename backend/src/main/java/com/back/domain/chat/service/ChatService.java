@@ -74,6 +74,9 @@ public class ChatService {
 
             notificationService.sendChatNotification(opponent.getId(), myMember.getName(),
                     "새 채팅방이 생성되었습니다");
+            notificationService.sendChatNotification(myId, myMember.getName(),
+                    "새 채팅방이 생성되었습니다");
+
 
             log.info("New chat room {} created, notified opponent {}", chatRoom.getId(), opponentId);
             notifyChatRoomCreated(chatRoom);
