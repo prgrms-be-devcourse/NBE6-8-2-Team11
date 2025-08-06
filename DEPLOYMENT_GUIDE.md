@@ -90,12 +90,15 @@ JWT_SECRET=***
 JWT_ACCESS_TOKEN_EXPIRATION=PT15M
 JWT_REFRESH_TOKEN_EXPIRATION=PT168H
 FRONTEND_URL=https://nbe-6-8-2-team11.vercel.app
+OAUTH2_REDIRECT_URI=https://nbe6-8-2-team11.onrender.com/login/oauth2/code/kakao
+KAKAO_CLIENT_ID=***
+KAKAO_CLIENT_SECRET=***
 DATABASE_URL=(자동 설정)
 ```
 
 #### **Vercel (프론트엔드)**
 ```bash
-NEXT_PUBLIC_API_URL=https://nbe6-8-2-team11.onrender.com
+NEXT_PUBLIC_API_BASE_URL=https://nbe6-8-2-team11.onrender.com
 NODE_ENV=production
 ```
 
@@ -318,124 +321,4 @@ git push origin main --force-with-lease
 ```
 
 ### **수동 배포 방법**
-```bash
-# 1. GitHub Actions에서 수동 실행
-# Repository → Actions → Deploy Pipeline → Run workflow
-
-# 2. Render에서 수동 배포
-# Dashboard → Web Service → Manual Deploy
-
-# 3. Vercel에서 수동 배포
-# Dashboard → Project → Deployments → Redeploy
 ```
-
----
-
-## 📈 성능 및 모니터링
-
-### **성능 메트릭**
-- **백엔드 응답 시간**: < 500ms (목표)
-- **프론트엔드 로딩 시간**: < 3초 (목표)
-- **배포 시간**: < 8분 (전체)
-- **가동 시간**: 99.9% (목표)
-
-### **모니터링 도구**
-- **GitHub Actions**: CI/CD 파이프라인 모니터링
-- **Render**: 백엔드 서비스 메트릭
-- **Vercel**: 프론트엘드 성능 분석
-- **Slack**: 실시간 알림
-
-### **로그 확인 방법**
-```bash
-# GitHub Actions 로그
-Repository → Actions → 워크플로우 선택 → 로그 확인
-
-# Render 로그
-Dashboard → Web Service → Logs
-
-# Vercel 로그
-Dashboard → Project → Functions → View Logs
-```
-
----
-
-## 🚀 팀원 가이드
-
-### **새로운 팀원 온보딩**
-1. ✅ 프로젝트 클론 및 로컬 환경 설정
-2. ✅ 개발 환경에서 정상 작동 확인
-3. ✅ feature 브랜치 생성 및 테스트 커밋
-4. ✅ 테스트 PR 생성 및 CI 확인
-5. ✅ Slack 알림 수신 확인
-6. ✅ 배포 URL 접속 확인
-
-### **일상적인 개발 플로우**
-```
-🧑‍💻 개발자는 코드만 작성하면 됩니다!
-
-1. 기능 개발 (feature 브랜치)
-2. PR 생성
-3. 자동 CI 테스트 (GitHub Actions)
-4. Slack 알림 받고 리뷰 요청
-5. 리뷰 & 승인 후 머지
-6. 자동 배포 시작
-7. 배포 완료 → 서비스 업데이트 ✅
-
-모든 과정이 자동화되어 있어 별도 작업 불필요!
-```
-
-### **주의사항**
-- ⚠️ **개인 Fork 레포 직접 수정 금지** (배포 전용)
-- ⚠️ **main 브랜치 직접 푸시 금지** (PR 필수)
-- ⚠️ **환경 변수 코드에 하드코딩 금지**
-- ⚠️ **대용량 파일 커밋 금지** (이미지 등)
-
----
-
-## 📞 지원 및 문의
-
-### **문제 해결 순서**
-1. 🔍 **이 가이드 확인**
-2. 📊 **GitHub Actions 로그 확인**
-3. 🌐 **배포 플랫폼 대시보드 확인**
-4. 💬 **팀 슬랙 채널에 문의**
-5. 🆘 **배포 담당자 연락**
-
-### **연락처**
-- **배포 시스템**: @진민호
-- **백엔드 이슈**: 백엔드 팀원
-- **프론트엔드 이슈**: 프론트엔드 팀원
-- **긴급 상황**: 팀 슬랙 #2차-team11
-
-### **유용한 링크**
-- 📊 [GitHub Actions](https://github.com/prgrms-be-devcourse/NBE6-8-2-Team11/actions)
-- 🌐 [백엔드 서비스](https://nbe6-8-2-team11.onrender.com)
-- 🌐 [프론트엔드 서비스](https://nbe-6-8-2-team11.vercel.app)
-- 📋 [Render 대시보드](https://dashboard.render.com/)
-- 📋 [Vercel 대시보드](https://vercel.com/dashboard)
-
----
-
-## ✅ 성공 지표
-
-### **배포 시스템 완성도**
-- ✅ **완전 자동화**: 코드 푸시 → 자동 배포
-- ✅ **무중단 배포**: 서비스 다운타임 없음
-- ✅ **실시간 알림**: Slack 통합
-- ✅ **롤백 시스템**: 문제 발생 시 즉시 복구
-- ✅ **모니터링**: 실시간 상태 확인
-
-### **팀 협업 효과**
-- 🚀 **개발 속도 향상**: 배포 걱정 없이 개발 집중
-- 📊 **품질 향상**: 자동 테스트로 버그 사전 차단
-- 💬 **소통 개선**: Slack 알림으로 즉시 리뷰
-- 🔄 **효율성 증대**: 수동 배포 작업 완전 제거
-
----
-
-**🎉 완전 자동화된 CI/CD 파이프라인**
-
-*마지막 업데이트: 2025-08-05*  
-*배포 시스템 구축 완료 및 문서화 완료*
-
----

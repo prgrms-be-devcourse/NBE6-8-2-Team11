@@ -88,6 +88,14 @@ export default function LoginPage() {
   const handleKakaoLogin = () => {
     // 백엔드의 OAuth2 엔드포인트로 리다이렉트
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+    if (!apiBaseUrl) {
+      console.error('API BASE URL이 설정되지 않았습니다!');
+      alert('환경 설정 오류가 발생했습니다.');
+      return;
+    }
+
+    console.log('API BASE URL:', apiBaseUrl); // 디버깅용
     window.location.href = `${apiBaseUrl}/oauth2/authorization/kakao`;
   };
 
