@@ -42,7 +42,7 @@ function OAuth2RedirectHandler() {
       console.warn("URL에 accessToken이 없습니다.");
       hasProcessed.current = true;
       router.replace('/');
-    }
+    };
   }, [login, router, searchParams]); 
 
   return (
