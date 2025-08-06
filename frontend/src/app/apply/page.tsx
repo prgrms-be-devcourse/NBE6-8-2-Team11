@@ -459,7 +459,9 @@ function ApplyPageContent() {
         await adoptionService.createAdoption({
           petId: selectedPet.id.toString(),
           title: `${selectedPet.name} 입양 신청`,
-          message: formData.reason
+          message: formData.reason,
+          anotherPets: formData.otherPets,
+          experience: formData.experience,
         });
       } else {
         // 돌봄 신청 - 날짜 필드가 이미 검증되었으므로 안전하게 변환
