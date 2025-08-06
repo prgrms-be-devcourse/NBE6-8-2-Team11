@@ -1,7 +1,7 @@
 // API 클라이언트 설정
 // 팀원들의 기존 환경과 호환성을 위한 우선순위 설정
 const API_BASE_URL = 
-  process.env.NEXT_PUBLIC_API_URL ||  // 환경변수 우선
+  process.env.NEXT_PUBLIC_API_BASE_URL ||  // 환경변수 우선
   'http://localhost:8080';             // Docker 환경 기본값
 
 interface ApiResponse<T> {

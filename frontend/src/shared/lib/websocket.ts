@@ -42,7 +42,7 @@ class WebSocketClient {
     this.currentUserId = userId;
     
     // 환경에 따른 WebSocket URL 설정
-    const wsUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const wsUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
     const wsEndpoint = `${wsUrl}/ws-chat`;
     
     console.log('Connecting to WebSocket:', wsEndpoint);
