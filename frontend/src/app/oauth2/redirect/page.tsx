@@ -1,13 +1,13 @@
-// 'use client';
-// import { useEffect, useRef, Suspense } from 'react';
-// import { useSearchParams, useRouter } from 'next/navigation';
-// import { useAuth } from '../../../context/AuthContext';
-// import { useMemberType } from '../../../context/MemberTypeContext';
+'use client';
+import { useEffect, useRef, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useAuth } from '../../../context/AuthContext';
+import { useMemberType } from '../../../context/MemberTypeContext';
 
-// // 동적 렌더링 강제
-// export const dynamic = 'force-dynamic';
+// 동적 렌더링 강제
+export const dynamic = 'force-dynamic';
 
-// function OAuth2RedirectHandler() {
+function OAuth2RedirectHandler() {
 //   const searchParams = useSearchParams();
 //   const router = useRouter();
 //   const { login } = useAuth();
@@ -67,4 +67,4 @@
 //       <OAuth2RedirectHandler />
 //     </Suspense>
 //   );
-// }
+}
