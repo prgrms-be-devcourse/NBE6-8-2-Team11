@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "@stomp/stompjs": "^7.1.1",
+    "@types/node": "^24.2.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/sockjs-client": "^1.5.4",
     "autoprefixer": "^10.4.21",
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
@@ -25,10 +29,6 @@
     "zustand": "^5.0.7"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@types/node": "^24.2.0",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@types/sockjs-client": "^1.5.4"
+    "@eslint/eslintrc": "^3"
   }
 }
