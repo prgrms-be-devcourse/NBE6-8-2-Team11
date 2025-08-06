@@ -38,11 +38,7 @@ function OAuth2RedirectHandler() {
         hasProcessed.current = true;
         router.replace('/');
       }
-    } else {
-      console.warn("URL에 accessToken이 없습니다.");
-      hasProcessed.current = true;
-      router.replace('/');
-    };
+    }; 
   }, [login, router, searchParams]); 
 
   return (
