@@ -81,7 +81,7 @@ export default function AnimalDetailPage() {
 
   // WebSocket 연결 및 알림 처리
   useEffect(() => {
-    if (!userInfo) return;
+    if (!userInfo || !userInfo.id) return;
 
     const token = localStorage.getItem('accessToken');
     if (token && userInfo && userInfo.id) {
@@ -104,7 +104,7 @@ export default function AnimalDetailPage() {
           title: notification.title || '새 알림',
           message: notification.message || notification.content || '새로운 알림이 도착했습니다.',
           type: (notification.type as 'NEW_MESSAGE' | 'ADOPTION_REQUESTED' | 'ADOPTION_ACCEPTED' | 'ADOPTION_REJECTED' | 'CARE_REQUESTED' | 'CARE_ACCEPTED' | 'CARE_REJECTED' | 'CHAT_ROOM_DELETED') || 'NEW_MESSAGE',
-          userId: userInfo.id,
+          userId: userInfo.id || 0,
         });
       };
 
