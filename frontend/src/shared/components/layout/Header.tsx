@@ -56,7 +56,7 @@ export default function Header() {
   }, []);
 
   // userInfo.auth 문자열에 'ADMIN'이 포함되어 있는지 확인
-  const isAdmin = userInfo?.auth?.includes('ADMIN');
+  const isAdmin = userInfo?.auth?.includes('ADMIN')
 
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50">
