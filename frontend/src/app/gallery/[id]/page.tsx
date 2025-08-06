@@ -10,6 +10,7 @@ import { Pet } from '../../../shared/types';
 import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../../shared/utils';
 import { useAuth } from '../../../context/AuthContext';
 import { wsClient } from '../../../shared/lib/websocket';
+
 import { useNotificationStore } from '../../../shared/components/common/notify/NotificationStore';
 import Image from 'next/image';
 
@@ -91,6 +92,8 @@ export default function AnimalDetailPage() {
     try {
       setIsCreatingChat(true);
       const currentUserId = parseInt(userInfo.sub, 10);
+      console.log('currentUserId: ', currentUserId);
+      console.log('pet.petOwnerId: ', pet.petOwnerId);
       
       // 채팅방 생성
       const chatRoom = await chatService.createChatRoom({
