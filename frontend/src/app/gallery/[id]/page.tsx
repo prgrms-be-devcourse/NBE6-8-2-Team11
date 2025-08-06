@@ -29,8 +29,8 @@ export default function AnimalDetailPage() {
     // 여러 방법으로 사용자 ID 확인
     let currentUserId: number;
     
-    if (userInfo.id) {
-      currentUserId = typeof userInfo.id === 'number' ? userInfo.id : parseInt(userInfo.id.toString(), 10);
+    if (userInfo.id && userInfo.id !== null && userInfo.id !== undefined) {
+      currentUserId = typeof userInfo.id === 'number' ? userInfo.id : parseInt(String(userInfo.id), 10);
     } else if (userInfo.sub) {
       currentUserId = parseInt(userInfo.sub, 10);
     } else {
@@ -126,7 +126,7 @@ export default function AnimalDetailPage() {
 
     try {
       setIsCreatingChat(true);
-      const currentUserId = userInfo.id || parseInt(userInfo.sub, 10);
+      const currentUserId = userInfo.id || parseInt(userInfo.sub || '0', 10);
       
       // 채팅방 생성
       const chatRoom = await chatService.createChatRoom({

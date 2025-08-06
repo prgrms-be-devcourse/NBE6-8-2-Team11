@@ -184,7 +184,7 @@ export default function ReceivedAdoptionHistory() {
     }
   };
 
-  const handleDeleteApplication = async (recordId: number, _type: string) => {
+  const handleDeleteApplication = async (recordId: number) => {
     if (!confirm('정말로 이 신청을 삭제하시겠습니까?')) return;
     
     try {
@@ -391,7 +391,7 @@ export default function ReceivedAdoptionHistory() {
                   </>
                 )}
                 <button 
-                  onClick={() => handleDeleteApplication(record.id, record.type)}
+                  onClick={() => handleDeleteApplication(record.id)}
                   className="text-sm text-gray-600 hover:text-gray-700 font-medium bg-gray-50 hover:bg-gray-100 px-3 py-1 rounded-lg transition-colors"
                 >
                   삭제
