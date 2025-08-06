@@ -1,15 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getUserInfoFromToken } from '../shared/utils/jwt';
-
-interface UserInfo {
-  id?: number;
-  sub: string;
-  auth: 'ROLE_USER' | 'ROLE_ADMIN';
-  exp: number;
-  nickname?: string;
-  email?: string;
-}
+import { getUserInfoFromToken, type UserInfo } from '../shared/utils/jwt';
 
 interface AuthContextType {
   isLoggedIn: boolean;

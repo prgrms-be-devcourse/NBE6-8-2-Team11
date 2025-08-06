@@ -10,7 +10,7 @@ interface JWTPayload {
   [key: string]: unknown;
 }
 
-interface UserInfo {
+export interface UserInfo {
   id?: number;
   sub?: string;
   auth: string;
