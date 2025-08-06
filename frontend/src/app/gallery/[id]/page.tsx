@@ -7,7 +7,7 @@ import Footer from '../../../shared/components/layout/Footer';
 import { petService } from '../../../shared/services/petService';
 import { chatService } from '../../../shared/services/chat';
 import { Pet } from '../../../shared/types';
-import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../../shared/utils';
+import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies, getPetStatusDisplayText, getPetStatusColorClass } from '../../../shared/utils';
 import { useAuth } from '../../../context/AuthContext';
 import { wsClient } from '../../../shared/lib/websocket';
 
@@ -154,6 +154,18 @@ export default function AnimalDetailPage() {
     }
   };
 
+  // 동물 상태에 따른 신청 가능 여부 결정
+  const canApply = () => {
+    if (!pet || !pet.petStatuses) return false;
+    
+    const statuses = pet.petStatuses;
+    
+    // 입양과 돌봄 모두 가능하거나, 입양만 가능하거나, 돌봄만 가능한 경우
+    return statuses.includes('AVAILABLE_BOTH') || 
+           statuses.includes('AVAILABLE_FOR_ADOPTION') || 
+           statuses.includes('AVAILABLE_FOR_CARE');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -190,17 +202,16 @@ export default function AnimalDetailPage() {
         {/* 헤더 영역 */}
         <div className="border-b border-gray-200 p-6 mb-8">
           <div className="flex justify-between items-start">
-            {/* 좌측: 입양 + 동물 이름 */}
+            {/* 좌측: 동물 이름 */}
             <div>
-              <div className="text-sm text-orange-600 font-medium mb-3">입양</div>
               <h1 className="text-3xl font-bold text-gray-900">{pet.name}</h1>
             </div>
             
             {/* 우측: 상태 및 버튼들 */}
-            <div className="text-right space-y-3">
-              <div className="flex items-center justify-end">
-                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
-                  입양 가능
+            <div className="text-right">
+              <div className="flex items-center justify-end mb-3">
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${getPetStatusColorClass(pet.petStatuses)}`}>
+                  {getPetStatusDisplayText(pet.petStatuses)}
                 </span>
               </div>
               
@@ -220,8 +231,12 @@ export default function AnimalDetailPage() {
               {!isOwner && (
                 <button
                   onClick={handleInquiryClick}
-                  disabled={isCreatingChat}
-                  className="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white text-sm px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                  disabled={isCreatingChat || !canApply()}
+                  className={`text-sm px-4 py-2 rounded-lg transition-colors duration-200 flex items-center space-x-2 ${
+                    canApply() 
+                      ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                      : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  }`}
                 >
                   <svg
                     className="w-4 h-4"
@@ -304,14 +319,19 @@ export default function AnimalDetailPage() {
           {/* 입양·돌봄 신청 버튼 (소유자가 아닌 경우에만 표시) */}
           {!isOwner && (
             <div className="mt-10 mb-10 pt-6 border-t border-gray-200 flex justify-center">
-              <div className="w-60 h-16 flex items-center justify-center">
-                <button 
-                  onClick={() => router.push(`/apply?petId=${pet.id}`)}
-                  className="w-full h-full bg-orange-500 text-white py-4 rounded-lg text-lg font-semibold border-0 outline outline-1 outline-white/50 transition-all duration-[1250ms] ease-[cubic-bezier(0.19,1,0.22,1)] 
-                  hover:border hover:border-solid hover:outline-offset-[15px] hover:outline-white/0 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.5),0_0_20px_rgba(255,255,255,0.2)] hover:text-shadow hover:scale-105"
-                >
-                  입양 · 돌봄 신청하기
-                </button>
+            <div className="w-60 h-16 flex items-center justify-center">
+              <button 
+                onClick={() => router.push(`/apply?petId=${pet.id}`)}
+                disabled={!canApply()}
+                className={`w-full h-full py-4 rounded-lg text-lg font-semibold border-0 outline outline-1 outline-white/50 transition-all duration-[1250ms] ease-[cubic-bezier(0.19,1,0.22,1)] 
+                ${
+                  canApply()
+                    ? 'bg-orange-500 text-white hover:border hover:border-solid hover:outline-offset-[15px] hover:outline-white/0 hover:shadow-[inset_0_0_20px_rgba(255,255,255,0.5),0_0_20px_rgba(255,255,255,0.2)] hover:text-shadow hover:scale-105'
+                    : 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                }`}
+              >
+                {canApply() ? '입양 · 돌봄 신청하기' : '신청 불가'}
+              </button>
               </div>
             </div>
           )}

@@ -43,13 +43,8 @@ class WebSocketClient {
     
     // 환경에 따른 WebSocket URL 설정
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-    const wsUrl = apiUrl.replace('https://', 'wss://').replace('http://', 'ws://');
-    const wsEndpoint = `${wsUrl}/ws-chat`;
+    const wsEndpoint = `${apiUrl}/ws-chat`;
     
-    console.log('API URL:', apiUrl);
-    console.log('WebSocket URL:', wsUrl);
-    console.log('Connecting to WebSocket:', wsEndpoint);
-    console.log('Current environment:', process.env.NODE_ENV);
     
     this.client = new Client({
       webSocketFactory: () => new SockJS(wsEndpoint),

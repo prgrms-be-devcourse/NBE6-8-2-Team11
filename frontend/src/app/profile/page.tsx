@@ -5,7 +5,7 @@ import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
 import ProfileInfo from '../../features/profile/components/ProfileInfo';
 import ProfileEdit from '../../features/profile/components/ProfileEdit';
-import MyPets from '../../features/profile/components/MyPets';
+import MyPets from '@/features/profile/components/MyPets';
 import AdoptionHistory from '../../features/profile/components/AdoptionHistory';
 import ReceivedAdoptionHistory from '../../features/profile/components/ReceivedAdoptionHistory';
 import LoadingSpinner from '../../shared/components/common/LoadingSpinner';
@@ -28,7 +28,7 @@ export default function ProfilePage() {
     const tabParam = urlParams.get('tab');
     const memberTypeRequired = urlParams.get('memberTypeRequired');
     
-    if (tabParam && ['info', 'edit', 'myPets', 'history', 'getHistory'].includes(tabParam)) {
+    if (tabParam && ['info', 'edit', 'history', 'getHistory'].includes(tabParam)) {
       setActiveTab(tabParam);
     }
 
@@ -70,8 +70,7 @@ export default function ProfilePage() {
   const tabs = [
     { id: 'info', label: '내 정보', icon: '👤' },
     { id: 'edit', label: '정보 수정', icon: '✏️' },
-    { id: 'myPets', label: '내 펫 관리', icon: '🐾' },
-    { id: 'history', label: '입양 신청 이력', icon: '📋' },
+    { id: 'history', label: '입양/돌봄 신청 이력', icon: '📋' },
     { id: 'getHistory', label: '받은 신청 이력', icon: '📖' }
   ];
 
@@ -121,7 +120,7 @@ export default function ProfilePage() {
             </div>
 
             {/* memberType 설정 안내 메시지 */}
-            {(showMemberTypeAlert || activeTab === 'edit') && !memberType && (
+            {showMemberTypeAlert && !memberType && (
               <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -151,7 +150,7 @@ export default function ProfilePage() {
             <div className="p-6">
               {activeTab === 'info' && <ProfileInfo user={user} />}
               {activeTab === 'edit' && <ProfileEdit user={user} setUser={setUser} />}
-              {activeTab === 'myPets' && <MyPets />}
+              {activeTab === 'pets' && <MyPets />}
               {activeTab === 'history' && <AdoptionHistory />}
               {activeTab === 'getHistory' && <ReceivedAdoptionHistory />}
             </div>

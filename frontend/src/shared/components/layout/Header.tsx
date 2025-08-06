@@ -29,16 +29,16 @@ export default function Header() {
     setIsNotificationDropdownOpen(!isNotificationDropdownOpen);
   };
 
-  // 테스트용 알림 추가 함수 (개발 중에만 사용)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const addTestNotification = () => {
-    addNotification({
-      title: '새 메시지',
-      message: '새로운 메시지가 도착했습니다.',
-      type: 'NEW_MESSAGE',
-      userId: 1,
-    });
-  };
+  // // 테스트용 알림 추가 함수 (개발 중에만 사용)
+  // // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // const addTestNotification = () => {
+  //   addNotification({
+  //     title: '새 메시지',
+  //     message: '새로운 메시지가 도착했습니다.',
+  //     type: 'NEW_MESSAGE',
+  //     userId: 1,
+  //   });
+  // };
 
   // 웹소켓 연결 상태 확인
   useEffect(() => {

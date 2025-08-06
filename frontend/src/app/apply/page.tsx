@@ -4,12 +4,11 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '../../shared/components/layout/Header';
 import Footer from '../../shared/components/layout/Footer';
-import { Pet, Member } from '../../shared/types';
+import { Pet } from '../../shared/types';
 import { formatAnimalAge, formatAnimalGender, formatAnimalSpecies } from '../../shared/utils';
 import { petService } from '../../shared/services/petService';
 import { adoptionService } from '../../shared/services/adoptionService';
 import Image from 'next/image';
-import { memberService } from '../../shared/services/member'; // 사용자 서비스 추가
 
 interface AdoptionFormData {
   petId: number;
@@ -147,9 +146,11 @@ const MessageDisplay = ({ message }: { message: string }) => {
 
 // 액션 버튼 컴포넌트
 const ActionButtons = ({ 
+  petId, 
   isSubmitting, 
   onSubmit 
 }: { 
+  petId: number; 
   isSubmitting: boolean; 
   onSubmit: (e: React.FormEvent) => void; 
 }) => (
@@ -181,8 +182,12 @@ const ApplicationTypeRadio = ({
   onTypeChange: (type: 'adoption' | 'care') => void; 
 }) => {
   // 상태에 따른 라디오 버튼 활성화 여부 결정
-  const canAdopt = petStatuses?.includes('AVAILABLE_FOR_ADOPTION') || petStatuses?.includes('AVAILABLE_BOTH');
-  const canCare = petStatuses?.includes('AVAILABLE_FOR_CARE') || petStatuses?.includes('AVAILABLE_BOTH');
+  const canAdopt = petStatuses?.some((status) => 
+    status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
+  );
+  const canCare = petStatuses?.some((status) => 
+    status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
+  );
 
   // 기본적으로 두 옵션 모두 활성화 (petStatuses가 없거나 빈 배열인 경우)
   const isAdoptEnabled = canAdopt !== false;
@@ -292,8 +297,6 @@ function ApplyPageContent() {
   const petIdFromUrl = searchParams.get('petId');
   
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [currentUser, setCurrentUser] = useState<Member | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
@@ -313,56 +316,57 @@ function ApplyPageContent() {
   });
 
   useEffect(() => {
-    const loadInitialData = async () => {
+    const loadPetData = async () => {
       try {
         setIsLoading(true);
+
         if (!petIdFromUrl) {
           setSubmitMessage('올바른 경로로 접근해주세요. 갤러리에서 동물을 선택한 후 신청해주세요.');
           return;
         }
-
-        // API 호출을 병렬로 처리하여 로딩 속도 개선
-        const [petData, userData] = await Promise.all([
-          petService.getPet(petIdFromUrl),
-          memberService.getCurrentUser()
-        ]);
-
-        setSelectedPet(petData);
-        setCurrentUser(userData as Member);
-
-        // 동물 상태에 따라 기본 신청 유형 설정
-        let defaultApplicationType: 'adoption' | 'care' = 'adoption';
-        const { petStatuses } = petData;
-        if (petStatuses && petStatuses.length > 0) {
-          const canAdopt = petStatuses.includes('AVAILABLE_FOR_ADOPTION');
-          const canCare = petStatuses.includes('AVAILABLE_FOR_CARE');
-          if (!canAdopt && canCare) {
-            defaultApplicationType = 'care';
-          }
-        }
         
-        // API에서 직접 받아온 userData 객체를 사용해 폼 데이터 상태를 설정합니다.
-        setFormData(prev => ({ 
-          ...prev, 
-          petId: petData.id,
-          applicationType: defaultApplicationType,
-          contactName: userData?.name || '',
-          contactEmail: userData?.email || '',
-          contactPhone: userData?.phone || '',
-          address: userData?.address || '', // 이제 address 값이 정상적으로 설정됩니다.
-        }));
-
+        if (petIdFromUrl) {
+          // API 호출을 병렬로 처리하여 로딩 속도 개선
+          const petData = await petService.getPet(petIdFromUrl);
+          setSelectedPet(petData);
+          
+          // petStatuses에 따라 기본 선택값 설정
+          let defaultApplicationType: 'adoption' | 'care' = 'adoption';
+          
+          if (petData.petStatuses && petData.petStatuses.length > 0) {
+            const canAdopt = petData.petStatuses.some((status) => 
+              status === 'AVAILABLE_FOR_ADOPTION' || status === 'AVAILABLE_BOTH'
+            );
+            const canCare = petData.petStatuses.some((status) => 
+              status === 'AVAILABLE_FOR_CARE' || status === 'AVAILABLE_BOTH'
+            );
+            
+            // 입양 및 돌봄 모두 가능하면 입양을 기본값으로 설정
+            if (canAdopt && canCare) {
+              defaultApplicationType = 'adoption';
+            } else if (canAdopt) {
+              defaultApplicationType = 'adoption';
+            } else if (canCare) {
+              defaultApplicationType = 'care';
+            }
+          }
+          
+          setFormData(prev => ({ 
+            ...prev, 
+            petId: petData.id,
+            applicationType: defaultApplicationType
+          }));
+        }
       } catch (error) {
-        console.error('Failed to load initial data:', error);
-        setSubmitMessage('페이지를 불러오는 데 실패했습니다.');
+        console.error('Failed to load pet data:', error);
+        setSubmitMessage('동물 정보를 불러오는데 실패했습니다.');
       } finally {
         setIsLoading(false);
       }
     };
-    
-    loadInitialData();
+
+    loadPetData();
   }, [petIdFromUrl]);
-  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -469,7 +473,7 @@ function ApplyPageContent() {
       }, 3000);
       
     } catch (error) {
-      console.error('신청 실패:', error);
+      console.error('Adoption application failed:', error);
       setSubmitMessage('입양/돌봄 신청에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
@@ -570,47 +574,48 @@ function ApplyPageContent() {
                 required
               />
 
-              <FormField
-                label="주소"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                placeholder="주소를 입력해주세요"
-                required
-              />
+            <FormField
+              label="주소"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="주소를 입력해주세요"
+              required
+            />
 
-              <FormField
-                label="현재 키우고 있는 다른 반려동물"
-                name="otherPets"
-                value={formData.otherPets}
-                onChange={handleInputChange}
-                placeholder="현재 키우고 있는 동물의 종류, 수를 입력해주세요"
-              />
+            <FormField
+              label="현재 키우고 있는 다른 반려동물"
+              name="otherPets"
+              value={formData.otherPets}
+              onChange={handleInputChange}
+              placeholder="현재 키우고 있는 동물의 종류, 수를 입력해주세요"
+            />
 
-              <FormField
-                label="반려동물 키우는 경험"
-                name="experience"
-                type="textarea"
-                value={formData.experience}
-                onChange={handleInputChange}
-                placeholder="이전에 반려동물을 키운 경험이 있다면 간단히 설명해주세요."
-                rows={3}
-              />
+            <FormField
+              label="반려동물 키우는 경험"
+              name="experience"
+              type="textarea"
+              value={formData.experience}
+              onChange={handleInputChange}
+              placeholder="이전에 반려동물을 키운 경험이 있다면 간단히 설명해주세요."
+              rows={3}
+            />
 
-              <FormField
-                label="입양/돌봄하고 싶은 이유"
-                name="reason"
-                type="textarea"
-                value={formData.reason}
-                onChange={handleInputChange}
-                placeholder="이 동물을 입양/돌봄하고 싶은 이유를 설명해주세요."
-                required
-                rows={3}
-              />
+            <FormField
+              label="입양/돌봄하고 싶은 이유"
+              name="reason"
+              type="textarea"
+              value={formData.reason}
+              onChange={handleInputChange}
+              placeholder="이 동물을 입양/돌봄하고 싶은 이유를 설명해주세요."
+              required
+              rows={3}
+            />
 
-              <MessageDisplay message={submitMessage} />
+            <MessageDisplay message={submitMessage} />
 
-              <ActionButtons 
+            <ActionButtons 
+                petId={selectedPet.id} 
                 isSubmitting={isSubmitting} 
                 onSubmit={handleSubmit}
               />
