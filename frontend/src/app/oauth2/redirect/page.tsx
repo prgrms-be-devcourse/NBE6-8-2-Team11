@@ -17,7 +17,6 @@ function OAuth2RedirectHandler() {
   useEffect(() => {
     const handleOAuthRedirect = async () => {
       try {
-        hasProcessed.current = true; // 처리 시작을 표시
 
         // AuthContext의 login 함수에 토큰만 전달 (사용자 정보는 토큰에서 추출)
         login(accessToken, refreshToken || '');
