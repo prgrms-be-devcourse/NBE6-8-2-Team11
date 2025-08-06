@@ -60,7 +60,7 @@ public class CareService {
                 .build();
         careRepository.save(care);
 
-        notificationService.sendCareRequestNotification(member.getId(), "동물 돌봄 신청이 접수되었습니다", pet.getName());
+        notificationService.sendCareRequestNotification(member.getId(), "동물 돌봄 신청이 접수되었습니다", member.getName());
 
         try {
             Thread.sleep(100);
