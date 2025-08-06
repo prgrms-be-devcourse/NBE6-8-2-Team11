@@ -19,7 +19,7 @@ function OAuth2RedirectHandler() {
       try {
 
         // AuthContext의 login 함수에 토큰만 전달 (사용자 정보는 토큰에서 추출)
-        login(accessToken, refreshToken || '');
+        // login(accessToken, refreshToken || '');
 
         console.log('OAuth 로그인 완료');
 
