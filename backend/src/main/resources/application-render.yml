@@ -19,6 +19,13 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
 
+# WebSocket 설정
+websocket:
+  allowed-origins:
+    - "https://nbe-6-8-2-team11.vercel.app"
+    - "https://*.vercel.app"
+    - "https://*.onrender.com"
+
 cookie:
   secure: true
 
@@ -26,3 +33,5 @@ logging:
   level:
     root: INFO
     com.back: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
