@@ -10,21 +10,31 @@ import ReceivedAdoptionHistory from '../../features/profile/components/ReceivedA
 import LoadingSpinner from '../../shared/components/common/LoadingSpinner';
 import ErrorBoundary from '../../shared/components/common/ErrorBoundary';
 import { User } from '../../features/profile/types';
-import {ProfileService} from '../../shared/services/profileService'
+import { ProfileService } from '../../shared/services/profileService';
+import { useMemberType } from '../../context/MemberTypeContext';
 
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('info');
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [showMemberTypeAlert, setShowMemberTypeAlert] = useState(false);
+  const { memberType } = useMemberType();
 
   useEffect(() => {
-    // URL 파라미터에서 탭 정보 읽기
+    // URL 파라미터에서 탭 정보와 memberType 필수 설정 여부 읽기
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
+    const memberTypeRequired = urlParams.get('memberTypeRequired');
     
     if (tabParam && ['info', 'edit', 'history', 'getHistory'].includes(tabParam)) {
       setActiveTab(tabParam);
+    }
+
+    // OAuth2 로그인 후 memberType 설정이 필요한 경우
+    if (memberTypeRequired === 'true' && !memberType) {
+      setActiveTab('edit');
+      setShowMemberTypeAlert(true);
     }
     
     // 실제 API 호출 대신 모의 데이터 사용
@@ -54,7 +64,7 @@ export default function ProfilePage() {
     };
 
     loadUserData();
-  }, []);
+  }, [memberType]);
 
   const tabs = [
     { id: 'info', label: '내 정보', icon: '👤' },
@@ -107,6 +117,33 @@ export default function ProfilePage() {
                 ))}
               </nav>
             </div>
+
+            {/* memberType 설정 안내 메시지 */}
+            {showMemberTypeAlert && !memberType && (
+              <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <span className="text-2xl">🎯</span>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-orange-800">
+                      회원 유형 설정이 필요합니다
+                    </h3>
+                    <div className="mt-2 text-sm text-orange-700">
+                      <p>서비스 이용을 위해 회원 유형(입양 희망자/보호소)을 선택해주세요.</p>
+                    </div>
+                  </div>
+                  <div className="ml-auto">
+                    <button
+                      onClick={() => setShowMemberTypeAlert(false)}
+                      className="text-orange-400 hover:text-orange-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* 탭 컨텐츠 */}
             <div className="p-6">

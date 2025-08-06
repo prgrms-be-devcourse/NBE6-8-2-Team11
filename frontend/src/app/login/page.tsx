@@ -61,6 +61,7 @@ export default function LoginPage() {
     
       // context/AuthContext의 login 함수를 호출하여 상태와 localStorage를 한번에 업데이트
       const userInfo = {
+        id: response.userId,  // id 필드 추가 (숫자형)
         sub: response.userId.toString(),
         auth: decodedToken.auth,
         exp: decodedToken.exp,
