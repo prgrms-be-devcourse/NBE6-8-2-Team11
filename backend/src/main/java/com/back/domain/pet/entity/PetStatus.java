@@ -27,7 +27,7 @@ public class PetStatus {
     @Column(name = "pet_status_id")
     private Long id;
 
-    @Column(name = "pet_status_type", nullable = false)
+    @Column(name = "pet_status_type", nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private PetStatusType status;
 
