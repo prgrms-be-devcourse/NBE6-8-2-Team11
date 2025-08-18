@@ -66,12 +66,6 @@ public class AdoptionService {
         adoptionRepository.save(adoption);
         notificationService.sendAdoptionRequestNotification(member.getId(), "입양을 신청하였습니다.", member.getName());
 
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
         notificationService.sendAdoptionRequestNotification(pet.getMember().getId(), "입양 신청이 도착하였습니다.", member.getName());
 
         return AdoptionResponseDto.from(adoption);
