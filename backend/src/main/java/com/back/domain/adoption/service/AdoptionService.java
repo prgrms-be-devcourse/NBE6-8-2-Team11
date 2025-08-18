@@ -8,6 +8,7 @@ import com.back.domain.adoption.dto.response.ApplicationSimpleListResponseDto;
 import com.back.domain.adoption.entity.Adoption;
 import com.back.domain.adoption.enums.RequestStatus;
 import com.back.domain.adoption.repository.AdoptionRepository;
+import com.back.domain.applicant.dto.request.ApplicantRequestDto;
 import com.back.domain.care.entity.Care;
 import com.back.domain.care.repository.CareRepository;
 import com.back.domain.member.entity.Member;
@@ -55,6 +56,7 @@ public class AdoptionService {
         }
 
         Adoption adoption = Adoption.builder()
+                .applicant(ApplicantRequestDto.of(adoptionRequestDto.applicantInfo()))
                 .member(member)
                 .pet(pet)
                 .title(adoptionRequestDto.title())

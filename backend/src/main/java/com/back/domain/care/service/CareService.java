@@ -1,6 +1,7 @@
 package com.back.domain.care.service;
 
 import com.back.domain.adoption.enums.RequestStatus;
+import com.back.domain.applicant.dto.request.ApplicantRequestDto;
 import com.back.domain.care.dto.request.CareRequestDto;
 import com.back.domain.care.dto.response.CareResponseDto;
 import com.back.domain.care.entity.Care;
@@ -48,6 +49,7 @@ public class CareService {
         }
 
         Care care = Care.builder()
+                .applicant(ApplicantRequestDto.of(careRequestDto.applicantInfo()))
                 .member(member)
                 .pet(pet)
                 .title(careRequestDto.title())
