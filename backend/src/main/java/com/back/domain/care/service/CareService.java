@@ -1,6 +1,7 @@
 package com.back.domain.care.service;
 
 import com.back.domain.adoption.enums.RequestStatus;
+import com.back.domain.applicant.dto.request.ApplicantRequestDto;
 import com.back.domain.care.dto.request.CareRequestDto;
 import com.back.domain.care.dto.response.CareResponseDto;
 import com.back.domain.care.entity.Care;
@@ -48,6 +49,7 @@ public class CareService {
         }
 
         Care care = Care.builder()
+                .applicant(ApplicantRequestDto.of(careRequestDto.applicantInfo()))
                 .member(member)
                 .pet(pet)
                 .title(careRequestDto.title())
@@ -60,13 +62,7 @@ public class CareService {
                 .build();
         careRepository.save(care);
 
-        notificationService.sendCareRequestNotification(member.getId(), "동물 돌봄 신청이 접수되었습니다", pet.getName());
-
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        notificationService.sendCareRequestNotification(member.getId(), "동물 돌봄 신청이 접수되었습니다", member.getName());
 
         notificationService.sendCareRequestNotification(pet.getMember().getId(), "동물 돌봄 신청이 도착하였습니다", member.getName());
 

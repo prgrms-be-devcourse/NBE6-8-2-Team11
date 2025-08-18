@@ -1,8 +1,19 @@
 // API 클라이언트 설정
 // 팀원들의 기존 환경과 호환성을 위한 우선순위 설정
 const API_BASE_URL = 
-  process.env.NEXT_PUBLIC_API_BASE_URL ||  // 환경변수 우선
+  process.env.NEXT_PUBLIC_API_URL ||  // 환경변수 우선
   'http://localhost:8080';             // Docker 환경 기본값
+
+// 디버깅을 위한 로그
+console.log('🔧 API_BASE_URL 설정:', {
+  envValue: process.env.NEXT_PUBLIC_API_URL,
+  finalValue: API_BASE_URL,
+  hasEnv: !!process.env.NEXT_PUBLIC_API_URL
+});
+
+if (!API_BASE_URL) {
+  throw new Error('API BASE URL이 설정되지 않았습니다!');
+}
 
 interface ApiResponse<T> {
   content: T;
@@ -41,7 +52,11 @@ class ApiClient {
       url: url,
       baseURL: this.baseURL,
       endpoint: endpoint,
-      normalizedEndpoint: normalizedEndpoint
+      normalizedEndpoint: normalizedEndpoint,
+      envCheck: {
+        NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+        NODE_ENV: process.env.NODE_ENV
+      }
     });
     
     const config: RequestInit = {

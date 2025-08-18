@@ -7,9 +7,12 @@ export interface AdoptionApplication {
   type: 'ADOPTION' | 'CARE';
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
-  memberInfo?: {
+  applicantInfo?: {
+    id: number;
     name: string;
+    phone: string;
     email: string;
+    address: string;
   };
   petInfo?: {
     id: string;
@@ -25,10 +28,13 @@ export interface AdoptionApplication {
 }
 
 export interface AdoptionApplicationDetail extends AdoptionApplication {
-  memberName: string;
-  memberPhone: string;
-  memberEmail: string;
-  memberAddress: string;
+  applicantInfo: {
+    id: number;
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+  };
   anotherPets: string;
   experience: string;
   message: string;
@@ -51,6 +57,12 @@ export interface CreateAdoptionRequest {
   anotherPets: string;
   experience: string;
   message: string;
+  applicantInfo: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+  };
 }
 
 export interface CreateCareRequest {
@@ -61,6 +73,12 @@ export interface CreateCareRequest {
   experience: string;
   desiredStartDate: Date;
   desiredEndDate: Date;
+  applicantInfo: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+  };
 }
 
 export interface UpdateAdoptionStatusRequest {

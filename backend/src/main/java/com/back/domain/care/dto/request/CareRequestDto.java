@@ -1,6 +1,7 @@
 package com.back.domain.care.dto.request;
 
 
+import com.back.domain.applicant.dto.request.ApplicantRequestDto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -14,6 +15,8 @@ public record CareRequestDto(
 
         @NotNull
         String title,
+
+        ApplicantRequestDto applicantInfo,
 
         String anotherPets,
 

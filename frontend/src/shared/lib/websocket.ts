@@ -47,7 +47,7 @@ class WebSocketClient {
 
 
     this.client = new Client({
-      webSocketFactory: () => new WebSocket("wss://nbe6-8-2-team11.onrender.com/ws-chat"),
+      webSocketFactory: () => new SockJS(wsEndpoint),
       connectHeaders: {
         'Authorization': `Bearer ${token}`
       },
