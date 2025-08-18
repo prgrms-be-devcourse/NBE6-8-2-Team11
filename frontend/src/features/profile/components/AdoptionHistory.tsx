@@ -16,6 +16,13 @@ interface AdoptionDetail {
   message: string;
   anotherPets: string;
   experience: string;
+  applicantInfo: {
+    id: number;
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+  };
   petInfo?: {
     id: number;
     name: string;
@@ -60,6 +67,19 @@ export default function AdoptionHistory() {
           type: app.type as 'ADOPTION' | 'CARE',
           status: app.status,
           createdAt: app.createdAt,
+          applicantInfo: app.applicantInfo ? {
+            id: app.applicantInfo.id,
+            name: app.applicantInfo.name,
+            phone: app.applicantInfo.phone,
+            email: app.applicantInfo.email,
+            address: app.applicantInfo.address
+          } : {
+            id: 0,
+            name: '신청자 정보 없음',
+            phone: '',
+            email: '',
+            address: ''
+          },
           petInfo: app.petInfo ? {
             id: parseInt(app.petInfo.id),
             name: app.petInfo.name,
@@ -152,6 +172,19 @@ export default function AdoptionHistory() {
         message: detail.message,
         anotherPets: detail.anotherPets,
         experience: detail.experience,
+                  applicantInfo: detail.applicantInfo ? {
+            id: detail.applicantInfo.id,
+            name: detail.applicantInfo.name,
+            phone: detail.applicantInfo.phone,
+            email: detail.applicantInfo.email,
+            address: detail.applicantInfo.address
+          } : {
+            id: 0,
+            name: '신청자 정보 없음',
+            phone: '',
+            email: '',
+            address: ''
+          },
         petInfo: detail.petInfo ? {
           id: parseInt(detail.petInfo.id),
           name: detail.petInfo.name,

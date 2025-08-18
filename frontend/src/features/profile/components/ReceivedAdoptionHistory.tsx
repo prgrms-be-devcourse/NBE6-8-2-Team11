@@ -12,10 +12,13 @@ interface ReceivedAdoptionRecord {
   type: 'ADOPTION' | 'CARE';
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
-  memberName: string;
-  memberPhone: string;
-  memberEmail: string;
-  memberAddress: string;
+  applicantInfo: {
+    id: number;
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+  };
   anotherPets: string;
   experience: string;
   message: string;
@@ -63,10 +66,19 @@ export default function ReceivedAdoptionHistory() {
           type: app.type as 'ADOPTION' | 'CARE',
           status: app.status,
           createdAt: app.createdAt,
-          memberName: app.memberInfo?.name || '신청자 정보 없음',
-          memberPhone: '',
-          memberEmail: app.memberInfo?.email || '',
-          memberAddress: '',
+          applicantInfo: app.applicantInfo ? {
+            id: app.applicantInfo.id,
+            name: app.applicantInfo.name,
+            phone: app.applicantInfo.phone,
+            email: app.applicantInfo.email,
+            address: app.applicantInfo.address
+          } : {
+            id: 0,
+            name: '신청자 정보 없음',
+            phone: '',
+            email: '',
+            address: ''
+          },
           anotherPets: '',
           experience: '',
           message: '',
@@ -220,10 +232,19 @@ export default function ReceivedAdoptionHistory() {
         type: detail.type as 'ADOPTION' | 'CARE',
         status: detail.status,
         createdAt: detail.createdAt,
-        memberName: detail.memberName,
-        memberPhone: detail.memberPhone,
-        memberEmail: detail.memberEmail,
-        memberAddress: detail.memberAddress,
+        applicantInfo: detail.applicantInfo ? {
+          id: detail.applicantInfo.id,
+          name: detail.applicantInfo.name,
+          phone: detail.applicantInfo.phone,
+          email: detail.applicantInfo.email,
+          address: detail.applicantInfo.address
+        } : {
+          id: 0,
+          name: '신청자 정보 없음',
+          phone: '',
+          email: '',
+          address: ''
+        },
         anotherPets: detail.anotherPets,
         experience: detail.experience,
         message: detail.message,
@@ -347,7 +368,7 @@ export default function ReceivedAdoptionHistory() {
                       <h3 className="font-semibold text-gray-900">{record.petInfo?.name || '동물 정보 없음'}</h3>
                       <p className="text-sm text-gray-600">{record.title}</p>
                       <p className="text-xs text-gray-500 mt-1">
-                        {getTypeLabel(record.type)} 신청 • 신청자: {record.memberName}
+                        {getTypeLabel(record.type)} 신청 • 신청자: {record.applicantInfo.name}
                       </p>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
@@ -449,10 +470,10 @@ export default function ReceivedAdoptionHistory() {
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">신청자 정보</h4>
                 <div className="bg-gray-50 p-3 rounded-lg space-y-1 text-sm">
-                  <p><span className="font-medium">이름:</span> {selectedRecord.memberName}</p>
-                  <p><span className="font-medium">연락처:</span> {selectedRecord.memberPhone}</p>
-                  <p><span className="font-medium">이메일:</span> {selectedRecord.memberEmail}</p>
-                  <p><span className="font-medium">주소:</span> {selectedRecord.memberAddress}</p>
+                  <p><span className="font-medium">이름:</span> {selectedRecord.applicantInfo.name}</p>
+                  <p><span className="font-medium">연락처:</span> {selectedRecord.applicantInfo.phone}</p>
+                  <p><span className="font-medium">이메일:</span> {selectedRecord.applicantInfo.email}</p>
+                  <p><span className="font-medium">주소:</span> {selectedRecord.applicantInfo.address}</p>
                 </div>
               </div>
 

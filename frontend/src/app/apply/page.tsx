@@ -12,10 +12,12 @@ import Image from 'next/image';
 
 interface AdoptionFormData {
   petId: number;
-  contactName: string;
-  contactPhone: string;
-  contactEmail: string;
-  address: string;
+  applicantInfo: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+  };
   experience: string;
   otherPets: string;
   reason: string;
@@ -303,10 +305,12 @@ function ApplyPageContent() {
 
   const [formData, setFormData] = useState<AdoptionFormData>({
     petId: 0,
-    contactName: '',
-    contactPhone: '',
-    contactEmail: '',
-    address: '',
+    applicantInfo: {
+      name: '',
+      phone: '',
+      email: '',
+      address: ''
+    },
     experience: '',
     otherPets: '',
     reason: '',
@@ -370,10 +374,22 @@ function ApplyPageContent() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    if (name.startsWith('applicantInfo.')) {
+      const field = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        applicantInfo: {
+          ...prev.applicantInfo,
+          [field]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleApplicationTypeChange = (type: 'adoption' | 'care') => {
@@ -418,7 +434,7 @@ function ApplyPageContent() {
     }
 
     // 필수 필드 검증
-    if (!formData.contactName || !formData.contactEmail || !formData.contactPhone || !formData.address || !formData.reason) {
+    if (!formData.applicantInfo.name || !formData.applicantInfo.email || !formData.applicantInfo.phone || !formData.applicantInfo.address || !formData.reason) {
       setSubmitMessage('필수 항목을 모두 입력해주세요.');
       return;
     }
@@ -449,6 +465,7 @@ function ApplyPageContent() {
           message: formData.reason,
           anotherPets: formData.otherPets,
           experience: formData.experience,
+          applicantInfo: formData.applicantInfo,
         });
       } else {
         // 돌봄 신청 - 날짜 필드가 이미 검증되었으므로 안전하게 변환
@@ -463,6 +480,7 @@ function ApplyPageContent() {
           desiredEndDate: endDate,
           anotherPets: formData.otherPets,
           experience: formData.experience,
+          applicantInfo: formData.applicantInfo,
         });
       }
 
@@ -551,13 +569,19 @@ function ApplyPageContent() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField label="신청자 성함" name="contactName" value={formData.contactName} onChange={handleInputChange} required />
+                <FormField 
+                  label="신청자 성함" 
+                  name="applicantInfo.name" 
+                  value={formData.applicantInfo.name} 
+                  onChange={handleInputChange} 
+                  required 
+                />
 
                 <FormField
                   label="이메일"
-                  name="contactEmail"
+                  name="applicantInfo.email"
                   type="email"
-                  value={formData.contactEmail}
+                  value={formData.applicantInfo.email}
                   onChange={handleInputChange}
                   placeholder="이메일을 입력해주세요"
                   required
@@ -566,22 +590,22 @@ function ApplyPageContent() {
 
               <FormField
                 label="연락처 (전화번호)"
-                name="contactPhone"
+                name="applicantInfo.phone"
                 type="tel"
-                value={formData.contactPhone}
+                value={formData.applicantInfo.phone}
                 onChange={handleInputChange}
                 placeholder="연락 가능한 전화번호를 입력해주세요"
                 required
               />
 
-            <FormField
-              label="주소"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              placeholder="주소를 입력해주세요"
-              required
-            />
+              <FormField
+                label="주소"
+                name="applicantInfo.address"
+                value={formData.applicantInfo.address}
+                onChange={handleInputChange}
+                placeholder="주소를 입력해주세요"
+                required
+              />
 
             <FormField
               label="현재 키우고 있는 다른 반려동물"
