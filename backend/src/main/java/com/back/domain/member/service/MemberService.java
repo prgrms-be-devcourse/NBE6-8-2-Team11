@@ -41,14 +41,14 @@ public class MemberService {
                 requestDto.address(),
                 requestDto.bio()
         );
-
-        if (requestDto.newPassword() != null && !requestDto.newPassword().isBlank()) {
-            if (!passwordEncoder.matches(requestDto.currentPassword(), memberToUpdate.getPassword())) {
-                throw new MemberException(MemberErrorCode.AUTH_LOGIN_FAILED);
-            }
-
-            memberToUpdate.updatePassword(passwordEncoder.encode(requestDto.newPassword()));
-        }
+//
+//        if (requestDto.newPassword() != null && !requestDto.newPassword().isBlank()) {
+//            if (!passwordEncoder.matches(requestDto.currentPassword(), memberToUpdate.getPassword())) {
+//                throw new MemberException(MemberErrorCode.AUTH_LOGIN_FAILED);
+//            }
+//
+//            memberToUpdate.updatePassword(passwordEncoder.encode(requestDto.newPassword()));
+//        }
 
         return MemberResponseDto.from(memberToUpdate);
     }

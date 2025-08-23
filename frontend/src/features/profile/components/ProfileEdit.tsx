@@ -92,8 +92,8 @@ export default function ProfileEdit({ user, setUser }: ProfileEditProps) {
           phone: formData.phone,
           address: formData.address,
           bio: formData.bio,
-          currentPassword: '',
-          newPassword: '',
+          // currentPassword: '',
+          // newPassword: '',
         }),
       });
 
