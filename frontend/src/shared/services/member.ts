@@ -105,6 +105,6 @@ export const memberService = {
 
   // 회원 탈퇴
   async deleteAccount(userId: number): Promise<void> {
-    await apiClient.delete(`/members/${userId}`);
+    await apiClient.delete(`/auth/${userId}`);
   },
 };
