@@ -1,6 +1,7 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getUserInfoFromToken, type UserInfo } from '../shared/utils/jwt';
+import { memberService } from '../shared/services/member';
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -22,34 +23,42 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 컴포넌트 마운트 시 localStorage에서 정보 로드
-    const token = localStorage.getItem('accessToken');
+    const validateTokenOnLoad = async () => {
+      const token = localStorage.getItem('accessToken');
+      const storedUserInfo = localStorage.getItem('userInfo');
 
-    if (token) {
+    if (token && storedUserInfo) {
       try {
         // 토큰에서 사용자 정보 추출
-        const extractedUserInfo = getUserInfoFromToken(token);
-        if (extractedUserInfo) {
-          setUserInfo(extractedUserInfo);
+        const parsedUserInfo = JSON.parse(storedUserInfo) as UserInfo;
+        const userId = parsedUserInfo.id;
+
+        if (!userId) {
+          throw new Error('User ID not found in stored info.');
+        }
+        const user = await memberService.validateTokenAndGetCurrentUser(userId);
+
+        if (user) {
+          const combinedUserInfo = { ...parsedUserInfo, nickname: user.name, email: user.email };
+          setUserInfo(combinedUserInfo);
           setIsLoggedIn(true);
-          // localStorage에 사용자 정보도 저장
-          localStorage.setItem('userInfo', JSON.stringify(extractedUserInfo));
+          localStorage.setItem('userInfo', JSON.stringify(combinedUserInfo));
         } else {
-          throw new Error('Invalid token');
+          throw new Error('User not found from API');
         }
       } catch (e) {
-        console.error("Failed to extract userInfo from token", e);
+        console.error("Token validation failed", e);
         // 토큰 오류 시 로그인 상태 초기화
         localStorage.clear();
         setIsLoggedIn(false);
         setUserInfo(null);
       }
-    } else {
-      setIsLoggedIn(false);
-      setUserInfo(null);
     }
-    setIsLoading(false);
-  }, []); // 빈 배열: 컴포넌트 마운트 시 한 번만 실행
+
+    validateTokenOnLoad();
+  };
+
+  },[]); // 빈 배열: 컴포넌트 마운트 시 한 번만 실행
 
   const login = (accessToken: string, refreshToken: string, userData?: UserInfo) => {
     localStorage.setItem('accessToken', accessToken);

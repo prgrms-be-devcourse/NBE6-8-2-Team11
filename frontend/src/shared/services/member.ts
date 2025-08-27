@@ -96,4 +96,10 @@ export const memberService = {
       };
     }
   },
-}; 
+
+  // 토큰 검증에 사용될 사용자 정보 조회
+  async validateTokenAndGetCurrentUser(userId: number): Promise<User> {
+    const response = await apiClient.get<User>(`/members/${userId}`);
+    return response.content;
+  },
+};
