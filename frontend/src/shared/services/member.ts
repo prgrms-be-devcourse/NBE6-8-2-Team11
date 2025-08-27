@@ -102,4 +102,9 @@ export const memberService = {
     const response = await apiClient.get<User>(`/members/${userId}`);
     return response.content;
   },
+
+  // 회원 탈퇴
+  async deleteAccount(userId: number): Promise<void> {
+    await apiClient.delete(`/members/${userId}`);
+  },
 };

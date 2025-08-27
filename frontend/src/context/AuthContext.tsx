@@ -9,6 +9,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (accessToken: string, refreshToken: string, userData?: UserInfo) => void;
   logout: () => void;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -87,8 +88,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUserInfo(null);
   };
 
+  const deleteAccount = async () => {
+    if (!userInfo?.id) {
+      throw new Error('사용자 정보가 없습니다.');
+    }
+    
+    try {
+      await memberService.deleteAccount(userInfo.id);
+      // 계정 삭제 성공 시 로그아웃 처리
+      logout();
+    } catch (error) {
+      console.error('계정 삭제 실패:', error);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ isLoggedIn, userInfo, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, userInfo, isLoading, login, logout, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );
