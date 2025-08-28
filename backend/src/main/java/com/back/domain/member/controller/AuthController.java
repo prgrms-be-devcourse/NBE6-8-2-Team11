@@ -2,6 +2,7 @@ package com.back.domain.member.controller;
 
 
 import com.back.domain.member.dto.request.LoginRequestDto;
+import com.back.domain.member.dto.request.ReissueRequestDto;
 import com.back.domain.member.dto.request.SignUpRequestDto;
 import com.back.domain.member.dto.response.MemberResponseDto;
 import com.back.domain.member.dto.response.TokenResponseDto;
@@ -38,5 +39,10 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> deleteMember(@PathVariable Long memberId, @AuthenticationPrincipal UserDetails userDetails) {
         authService.deleteMember(memberId, userDetails);
         return ResponseEntity.ok(ApiResponse.success("회원 탈퇴가 완료되었습니다.", null));
+    }
+    @PostMapping("/reissue")
+    public ResponseEntity<ApiResponse<TokenResponseDto>> reissue(@Valid @RequestBody ReissueRequestDto requestDto) {
+        TokenResponseDto tokenResponseDto = authService.reissueToken(requestDto.refreshToken());
+        return ResponseEntity.ok(ApiResponse.success("토큰이 재발급 됐습니다.", tokenResponseDto));
     }
 }

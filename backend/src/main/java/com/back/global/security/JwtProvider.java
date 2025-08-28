@@ -76,7 +76,7 @@ public class JwtProvider {
         // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + this.accessTokenExpiration);
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName()) // 이메일 또는 사용자 식별자
+                .setSubject(email)
                 .claim("auth", authorities)
                 .claim("email", email)
                 .claim("nickname", nickname)
@@ -88,6 +88,7 @@ public class JwtProvider {
         // Refresh Token 생성
         Date refreshTokenExpiresIn = new Date(now + this.refreshTokenExpiration);
         String refreshToken = Jwts.builder()
+                .setSubject(email)
                 .setExpiration(refreshTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
