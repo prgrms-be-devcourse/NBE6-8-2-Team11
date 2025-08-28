@@ -171,7 +171,21 @@ export default function ProfilePage() {
 
             {/* 탭 컨텐츠 */}
             <div className="p-6">
-              {activeTab === 'info' && <ProfileInfo user={user} />}
+              {activeTab === 'info' && (
+                <div className="relative">
+                  {/* 계정 삭제 버튼 - 내 정보 탭에서만 우측 상단에 표시 */}
+                  <div className="absolute top-0 right-0">
+                    <button
+                      onClick={handleDeleteAccount}
+                      disabled={isDeleting}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
+                    >
+                      {isDeleting ? '삭제 중...' : '계정탈퇴'}
+                    </button>
+                  </div>
+                  <ProfileInfo user={user} />
+                </div>
+              )}
               {activeTab === 'edit' && <ProfileEdit user={user} setUser={setUser} />}
               {activeTab === 'pets' && <MyPets />}
               {activeTab === 'history' && <AdoptionHistory />}
@@ -179,28 +193,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* 계정 삭제 버튼 */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="border-l-4 border-red-400 bg-red-50 p-4 mb-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <span className="text-red-400">⚠️</span>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700">
-                    계정을 삭제하면 모든 데이터가 영구적으로 삭제됩니다.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={handleDeleteAccount}
-              disabled={isDeleting}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-            >
-              {isDeleting ? '삭제 중...' : '계정탈퇴'}
-            </button>
-          </div>
         </main>
 
         <Footer />
