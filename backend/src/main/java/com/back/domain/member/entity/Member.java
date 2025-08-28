@@ -46,6 +46,11 @@ public class Member implements UserDetails {
     @Column(name = "member_phone")
     private String phone;
 
+
+    //리프레시 토큰 db에 저장
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
     @Column(name = "member_role", nullable = false)
     @Enumerated(EnumType.STRING)
     private UserRole role;
@@ -127,6 +132,10 @@ public class Member implements UserDetails {
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
 }
