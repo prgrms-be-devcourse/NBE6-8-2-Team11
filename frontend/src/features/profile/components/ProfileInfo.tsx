@@ -63,7 +63,7 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
             <span className={`${getMemberTypeClass(finalMemberType)} px-3 py-1 rounded-full`}>
               {getMemberTypeLabel(finalMemberType)}
             </span>
-              <span>가입일: {formatDate(user.createdAt)}</span>
+              <span>가입일: {user.createdAt ? formatDate(new Date(user.createdAt)) : '날짜 미상'}</span>
             </div>
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function ProfileInfo({ user }: ProfileInfoProps) {
 
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">가입일</span>
-                <span className="font-medium">{formatDate(user.createdAt)}</span>
+                <span className="font-medium">{user.createdAt ? formatDate(new Date(user.createdAt)) : '날짜 미상'}</span>
               </div>
             </div>
           </div>

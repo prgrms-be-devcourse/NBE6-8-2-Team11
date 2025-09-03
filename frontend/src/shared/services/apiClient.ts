@@ -94,7 +94,48 @@ class ApiClient {
             window.location.href = '/login';
           }
         }
-        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+        
+        // 서버가 보낸 에러 메시지를 읽는다.
+        let errorMessage = `HTTP error! status: ${response.status} - ${response.statusText}`;
+        
+        try {
+          const errorText = await response.text();
+          console.log('🔍 Error Response Text:', errorText);
+          
+          if (errorText.trim()) {
+            const errorData = JSON.parse(errorText);
+            console.log('🔍 Parsed Error Data:', errorData);
+            
+            // 다양한 에러 메시지 필드 확인
+            if (errorData.message) {
+              errorMessage = errorData.message;
+            } else if (errorData.error) {
+              errorMessage = errorData.error;
+            } else if (errorData.errorMessage) {
+              errorMessage = errorData.errorMessage;
+            } else if (errorData.detail) {
+              errorMessage = errorData.detail;
+            }
+            
+            // 백엔드 에러 코드에 따른 사용자 친화적 메시지
+            if (errorData.code === 'AUTH-401') {
+              // 인증 실패 시 서버 메시지 사용
+              errorMessage = errorData.message;
+            } else if (errorData.code === 'SERVER-500' && errorData.message === '서버 내부 오류가 발생하였습니다.') {
+              // 로그인 실패 시 더 구체적인 메시지 제공
+              if (url.includes('/auth/login')) {
+                errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다.';
+              }
+            }
+            
+            console.log('🔍 Final Error Message:', errorMessage);
+          }
+        } catch (jsonError) {
+          console.log('🔍 JSON Parse Error:', jsonError);
+          // JSON 파싱에 실패하면 기본 에러 메시지 사용
+        }
+        
+        throw new Error(errorMessage);
       }
       
       // 응답이 비어있는지 확인
