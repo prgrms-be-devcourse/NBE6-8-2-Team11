@@ -3,6 +3,8 @@ import { useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
 import { useMemberType } from '../../../context/MemberTypeContext';
+import { getUserInfoFromToken } from '../../../shared/utils/jwt';
+import { memberService } from '../../../shared/services/member';
 
 // 동적 렌더링 강제
 export const dynamic = 'force-dynamic';
@@ -31,29 +33,37 @@ function OAuth2RedirectHandler() {
         // AuthContext의 login 함수에 토큰만 전달 (사용자 정보는 토큰에서 추출)
         login(accessToken, refreshToken || '');
 
-        console.log('OAuth 로그인 완료');
+        const userInfo = getUserInfoFromToken(accessToken);
 
-        // memberType이 설정되어 있는지 확인
-        const savedMemberType = localStorage.getItem('memberType');
-        if (!savedMemberType) {
-          console.log('memberType이 설정되지 않음, 프로필 설정 페이지로 이동');
-          router.replace('/profile?tab=edit&memberTypeRequired=true');
+        if (userInfo && userInfo.id) {
+          memberService.getUserById(userInfo.id).then(userProfile => {
+            if (!userProfile.phone || !userProfile.address) {
+              console.log('프로필 정보 미완성, 프로필 설정 페이지로 이동');
+              router.replace('/profile?tab=edit&memberTypeRequired=true');
+            } else {
+              console.log('프로필 정보 완성됨, 홈으로 이동');
+              router.replace('/');
+            }
+          })
+          .catch(error => {
+            console.error("사용자 정보 조회 실패:", error);
+            router.replace('/');
+          });
         } else {
-          console.log('memberType 이미 설정됨:', savedMemberType, ', 홈으로 이동');
+          console.error("토큰에서 사용자 ID 추출 불가");
           router.replace('/');
         }
-
       } catch (error) {
-        console.error("토큰 처리 중 오류 발생:", error);
+        console.error("토큰 처리 중 오류:", error);
         hasProcessed.current = true;
         router.replace('/');
       }
     } else {
-      console.warn("URL에 accessToken이 없습니다.");
+      // URL에 토큰이 없는 예외 케이스 처리
       hasProcessed.current = true;
       router.replace('/');
     }
-  }, [login, router, searchParams]); 
+    }, [login, router, searchParams]); 
 
   return (
     <div className="flex items-center justify-center min-h-screen">

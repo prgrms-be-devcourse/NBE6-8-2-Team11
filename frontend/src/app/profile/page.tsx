@@ -13,6 +13,8 @@ import ErrorBoundary from '../../shared/components/common/ErrorBoundary';
 import { User } from '../../features/profile/types';
 import { ProfileService } from '../../shared/services/profileService';
 import { useMemberType } from '../../context/MemberTypeContext';
+import { useAuth } from '../../context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 
 export default function ProfilePage() {
@@ -20,7 +22,10 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [showMemberTypeAlert, setShowMemberTypeAlert] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { memberType } = useMemberType();
+  const { deleteAccount } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     // URL 파라미터에서 탭 정보와 memberType 필수 설정 여부 읽기
@@ -66,6 +71,24 @@ export default function ProfilePage() {
 
     loadUserData();
   }, [memberType]);
+
+  const handleDeleteAccount = async () => {
+    if (!confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+      alert('계정이 성공적으로 삭제되었습니다.');
+      router.push('/');
+    } catch (error) {
+      console.error('계정 삭제 실패:', error);
+      alert('계정 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const tabs = [
     { id: 'info', label: '내 정보', icon: '👤' },
@@ -148,13 +171,28 @@ export default function ProfilePage() {
 
             {/* 탭 컨텐츠 */}
             <div className="p-6">
-              {activeTab === 'info' && <ProfileInfo user={user} />}
+              {activeTab === 'info' && (
+                <div className="relative">
+                  {/* 계정 삭제 버튼 - 내 정보 탭에서만 우측 상단에 표시 */}
+                  <div className="absolute top-0 right-0">
+                    <button
+                      onClick={handleDeleteAccount}
+                      disabled={isDeleting}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm"
+                    >
+                      {isDeleting ? '삭제 중...' : '계정탈퇴'}
+                    </button>
+                  </div>
+                  <ProfileInfo user={user} />
+                </div>
+              )}
               {activeTab === 'edit' && <ProfileEdit user={user} setUser={setUser} />}
               {activeTab === 'pets' && <MyPets />}
               {activeTab === 'history' && <AdoptionHistory />}
               {activeTab === 'getHistory' && <ReceivedAdoptionHistory />}
             </div>
           </div>
+
         </main>
 
         <Footer />
